@@ -32,3 +32,4 @@ Every `SKILL.md` file follows the strict specification:
 7. **Output Format:** Structured JSON schema.
 8. **Validation Rules:** Verification constraints (e.g. non-negative bounds).
 9. **Limitations:** Known boundary conditions.
+

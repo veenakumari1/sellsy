@@ -52,3 +52,4 @@ python -m app.mcp.server
   }
 }
 ```
+

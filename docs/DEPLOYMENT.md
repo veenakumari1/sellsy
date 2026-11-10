@@ -71,3 +71,4 @@ npm run dev
 ```
 
 Visit `http://localhost:3000` to interact with the platform. Click **Launch Instant Demo Account** on the login page for immediate zero-friction evaluation!
+

@@ -8,9 +8,7 @@ import {
   Calendar,
   ChevronDown,
   Store,
-  Bell,
-  Search,
-  Check
+  Check,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -59,15 +57,20 @@ export const Navbar: React.FC<NavbarProps> = ({
     { label: "Last 90 Days", value: 90 },
   ];
 
+  const mono: React.CSSProperties = {
+    fontFamily: 'var(--font-plex-mono), ui-monospace, monospace',
+  };
+
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
+    <header className="h-16 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#14090b]/10 px-6 flex items-center justify-between sticky top-0 z-20">
       {/* Page Title & Store Indicator */}
       <div className="flex items-center gap-4">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">
+          {/* h1 ko globals.css se Fraunces mil jata hai */}
+          <h1 className="text-lg font-semibold text-[#14090b] tracking-tight leading-none">
             {getPageTitle(pathname)}
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#6f6264] mt-0.5">
             Real-time verified e-commerce intelligence
           </p>
         </div>
@@ -76,34 +79,37 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="relative hidden md:block">
           <button
             onClick={() => setStoreDropdownOpen(!storeDropdownOpen)}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100/80 text-xs font-medium text-slate-700 transition-colors"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[#14090b]/10 bg-white hover:bg-[#7b1425]/[0.04] text-xs font-medium text-[#14090b]/80 transition-colors"
           >
-            <Store size={14} className="text-blue-600" />
-            <span className="font-semibold text-slate-900">Aura Living Essentials</span>
-            <span className="px-1.5 py-0.2 bg-blue-100 text-blue-700 text-[10px] font-bold rounded">
+            <Store size={14} className="text-[#7b1425]" />
+            <span className="font-semibold text-[#14090b]">Aura Living Essentials</span>
+            <span
+              style={mono}
+              className="px-1.5 py-0.5 bg-[#7b1425]/10 text-[#7b1425] text-[10px] font-medium rounded"
+            >
               Demo Store
             </span>
-            <ChevronDown size={14} className="text-slate-400" />
+            <ChevronDown size={14} className="text-[#6f6264]" />
           </button>
 
           {storeDropdownOpen && (
-            <div className="absolute left-0 mt-1.5 w-60 bg-white border border-slate-200 rounded-lg shadow-lg py-1.5 z-50">
-              <div className="px-3 py-1.5 border-b border-slate-100">
-                <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+            <div className="absolute left-0 mt-1.5 w-60 bg-white border border-[#14090b]/10 rounded-lg shadow-lg py-1.5 z-50">
+              <div className="px-3 py-1.5 border-b border-[#14090b]/10">
+                <p style={mono} className="text-[10px] font-medium text-[#6f6264] uppercase tracking-[0.14em]">
                   Active Store
                 </p>
               </div>
-              <div className="px-3 py-2 flex items-center justify-between bg-blue-50/50">
+              <div className="px-3 py-2 flex items-center justify-between bg-[#7b1425]/[0.05]">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
+                  <div className="w-6 h-6 rounded bg-[#7b1425] text-white font-bold text-xs flex items-center justify-center">
                     A
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-900">Aura Living Essentials</p>
-                    <p className="text-[10px] text-slate-500">Shopify Demo Sync</p>
+                    <p className="text-xs font-semibold text-[#14090b]">Aura Living Essentials</p>
+                    <p className="text-[10px] text-[#6f6264]">Shopify Demo Sync</p>
                   </div>
                 </div>
-                <Check size={14} className="text-blue-600" />
+                <Check size={14} className="text-[#7b1425]" />
               </div>
             </div>
           )}
@@ -117,15 +123,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="relative">
             <button
               onClick={() => setDateDropdownOpen(!dateDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-2xs transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#7b1425]/40 bg-white hover:bg-[#7b1425]/[0.05] text-xs font-medium text-[#7b1425] transition-colors"
             >
-              <Calendar size={14} className="text-slate-500" />
+              <Calendar size={14} />
               <span>{dateOptions.find((d) => d.value === daysFilter)?.label || "Date Range"}</span>
-              <ChevronDown size={14} className="text-slate-400" />
+              <ChevronDown size={14} className="opacity-70" />
             </button>
 
             {dateDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50">
+              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-[#14090b]/10 rounded-lg shadow-lg py-1 z-50">
                 {dateOptions.map((opt) => (
                   <button
                     key={opt.value}
@@ -133,10 +139,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onDaysChange(opt.value);
                       setDateDropdownOpen(false);
                     }}
-                    className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs text-[#14090b]/80 hover:bg-[#7b1425]/[0.05] flex items-center justify-between"
                   >
                     <span>{opt.label}</span>
-                    {daysFilter === opt.value && <Check size={14} className="text-blue-600" />}
+                    {daysFilter === opt.value && <Check size={14} className="text-[#7b1425]" />}
                   </button>
                 ))}
               </div>
@@ -147,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* AI Assistant Quick Shortcut */}
         <Link
           href="/assistant"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-xs transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#14090b] hover:bg-[#7b1425] text-white text-xs font-semibold transition-colors"
         >
           <Sparkles size={14} />
           <span className="hidden sm:inline">Ask AI Agent</span>

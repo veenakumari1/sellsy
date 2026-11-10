@@ -99,3 +99,4 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
     </div>
   );
 };
+

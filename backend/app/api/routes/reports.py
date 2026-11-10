@@ -76,3 +76,4 @@ def download_report(
         media_type=media_type,
         filename=filename
     )
+

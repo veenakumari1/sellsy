@@ -69,3 +69,4 @@ export const TopProductsTable: React.FC<TopProductsTableProps> = ({ products }) 
     </div>
   );
 };
+

@@ -13,3 +13,4 @@ def seed_demo_data(db: Session = Depends(get_db)):
         "user_email": demo_user.email,
         "demo_password": "demo123456"
     }
+

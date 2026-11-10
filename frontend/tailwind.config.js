@@ -9,28 +9,37 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: "#EFF6FF",
-          100: "#DBEAFE",
-          200: "#BFDBFE",
-          300: "#93C5FD",
-          400: "#60A5FA",
-          500: "#3B82F6",
-          600: "#2563EB",
-          700: "#1D4ED8",
-          800: "#1E40AF",
-          900: "#1E3A8A",
-          DEFAULT: "#2563EB"
+          50: "#FBF1F3",
+          100: "#F6E1E5",
+          200: "#EBC3CB",
+          300: "#DC9AA7",
+          400: "#C26679",
+          500: "#A3243A",
+          600: "#7B1425",
+          700: "#620F1E",
+          800: "#4D0C18",
+          900: "#380911",
+          DEFAULT: "#7B1425",
         },
         navy: {
-          900: "#101828",
-          800: "#1D2939",
-          700: "#344054",
-          600: "#475467"
+          900: "#14090B",
+          800: "#2A1B1E",
+          700: "#4A3A3D",
+          600: "#6B5D60",
         },
+        paper: "#FAF8F5",
+        ink: "#14090B",
+        wine: { DEFAULT: "#7B1425", 2: "#A3243A" },
+        line: "#E8E2DC",
         surface: "#FFFFFF",
-        muted: "#64748B"
-      }
+        muted: "#6B6366",
+      },
+      fontFamily: {
+        serif: ["var(--font-fraunces)", "Georgia", "serif"],
+        sans: ["var(--font-inter-tight)", "system-ui", "sans-serif"],
+        mono: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
+      },
     },
   },
   plugins: [],
-}
+};

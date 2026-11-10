@@ -59,3 +59,4 @@ flowchart TD
 - **Role:** Generates actionable growth campaigns, hero product offers, and retention triggers.
 - **Tools Invoked:** `generate_marketing_strategy`.
 - **Governing Skill:** `skills/marketing-strategy/SKILL.md`.
+

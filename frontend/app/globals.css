@@ -3,29 +3,54 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 16, 24, 40;
-  --background-rgb: 248, 250, 252;
+  --ink: #14090b;
+  --paper: #faf8f5;
+  --wine: #7b1425;
+  --wine-2: #a3243a;
+  --foreground-rgb: 20, 9, 11;
+  --background-rgb: 250, 248, 245;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background-color: rgb(var(--background-rgb));
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Restrained scrollbar */
+/* Headings use the Sellsy display serif */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-variation-settings: "SOFT" 100, "WONK" 0;
+    letter-spacing: -0.015em;
+  }
+  ::selection {
+    background: #7b1425;
+    color: #fff;
+  }
+}
+
+/* Numbers / labels helper: add class="num" for IBM Plex Mono */
+.num {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Restrained scrollbar (warm) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f3eeea;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d4c9c2;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #a89b99;
 }

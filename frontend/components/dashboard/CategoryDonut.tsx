@@ -84,3 +84,4 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ data }) => {
     </div>
   );
 };
+

@@ -67,3 +67,4 @@ export const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({ orders }) 
     </div>
   );
 };
+

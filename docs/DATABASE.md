@@ -126,3 +126,4 @@ erDiagram
 - `idx_orders_store_created`: Indexed on `(store_id, created_at)` for rolling window queries.
 - `idx_products_sku`: Indexed on `(store_id, sku)` for fast catalog lookups and duplicate detection during CSV ingestion.
 - `idx_customers_email`: Indexed on `(store_id, email)` for customer cohort tracking.
+

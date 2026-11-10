@@ -64,3 +64,4 @@ Instead of a single unstructured prompt, Sellsy implements a multi-agent state g
 - **Authentication:** Standard OAuth2 Password Bearer with HMAC-SHA256 JWT tokens.
 - **Password Protection:** Direct salted bcrypt hashing with strict 72-byte truncation guardrails.
 - **Store-Level Isolation:** All analytical queries, products, orders, and customer records are explicitly scoped by foreign key `store_id` matching the authenticated user.
+

@@ -17,3 +17,4 @@ api_router.include_router(assistant.router)
 api_router.include_router(reports.router)
 api_router.include_router(integrations.router)
 api_router.include_router(seed.router)
+

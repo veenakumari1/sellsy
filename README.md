@@ -218,3 +218,4 @@ Developed by a dedicated 2-member team:
 ## 9. License & Capstone Deliverable
 
 Developed as a professional capstone project demonstrating modern agentic AI engineering, MCP integration, and full-stack SaaS architecture.
+
