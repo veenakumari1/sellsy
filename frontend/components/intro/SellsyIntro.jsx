@@ -1,17 +1,9 @@
 'use client';
 /**
- * SellsyIntro v3 — white stage · burgundy · black  (+ ENTER gate for autoplay sound)
- * 0) ENTER screen  → click unlocks audio (browser rule), then everything below is automatic
- * 1) "Sellsy" artistic logotype writes itself (Fraunces italic + burgundy swash)
- * 2) wordmark slides away, ribbon of live dashboard cards sweeps through 3D
- * 3) curtain lifts → page
- *
- * Needs:  npm i three
- * Sound:  ./sellsySound.js  (same folder, unchanged)
- * props:  once (bool, default true → plays once per browser session)
- *         duration (s, ribbon phase, default 4.5)
- *         logoTime (s, logo hold before ribbon, default 3)
- *         onDone()
+ * SellsyIntro v3 — white stage · burgundy · black (+ ENTER gate for autoplay sound)
+ * STAGE 1: Splash gate (ENTER button, unlocks Web Audio)
+ * STAGE 2: Cinematic intro ("Welcome to Sellsy" + 3D curved live card ribbon)
+ * STAGE 3: Smooth exit fade -> Landing page
  */
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -30,7 +22,6 @@ const FONT_URL =
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const mix = (a, b, t) => a + (b - a) * t;
 const ease = (t) => t * t * (3 - 2 * t);
-const out = (t) => 1 - (1 - t) ** 3;
 const span = (p, a, b) => clamp((p - a) / (b - a));
 
 /* ---------------- card themes: light / dark / burgundy ---------------- */
@@ -255,11 +246,21 @@ void main(){
 const WORD = 'Sellsy'.split('');
 
 /* ---------------- component ---------------- */
-export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoTime = 3 }) {
-  const [show, setShow] = useState(null);
+export default function SellsyIntro({
+  phase = 'splash',
+  onEnter: propOnEnter,
+  onDone = () => {},
+  duration = 4.5,
+  logoTime = 3,
+}) {
+  const [internalPhase, setInternalPhase] = useState('splash');
+  const currentPhase = propOnEnter ? phase : internalPhase;
+
+  const [startedIntro, setStartedIntro] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [destroyed, setDestroyed] = useState(false);
   const [snd, setSnd] = useState('on'); // 'on' | 'off'
-  const [entered, setEntered] = useState(false); // ENTER gate
+
   const sndRef = useRef(null);
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
@@ -267,51 +268,42 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
 
   const rootRef = useRef(null), canvasRef = useRef(null), stageRef = useRef(null);
   const l1 = useRef(null), l2 = useRef(null), cap = useRef(null), glow = useRef(null),
-    cross = useRef(null), rule = useRef(null), hint = useRef(null), btn = useRef(null), nameEl = useRef(null);
+    cross = useRef(null), hint = useRef(null), nameEl = useRef(null);
 
-  // ENTER click: AudioContext is created + resumed INSIDE the click (required by Safari/iOS/Chrome)
-  const onEnter = () => {
+  // ENTER click handler: unlocks audio and enters intro
+  const handleEnter = () => {
     const s = createSound(setSnd, logoTime, duration) || NOOP;
     sndRef.current = s;
     s.resume();
-    setEntered(true);
+    if (propOnEnter) {
+      propOnEnter();
+    } else {
+      setInternalPhase('intro');
+    }
   };
 
-  // decide whether to play
+  // Keyboard Enter on splash gate
   useEffect(() => {
-    let skip = false;
-    try {
-      if (once && sessionStorage.getItem('sellsyIntroSeen')) skip = true;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) skip = true;
-    } catch (e) {}
-    if (skip) {
-      doneRef.current && doneRef.current();
-      setShow(false);
-    } else setShow(true);
-  }, [once]);
-
-  // lock scroll while the gate is visible
-  useEffect(() => {
-    if (show !== true || entered) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, [show, entered]);
-
-  // Enter key also works on the gate
-  useEffect(() => {
-    if (show !== true || entered) return;
-    const k = (e) => { if (e.key === 'Enter') onEnter(); };
+    if (currentPhase !== 'splash') return;
+    const k = (e) => {
+      if (e.key === 'Enter') handleEnter();
+    };
     window.addEventListener('keydown', k);
     return () => window.removeEventListener('keydown', k);
-    // eslint-disable-next-line
-  }, [show, entered]);
+  }, [currentPhase]);
 
+  // When phase changes to 'intro', record that intro animation is active
   useEffect(() => {
-    if (show !== true || !entered) return;
+    if (currentPhase === 'intro') {
+      setStartedIntro(true);
+    }
+  }, [currentPhase]);
+
+  // Three.js and Intro Animation Loop
+  useEffect(() => {
+    if (!startedIntro) return;
     let disposed = false, raf = 0;
 
-    // sound — already created inside the ENTER click
     const sound = sndRef.current || NOOP;
     const GEST = ['pointerdown', 'pointerup', 'mousedown', 'click', 'touchstart', 'touchend', 'keydown'];
     const gesture = (e) => {
@@ -321,14 +313,11 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
     GEST.forEach((ev) => window.addEventListener(ev, gesture, { passive: true }));
     sound.resume();
 
-    // fonts
+    // Load fonts
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = FONT_URL;
     document.head.appendChild(link);
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
 
     /* renderer */
     const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, alpha: true });
@@ -405,13 +394,6 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
     resize();
     buildPath();
 
-    function grid(i) {
-      const vh = 2 * GZ * tanH, vw = vh * asp, gw = vw * (cols === 3 ? 0.74 : 0.88), gap = gw * 0.017;
-      const cw = (gw - gap * (cols - 1)) / cols, ch = cw / (CARD_W / CARD_H), gh = ch * rows + gap * 1.6 * (rows - 1);
-      const c = i % cols, r = Math.floor(i / cols);
-      return { x: -gw / 2 + cw / 2 + c * (cw + gap), y: gh / 2 - ch / 2 - r * (ch + gap * 1.6), w: cw, h: ch, vw, vh, c, r };
-    }
-
     /* poses */
     const op = new THREE.Vector3(), ot = new THREE.Vector3(), up = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0), vp = new THREE.Vector3();
     function poseRibbon(c, head) {
@@ -425,20 +407,6 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
           pos.setXYZ(k, vp.x, vp.y, vp.z);
         }
       pos.needsUpdate = true;
-    }
-    function poseGrid(c, q) {
-      const g = grid(c.i), pos = c.geo.attributes.position;
-      const dx = (g.c - (cols - 1) / 2) * 1.2, dy = g.r < rows / 2 ? 1 : -1;
-      const ox = dx * g.vw * 0.62 * (1 - q), oy = dy * g.vh * (g.c === 1 ? 0.95 : 0.34) * (1 - q);
-      const tilt = (1 - q) * 0.22 * (g.c - 1 || 0.5) * dy;
-      const cs = Math.cos(tilt), sn = Math.sin(tilt);
-      for (let iy = 0; iy <= NY; iy++)
-        for (let ix = 0; ix <= NX; ix++) {
-          const k = iy * (NX + 1) + ix, x = (ix / NX - 0.5) * g.w, y = (0.5 - iy / NY) * g.h;
-          pos.setXYZ(k, g.x + ox + x * cs - y * sn, g.y + oy + x * sn + y * cs, -GZ - (1 - q) * 0.6 * Math.sin((ix / NX) * Math.PI));
-        }
-      pos.needsUpdate = true;
-      c.rect = g;
     }
 
     /* interaction */
@@ -456,10 +424,12 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
         }
       }
       const n = nameEl.current;
-      n.style.opacity = hit ? 1 : 0;
-      if (hit) { n.textContent = hit.title; n.style.transform = `translate(${e.clientX + 14}px,${e.clientY + 16}px)`; }
+      if (n) {
+        n.style.opacity = hit ? 1 : 0;
+        if (hit) { n.textContent = hit.title; n.style.transform = `translate(${e.clientX + 14}px,${e.clientY + 16}px)`; }
+      }
     };
-    stage.addEventListener('pointermove', onMove);
+    if (stage) stage.addEventListener('pointermove', onMove);
 
     let finished = false;
     const exit = () => {
@@ -467,28 +437,29 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
       finished = true;
       sound.finale();
       setLeaving(true);
-      try { sessionStorage.setItem('sellsyIntroSeen', '1'); } catch (e) {}
+      if (doneRef.current) {
+        doneRef.current();
+      }
       setTimeout(() => {
-        document.body.style.overflow = prevOverflow;
-        doneRef.current && doneRef.current();
-        setShow(false);
-      }, 1100);
+        setDestroyed(true);
+      }, 900);
     };
     exitRef.current = exit;
+
     const onKey = (e) => { if (e.key === 'Enter' || e.key === 'Escape') exit(); };
-    // small delay so the same Enter key press that opened the gate doesn't skip the intro
     const keyTimer = setTimeout(() => window.addEventListener('keydown', onKey), 400);
 
     /* render */
     const RIB_A = 0.14, RIB_B = 0.95;
     function render(pp, clock, frameNo) {
-      // wordmark: "Welcome to" goes right, "Sellsy" goes left
       const run = ease(span(pp, 0, 0.5)) * 95;
-      l1.current.style.transform = `translate3d(${run}vw,0,0)`;
-      l2.current.style.transform = `translate3d(${-run}vw,0,0)`;
-      cap.current.style.opacity = 1 - span(pp, 0, 0.1);
+      if (l1.current) l1.current.style.transform = `translate3d(${run}vw,0,0)`;
+      if (l2.current) l2.current.style.transform = `translate3d(${-run}vw,0,0)`;
+      if (cap.current) cap.current.style.opacity = 1 - span(pp, 0, 0.1);
       const intro = 1 - span(pp, 0, 0.08);
-      hint.current.style.opacity = intro; cross.current.style.opacity = intro; glow.current.style.opacity = intro;
+      if (hint.current) hint.current.style.opacity = intro;
+      if (cross.current) cross.current.style.opacity = intro;
+      if (glow.current) glow.current.style.opacity = intro;
 
       const k = 1 - span(pp, 0.7, 0.86);
       mxs += (mx - mxs) * 0.06; mys += (my - mys) * 0.06;
@@ -509,7 +480,6 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
       renderer.render(scene, camera);
     }
 
-    /* start once fonts are ready, so the logotype never flashes in a fallback font */
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const fontsReady = async () => {
       await Promise.race([new Promise((r) => { link.onload = r; link.onerror = r; }), wait(2500)]);
@@ -534,18 +504,20 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
       [logoTime, () => sound.slide()],
       [logoTime + 0.27 * duration, () => sound.pass()],
     ].sort((a, b) => a[0] - b[0]);
+
     const loop = () => {
       if (disposed) return;
       const clock = (performance.now() - t0) / 1000;
       const pp = clamp((clock - logoTime) / duration);
       pNow = pp;
-      sound.resume(); // keep trying to unlock audio every frame
+      sound.resume();
       while (cues.length && clock >= cues[0][0]) cues.shift()[1]();
       sound.tick(pp, clock);
       render(pp, clock, n++);
-      if (clock > logoTime + duration + 0.1) exit(); // auto-open the page
+      if (clock > logoTime + duration + 0.1) exit();
       raf = requestAnimationFrame(loop);
     };
+
     fontsReady().then(() => {
       if (disposed) return;
       if (rootRef.current) rootRef.current.dataset.go = '1';
@@ -562,37 +534,41 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
       sndRef.current = null;
       window.removeEventListener('resize', resize);
       window.removeEventListener('keydown', onKey);
-      stage.removeEventListener('pointermove', onMove);
-      document.body.style.overflow = prevOverflow;
+      if (stage) stage.removeEventListener('pointermove', onMove);
       cards.forEach((c) => { c.geo.dispose(); c.mat.dispose(); c.tex.dispose(); });
       renderer.dispose();
       link.remove();
     };
-  }, [show, entered, duration, logoTime]);
+  }, [startedIntro, duration, logoTime]);
 
-  if (!show) return null;
-
-  /* ---------- ENTER gate ---------- */
-  if (!entered) {
+  // STAGE 1: Splash gate (first thing visible on load)
+  if (currentPhase === 'splash') {
     return (
       <div className="sv-gate">
         <link rel="stylesheet" href={FONT_URL} />
         <style>{CSS}</style>
         <div className="sv-gate-logo"><b>S</b>ellsy</div>
-        <button type="button" className="sv-gate-btn" onClick={onEnter} autoFocus>
+        <button type="button" className="sv-gate-btn" onClick={handleEnter} autoFocus>
           ENTER
         </button>
-        
       </div>
     );
   }
 
+  // Once destroyed, intro unmounts completely
+  if (destroyed || (currentPhase === 'done' && !leaving)) {
+    return null;
+  }
+
+  // STAGE 2: Cinematic intro (with smooth fade/curtain exit into STAGE 3)
   return (
     <div
       ref={rootRef}
       className="sv-root"
       style={{
         clipPath: leaving ? 'inset(0 0 100% 0)' : 'inset(0 0 0% 0)',
+        opacity: leaving ? 0 : 1,
+        transition: 'clip-path 0.85s cubic-bezier(.77,0,.18,1), opacity 0.85s ease-out',
         pointerEvents: leaving ? 'none' : 'auto',
       }}
     >
@@ -644,7 +620,7 @@ export default function SellsyIntro({ onDone, once = true, duration = 4.5, logoT
 
 /* ---------------- styles ---------------- */
 const CSS = `
-.sv-root{position:fixed;inset:0;z-index:99999;background:${PAPER};color:${INK};transition:clip-path 1s cubic-bezier(.77,0,.18,1);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.sv-root{position:fixed;inset:0;z-index:99999;background:${PAPER};color:${INK};font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .sv-root *{box-sizing:border-box;margin:0;padding:0}
 .sv-stage{position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse 70% 55% at 50% -10%,rgba(123,20,37,.10),rgba(123,20,37,0) 70%),${PAPER}}
 .sv-glow{position:absolute;left:0;right:0;top:0;height:42%;background:linear-gradient(rgba(123,20,37,.05),rgba(123,20,37,0))}

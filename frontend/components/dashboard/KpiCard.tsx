@@ -25,13 +25,13 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   const isDown = trend === "down" || deltaPct < 0;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-xl border border-[#e8e2dc]/80 p-5 shadow-xs hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{title}</p>
-        {icon && <div className="text-slate-400">{icon}</div>}
+        <p className="text-xs font-semibold text-[#6f6264] uppercase tracking-wider">{title}</p>
+        {icon && <div className="text-[#a89b99]">{icon}</div>}
       </div>
       <div className="mt-2.5 flex items-baseline justify-between">
-        <p className="text-2xl font-bold text-slate-900 tracking-tight">{value}</p>
+        <p className="text-2xl font-bold text-[#14090b] tracking-tight">{value}</p>
         <div
           className={cn(
             "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold",
@@ -39,7 +39,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
               ? "bg-emerald-50 text-emerald-700"
               : isDown
               ? "bg-rose-50 text-rose-700"
-              : "bg-slate-100 text-slate-600"
+              : "bg-[#f3ede7] text-[#5a4e50]"
           )}
         >
           {isUp ? (
@@ -52,7 +52,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           <span>{deltaPct > 0 ? `+${deltaPct}%` : `${deltaPct}%`}</span>
         </div>
       </div>
-      <p className="mt-2 text-xs text-slate-400">{subtext}</p>
+      <p className="mt-2 text-xs text-[#a89b99]">{subtext}</p>
     </div>
   );
 };

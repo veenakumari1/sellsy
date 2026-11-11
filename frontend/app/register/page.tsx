@@ -29,24 +29,24 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#faf8f5] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-[#7b1425] flex items-center justify-center text-white font-bold text-xl shadow-sm">
             S
           </div>
-          <span className="font-extrabold text-2xl text-slate-900 tracking-tight">Sellsy</span>
+          <span className="font-extrabold text-2xl text-[#14090b] tracking-tight">Sellsy</span>
         </Link>
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+        <h2 className="text-2xl font-bold text-[#14090b] tracking-tight">
           Create Your Merchant Account
         </h2>
-        <p className="mt-1.5 text-xs text-slate-500">
+        <p className="mt-1.5 text-xs text-[#6f6264]">
           Get started with AI-driven store insights and predictive forecasting
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <div className="bg-white py-8 px-6 sm:px-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-6">
+        <div className="bg-white py-8 px-6 sm:px-8 rounded-2xl border border-[#e8e2dc]/90 shadow-sm space-y-6">
           {error && (
             <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 flex items-center gap-2 text-rose-700 text-xs">
               <AlertCircle size={16} className="flex-shrink-0" />
@@ -56,39 +56,39 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+              <label className="block text-xs font-semibold text-[#3b2f31] mb-1">Full Name</label>
               <div className="relative">
-                <User size={16} className="absolute left-3 top-3 text-slate-400" />
+                <User size={16} className="absolute left-3 top-3 text-[#a89b99]" />
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Sarah Jenkins"
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#e8e2dc] focus:outline-hidden focus:ring-2 focus:ring-[#7b1425]/20 focus:border-[#7b1425] transition-all text-[#14090b]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Store / Business Email</label>
+              <label className="block text-xs font-semibold text-[#3b2f31] mb-1">Store / Business Email</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3 top-3 text-slate-400" />
+                <Mail size={16} className="absolute left-3 top-3 text-[#a89b99]" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="sarah@yourstore.com"
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#e8e2dc] focus:outline-hidden focus:ring-2 focus:ring-[#7b1425]/20 focus:border-[#7b1425] transition-all text-[#14090b]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <label className="block text-xs font-semibold text-[#3b2f31] mb-1">Password</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-3 text-slate-400" />
+                <Lock size={16} className="absolute left-3 top-3 text-[#a89b99]" />
                 <input
                   type="password"
                   required
@@ -96,7 +96,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#e8e2dc] focus:outline-hidden focus:ring-2 focus:ring-[#7b1425]/20 focus:border-[#7b1425] transition-all text-[#14090b]"
                 />
               </div>
             </div>
@@ -104,15 +104,15 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-lg bg-[#7b1425] hover:bg-[#620F1E] text-white font-semibold text-xs shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? "Creating Account..." : "Create Account & Workspace"}
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-500">
+          <p className="text-center text-xs text-[#6f6264]">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700">
+            <Link href="/login" className="font-semibold text-[#7b1425] hover:text-[#620F1E]">
               Sign in
             </Link>
           </p>

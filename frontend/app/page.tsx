@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   TrendingUp,
@@ -15,7 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import SellsyIntro from "@/components/intro/SellsyIntro";
-
+import ChatWidget from "@/components/ChatWidget";
 /*
   Theme: white · burgundy · black
   paper #faf8f5 | ink #14090b | burgundy #7b1425 | burgundy-light #a3243a | mute #6f6264
@@ -53,13 +53,6 @@ const steps = [
   { n: "3", title: "Decide", text: "Get clear, number-backed recommendations and ask follow-up questions in plain language." },
 ];
 
-const kpis = [
-  { label: "Total Revenue", value: "$11,585.38", sub: "+36.6% vs prior", good: true },
-  { label: "Total Orders", value: "99", sub: "+28.5% volume", good: true },
-  { label: "Average Order Value", value: "$117.02", sub: "Grounded AOV", good: false },
-  { label: "Repeat Buyers", value: "97.8%", sub: "VIP Retention", good: true },
-];
-
 function Wordmark({ size = 28 }: { size?: number }) {
   return (
     <span style={{ ...display, fontStyle: "italic", fontWeight: 800, fontSize: size, lineHeight: 1, letterSpacing: "-0.03em", color: "#14090b" }}>
@@ -78,13 +71,38 @@ function Kicker({ children, light = false }: { children: React.ReactNode; light?
 }
 
 export default function LandingPage() {
+  const [phase, setPhase] = useState<"splash" | "intro" | "done">("splash");
+
+  useEffect(() => {
+    if (phase !== "done") {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [phase]);
+
   return (
     <>
       <link rel="stylesheet" href={FONT_URL} />
-      {/* Intro — testing ke liye once={false}; final mein sirf <SellsyIntro /> rakhna */}
-      <SellsyIntro once={false} />
+      <SellsyIntro
+        phase={phase}
+        onEnter={() => setPhase("intro")}
+        onDone={() => setPhase("done")}
+      />
 
-      <div className="min-h-screen bg-[#faf8f5] text-[#14090b] flex flex-col">
+      {/* Chat widget: intro khatam hone ke baad dikhega */}
+      {phase === "done" && <ChatWidget />}
+
+      <div
+        className="min-h-screen bg-[#faf8f5] text-[#14090b] flex flex-col"
+        style={{
+          display: phase === "done" ? "flex" : "none",
+        }}
+      >
         {/* 1. Navigation */}
         <header className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#14090b]/10">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -152,57 +170,10 @@ export default function LandingPage() {
                 Explore Features
               </a>
             </div>
-
-            {/* 3. Dashboard preview */}
-            <div className="mt-16 rounded-2xl border border-[#14090b]/10 bg-white p-3 shadow-[0_30px_80px_-30px_rgba(123,20,37,.35)] max-w-5xl mx-auto">
-              <div className="rounded-xl border border-[#14090b]/10 bg-[#faf8f5] p-6 text-left">
-                <div className="flex items-center justify-between pb-5 border-b border-[#14090b]/10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-[#7b1425] text-white flex items-center justify-center" style={{ ...display, fontStyle: "italic", fontWeight: 800 }}>
-                      A
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold">Aura Living Essentials</h4>
-                      <p style={mono} className="text-[11px] text-[#6f6264]">Verified Live Sync • 99 Orders</p>
-                    </div>
-                  </div>
-                  <span style={mono} className="px-3 py-1 rounded-full border border-[#7b1425]/50 text-[#7b1425] text-[11px] font-medium">
-                    Last 30 Days
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
-                  {kpis.map((k) => (
-                    <div key={k.label} className="bg-white p-4 rounded-lg border border-[#14090b]/10">
-                      <p style={mono} className="text-[10px] uppercase tracking-wider text-[#6f6264]">{k.label}</p>
-                      <p style={display} className="text-2xl font-bold mt-1.5">{k.value}</p>
-                      <p className={`text-[11px] font-semibold mt-1 ${k.good ? "text-[#7b1425]" : "text-[#6f6264]"}`}>{k.sub}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4 rounded-lg border border-[#14090b]/10 bg-white p-4">
-                  <svg viewBox="0 0 600 90" className="w-full h-20" preserveAspectRatio="none" aria-hidden>
-                    <path d="M0 70 C60 60 90 30 150 42 S240 72 300 48 S400 8 460 30 S560 24 600 10 L600 90 L0 90 Z" fill="#7b1425" fillOpacity=".08" />
-                    <path d="M0 70 C60 60 90 30 150 42 S240 72 300 48 S400 8 460 30 S560 24 600 10" fill="none" stroke="#7b1425" strokeWidth="2.5" strokeLinecap="round" />
-                  </svg>
-                </div>
-
-                <div className="mt-4 p-4 rounded-lg bg-[#7b1425]/[0.06] border-l-4 border-[#7b1425] flex items-start gap-3">
-                  <Sparkles size={18} className="text-[#7b1425] mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold">AI Orchestrator Diagnostic</p>
-                    <p className="text-xs text-[#14090b]/75 mt-1 leading-relaxed">
-                      "Weekend sales generate 58.4% of total turnover. The Ceramic Planter is your highest margin asset (66.7%). Recommend launching an automated VIP win-back flow offering bundle savings on Cedarwood Room Spray."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
-        {/* 4. Capabilities */}
+        {/* 3. Capabilities */}
         <section id="features" className="py-24 bg-white border-y border-[#14090b]/10 px-6">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-2xl mb-16">
@@ -232,7 +203,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 5. Multi-agent engine */}
+        {/* 4. Multi-agent engine */}
         <section id="agents" className="py-24 px-6 bg-[#f3ede7]">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-2xl mb-14">
@@ -257,7 +228,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 6. How it works */}
+        {/* 5. How it works */}
         <section id="how-it-works" className="py-24 px-6 bg-white border-y border-[#14090b]/10">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-2xl mb-14">
@@ -280,7 +251,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 7. Integrations */}
+        {/* 6. Integrations */}
         <section id="integrations" className="py-20 px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 style={display} className="text-3xl sm:text-4xl font-semibold tracking-[-0.02em]">Seamless data ingestion</h2>
@@ -303,7 +274,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 8. CTA */}
+        {/* 7. CTA */}
         <section className="py-24 bg-[#7b1425] text-[#faf8f5] px-6 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 style={display} className="text-4xl sm:text-6xl font-semibold tracking-[-0.03em] leading-[1.04]">
@@ -323,7 +294,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 9. Footer */}
+        {/* 8. Footer */}
         <footer className="mt-auto py-8 bg-[#faf8f5] text-[#6f6264] text-xs px-6 border-t border-[#14090b]/10">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">

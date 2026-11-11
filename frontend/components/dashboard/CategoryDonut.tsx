@@ -16,12 +16,12 @@ interface CategoryDonutProps {
   data: CategoryRevenue[];
 }
 
-const COLORS = ["#2563EB", "#06B6D4", "#8B5CF6", "#F59E0B", "#10B981"];
+const COLORS = ["#7b1425", "#06B6D4", "#8B5CF6", "#F59E0B", "#10B981"];
 
 export const CategoryDonut: React.FC<CategoryDonutProps> = ({ data }) => {
   if (!data || data.length === 0) {
     return (
-      <div className="h-60 flex items-center justify-center text-slate-400 text-xs">
+      <div className="h-60 flex items-center justify-center text-[#a89b99] text-xs">
         No category revenue data.
       </div>
     );
@@ -31,10 +31,10 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ data }) => {
     if (active && payload && payload.length) {
       const p = payload[0].payload;
       return (
-        <div className="bg-slate-900 text-white p-2.5 rounded-lg shadow-lg text-xs">
-          <p className="font-semibold text-slate-200">{p.category_name}</p>
-          <p className="font-bold text-blue-400">{formatCurrency(p.revenue)}</p>
-          <p className="text-slate-400">{p.percentage}% of catalog sales</p>
+        <div className="bg-[#14090b] text-white p-2.5 rounded-lg shadow-lg text-xs">
+          <p className="font-semibold text-[#e8e2dc]">{p.category_name}</p>
+          <p className="font-bold text-[#C26679]">{formatCurrency(p.revenue)}</p>
+          <p className="text-[#a89b99]">{p.percentage}% of catalog sales</p>
         </div>
       );
     }
@@ -70,13 +70,13 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ data }) => {
                 className="w-2.5 h-2.5 rounded-full"
                 style={{ backgroundColor: COLORS[idx % COLORS.length] }}
               />
-              <span className="font-medium text-slate-700 truncate max-w-[120px]">
+              <span className="font-medium text-[#3b2f31] truncate max-w-[120px]">
                 {cat.category_name}
               </span>
             </div>
             <div className="text-right">
-              <span className="font-bold text-slate-900">{formatCurrency(cat.revenue)}</span>
-              <span className="ml-1.5 text-slate-400 font-medium">({cat.percentage}%)</span>
+              <span className="font-bold text-[#14090b]">{formatCurrency(cat.revenue)}</span>
+              <span className="ml-1.5 text-[#a89b99] font-medium">({cat.percentage}%)</span>
             </div>
           </div>
         ))}

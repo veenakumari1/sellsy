@@ -21,8 +21,8 @@ interface AiInsightsPanelProps {
 export const AiInsightsPanel: React.FC<AiInsightsPanelProps> = ({ insights }) => {
   if (!insights || insights.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-500">
-        <Sparkles size={24} className="mx-auto text-blue-500 mb-2" />
+      <div className="bg-white rounded-xl border border-[#e8e2dc] p-6 text-center text-[#6f6264]">
+        <Sparkles size={24} className="mx-auto text-[#A3243A] mb-2" />
         <p className="text-sm font-medium">No active AI alerts. Store operations are performing optimally.</p>
       </div>
     );
@@ -31,7 +31,7 @@ export const AiInsightsPanel: React.FC<AiInsightsPanelProps> = ({ insights }) =>
   const getCategoryBadge = (cat: string) => {
     switch (cat.toLowerCase()) {
       case "sales":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-[#F6E1E5] text-[#4D0C18] border-[#EBC3CB]";
       case "products":
         return "bg-amber-100 text-amber-800 border-amber-200";
       case "customers":
@@ -39,23 +39,23 @@ export const AiInsightsPanel: React.FC<AiInsightsPanelProps> = ({ insights }) =>
       case "marketing":
         return "bg-emerald-100 text-emerald-800 border-emerald-200";
       default:
-        return "bg-slate-100 text-slate-800 border-slate-200";
+        return "bg-[#f3ede7] text-[#2a1b1e] border-[#e8e2dc]";
     }
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/40 via-white to-transparent">
+    <div className="bg-white rounded-xl border border-[#e8e2dc]/90 shadow-xs overflow-hidden">
+      <div className="px-6 py-4 border-b border-[#f3ede7] flex items-center justify-between bg-gradient-to-r from-[#FBF1F3]/40 via-white to-transparent">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-blue-600/10 flex items-center justify-center text-blue-600">
+          <div className="w-7 h-7 rounded-lg bg-[#7b1425]/10 flex items-center justify-center text-[#7b1425]">
             <Sparkles size={16} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">AI Business Intelligence Engine</h3>
-            <p className="text-xs text-slate-500">Synthesized directly from verified store transactions</p>
+            <h3 className="text-sm font-bold text-[#14090b]">AI Business Intelligence Engine</h3>
+            <p className="text-xs text-[#6f6264]">Synthesized directly from verified store transactions</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-700">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f3ede7] text-[11px] font-semibold text-[#3b2f31]">
           <ShieldCheck size={13} className="text-emerald-600" />
           <span>Grounded Database Evidence</span>
         </div>
@@ -65,7 +65,7 @@ export const AiInsightsPanel: React.FC<AiInsightsPanelProps> = ({ insights }) =>
         {insights.map((ins) => (
           <div
             key={ins.id}
-            className="flex flex-col justify-between p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50/90 transition-all hover:border-blue-200 shadow-2xs"
+            className="flex flex-col justify-between p-4 rounded-xl border border-[#e8e2dc]/80 bg-[#faf8f5]/50 hover:bg-[#faf8f5]/90 transition-all hover:border-[#EBC3CB] shadow-2xs"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
@@ -77,23 +77,23 @@ export const AiInsightsPanel: React.FC<AiInsightsPanelProps> = ({ insights }) =>
                 >
                   {ins.category}
                 </span>
-                <span className="text-[11px] font-semibold text-slate-400">
+                <span className="text-[11px] font-semibold text-[#a89b99]">
                   {Math.round(ins.confidence_score * 100)}% Confidence
                 </span>
               </div>
-              <h4 className="text-sm font-bold text-slate-900 leading-snug">{ins.title}</h4>
-              <p className="mt-2 text-xs text-slate-600 leading-relaxed">{ins.observation}</p>
+              <h4 className="text-sm font-bold text-[#14090b] leading-snug">{ins.title}</h4>
+              <p className="mt-2 text-xs text-[#5a4e50] leading-relaxed">{ins.observation}</p>
               {ins.impact && (
-                <div className="mt-2 text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
-                  <span className="font-semibold text-slate-700">Impact:</span>
+                <div className="mt-2 text-[11px] font-medium text-[#6f6264] flex items-center gap-1.5">
+                  <span className="font-semibold text-[#3b2f31]">Impact:</span>
                   <span>{ins.impact}</span>
                 </div>
               )}
             </div>
 
-            <div className="mt-3.5 pt-3 border-t border-slate-200/60">
-              <div className="flex items-start gap-1.5 text-xs text-blue-900 bg-blue-50/80 p-2.5 rounded-lg border border-blue-100">
-                <CheckCircle2 size={15} className="text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="mt-3.5 pt-3 border-t border-[#e8e2dc]/60">
+              <div className="flex items-start gap-1.5 text-xs text-[#380911] bg-[#FBF1F3]/80 p-2.5 rounded-lg border border-[#F6E1E5]">
+                <CheckCircle2 size={15} className="text-[#7b1425] mt-0.5 flex-shrink-0" />
                 <span className="font-medium leading-relaxed">{ins.actionable_recommendation}</span>
               </div>
             </div>

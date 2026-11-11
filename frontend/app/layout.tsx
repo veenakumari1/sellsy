@@ -6,6 +6,7 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-fraunces",
   axes: ["SOFT", "WONK", "opsz"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -24,7 +25,8 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "Sellsy | AI-Powered E-commerce Intelligence & Growth Platform",
-  description: "Understand your store, predict sales trends, segment customer cohorts, and make smarter data-driven decisions with specialized AI agents.",
+  description:
+    "Understand your store, predict sales trends, segment customer cohorts, and make smarter data-driven decisions with specialized AI agents.",
 };
 
 export default function RootLayout({
@@ -33,7 +35,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${interTight.variable} ${plexMono.variable}`}>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${interTight.variable} ${plexMono.variable}`}
+    >
       <body className="bg-paper text-ink font-sans antialiased min-h-screen">
         {children}
       </body>

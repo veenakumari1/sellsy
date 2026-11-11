@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const DIRS = ["app", "components", "src"];
+const DIRS = ["frontend/app", "frontend/components"];
 const EXT = [".tsx", ".ts", ".jsx", ".js", ".css"];
 
 const wine = {

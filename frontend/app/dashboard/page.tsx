@@ -38,17 +38,17 @@ export default function DashboardPage() {
     <DashboardLayout daysFilter={days} onDaysChange={setDays}>
       <div className="space-y-6">
         {/* Banner with refresh and status */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e8e2dc]">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Executive Performance Hub</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Executive Performance Hub</h2>
+            <p className="text-xs text-[#6f6264] mt-0.5">
               Comprehensive store performance metrics and autonomous AI agent diagnostics
             </p>
           </div>
           <button
             onClick={loadDashboard}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs transition-colors self-start sm:self-auto"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e8e2dc] bg-white hover:bg-[#faf8f5] text-xs font-semibold text-[#3b2f31] shadow-2xs transition-colors self-start sm:self-auto"
           >
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
             <span>Refresh Analytics</span>
@@ -63,8 +63,8 @@ export default function DashboardPage() {
         )}
 
         {loading && !data ? (
-          <div className="py-24 flex flex-col items-center justify-center text-slate-400 space-y-3">
-            <RefreshCw size={28} className="animate-spin text-blue-600" />
+          <div className="py-24 flex flex-col items-center justify-center text-[#a89b99] space-y-3">
+            <RefreshCw size={28} className="animate-spin text-[#7b1425]" />
             <p className="text-sm font-medium">Aggregating store metrics & running AI agents...</p>
           </div>
         ) : data ? (
@@ -127,21 +127,21 @@ export default function DashboardPage() {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Revenue Timeline */}
-              <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs">
+              <div className="lg:col-span-2 bg-white rounded-xl border border-[#e8e2dc]/90 p-6 shadow-xs">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">Revenue Timeline</h3>
-                    <p className="text-xs text-slate-500">Chronological daily gross sales over selected period</p>
+                    <h3 className="text-sm font-bold text-[#14090b]">Revenue Timeline</h3>
+                    <p className="text-xs text-[#6f6264]">Chronological daily gross sales over selected period</p>
                   </div>
                 </div>
                 <RevenueChart data={data.trends} />
               </div>
 
               {/* Category Breakdown */}
-              <div className="bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between">
+              <div className="bg-white rounded-xl border border-[#e8e2dc]/90 p-6 shadow-xs flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Revenue by Category</h3>
-                  <p className="text-xs text-slate-500 mb-4">Gross sales contribution by collection</p>
+                  <h3 className="text-sm font-bold text-[#14090b]">Revenue by Category</h3>
+                  <p className="text-xs text-[#6f6264] mb-4">Gross sales contribution by collection</p>
                   <CategoryDonut data={data.category_distribution} />
                 </div>
               </div>

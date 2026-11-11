@@ -83,7 +83,7 @@ export default function ProductsPage() {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#f3ede7] text-[#3b2f31]">
             <span>Stable</span>
           </span>
         );
@@ -96,10 +96,10 @@ export default function ProductsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e8e2dc]">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Product Intelligence & SKU Analytics</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Product Intelligence & SKU Analytics</h2>
+            <p className="text-xs text-[#6f6264] mt-0.5">
               SKU-level margins, inventory turnover, catalog stars, and declining liquidation targets
             </p>
           </div>
@@ -129,24 +129,24 @@ export default function ProductsPage() {
         </div>
 
         {/* Filter and Search Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-[#e8e2dc]/90 shadow-2xs">
           <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-80">
-            <Search size={15} className="absolute left-3 top-2.5 text-slate-400" />
+            <Search size={15} className="absolute left-3 top-2.5 text-[#a89b99]" />
             <input
               type="text"
               placeholder="Search by title or SKU..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-slate-900"
+              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-[#e8e2dc] focus:outline-hidden focus:ring-2 focus:ring-[#7b1425]/20 focus:border-[#7b1425] text-[#14090b]"
             />
           </form>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <span className="text-xs text-slate-500 font-medium">Sort By:</span>
+            <span className="text-xs text-[#6f6264] font-medium">Sort By:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-700 focus:outline-hidden"
+              className="px-2.5 py-1.5 rounded-lg border border-[#e8e2dc] text-xs font-semibold bg-[#faf8f5] text-[#3b2f31] focus:outline-hidden"
             >
               <option value="revenue">Gross Revenue</option>
               <option value="units">Units Sold</option>
@@ -155,7 +155,7 @@ export default function ProductsPage() {
             </select>
             <button
               onClick={loadProducts}
-              className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600"
+              className="p-1.5 rounded-lg border border-[#e8e2dc] bg-white hover:bg-[#faf8f5] text-[#5a4e50]"
               title="Refresh"
             >
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -164,10 +164,10 @@ export default function ProductsPage() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#e8e2dc]/90 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100">
+              <thead className="bg-[#faf8f5] text-[#6f6264] uppercase font-semibold text-[10px] tracking-wider border-b border-[#f3ede7]">
                 <tr>
                   <th className="px-6 py-3">Product Name</th>
                   <th className="px-4 py-3">SKU</th>
@@ -179,16 +179,16 @@ export default function ProductsPage() {
                   <th className="px-6 py-3 text-right">Velocity Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#f3ede7]">
                 {products.map((p) => (
                   <tr
                     key={p.id}
                     onClick={() => handleOpenDetail(p.id)}
-                    className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                    className="hover:bg-[#faf8f5]/70 transition-colors cursor-pointer group"
                   >
-                    <td className="px-6 py-3 font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <td className="px-6 py-3 font-semibold text-[#14090b] group-hover:text-[#7b1425] transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 overflow-hidden flex items-center justify-center flex-shrink-0 text-slate-400">
+                        <div className="w-8 h-8 rounded-lg bg-[#f3ede7] border border-[#e8e2dc]/60 overflow-hidden flex items-center justify-center flex-shrink-0 text-[#a89b99]">
                           {p.image_url ? (
                             <img src={p.image_url} alt="" className="w-full h-full object-cover" />
                           ) : (
@@ -198,14 +198,14 @@ export default function ProductsPage() {
                         <span className="truncate max-w-xs">{p.title}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{p.sku || "-"}</td>
-                    <td className="px-4 py-3 text-slate-600">{p.category?.name || "General"}</td>
-                    <td className="px-4 py-3 font-medium text-slate-900">{formatCurrency(p.price)}</td>
-                    <td className="px-4 py-3 text-center font-medium text-slate-600">
+                    <td className="px-4 py-3 font-mono text-[11px] text-[#6f6264]">{p.sku || "-"}</td>
+                    <td className="px-4 py-3 text-[#5a4e50]">{p.category?.name || "General"}</td>
+                    <td className="px-4 py-3 font-medium text-[#14090b]">{formatCurrency(p.price)}</td>
+                    <td className="px-4 py-3 text-center font-medium text-[#5a4e50]">
                       {p.inventory_quantity} units
                     </td>
-                    <td className="px-4 py-3 text-center font-bold text-slate-900">{formatNumber(p.units_sold)}</td>
-                    <td className="px-4 py-3 font-bold text-slate-900">{formatCurrency(p.revenue_generated)}</td>
+                    <td className="px-4 py-3 text-center font-bold text-[#14090b]">{formatNumber(p.units_sold)}</td>
+                    <td className="px-4 py-3 font-bold text-[#14090b]">{formatCurrency(p.revenue_generated)}</td>
                     <td className="px-6 py-3 text-right">{getStatusBadge(p.velocity_status)}</td>
                   </tr>
                 ))}
@@ -216,16 +216,16 @@ export default function ProductsPage() {
 
         {/* Product Detail Modal */}
         {selectedProduct && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="fixed inset-0 z-50 bg-[#14090b]/40 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-xl w-full border border-[#e8e2dc] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-6 py-4 border-b border-[#f3ede7] flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">{selectedProduct.title}</h3>
-                  <p className="text-xs text-slate-500 font-mono mt-0.5">SKU: {selectedProduct.sku || "N/A"}</p>
+                  <h3 className="text-base font-bold text-[#14090b]">{selectedProduct.title}</h3>
+                  <p className="text-xs text-[#6f6264] font-mono mt-0.5">SKU: {selectedProduct.sku || "N/A"}</p>
                 </div>
                 <button
                   onClick={() => setSelectedProduct(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                  className="p-1 rounded-lg text-[#a89b99] hover:text-[#5a4e50] hover:bg-[#f3ede7]"
                 >
                   <X size={18} />
                 </button>
@@ -233,38 +233,38 @@ export default function ProductsPage() {
 
               <div className="p-6 space-y-4">
                 <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10px] uppercase font-bold text-slate-400">Retail Price</p>
-                    <p className="text-base font-bold text-slate-900 mt-0.5">{formatCurrency(selectedProduct.price)}</p>
+                  <div className="p-3 rounded-xl bg-[#faf8f5] border border-[#f3ede7]">
+                    <p className="text-[10px] uppercase font-bold text-[#a89b99]">Retail Price</p>
+                    <p className="text-base font-bold text-[#14090b] mt-0.5">{formatCurrency(selectedProduct.price)}</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10px] uppercase font-bold text-slate-400">Gross Margin</p>
+                  <div className="p-3 rounded-xl bg-[#faf8f5] border border-[#f3ede7]">
+                    <p className="text-[10px] uppercase font-bold text-[#a89b99]">Gross Margin</p>
                     <p className="text-base font-bold text-emerald-600 mt-0.5">{selectedProduct.margin_pct}%</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10px] uppercase font-bold text-slate-400">Total Units</p>
-                    <p className="text-base font-bold text-slate-900 mt-0.5">{selectedProduct.units_sold}</p>
+                  <div className="p-3 rounded-xl bg-[#faf8f5] border border-[#f3ede7]">
+                    <p className="text-[10px] uppercase font-bold text-[#a89b99]">Total Units</p>
+                    <p className="text-base font-bold text-[#14090b] mt-0.5">{selectedProduct.units_sold}</p>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Monthly Breakdown</h4>
+                  <h4 className="text-xs font-bold text-[#2a1b1e] uppercase tracking-wider mb-2">Monthly Breakdown</h4>
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {selectedProduct.monthly_sales.map((m: any) => (
-                      <div key={m.month} className="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-xs">
-                        <span className="font-medium text-slate-700">{m.month}</span>
-                        <span className="text-slate-500">{m.units} units</span>
-                        <span className="font-bold text-slate-900">{formatCurrency(m.revenue)}</span>
+                      <div key={m.month} className="flex items-center justify-between p-2 rounded-lg bg-[#faf8f5] text-xs">
+                        <span className="font-medium text-[#3b2f31]">{m.month}</span>
+                        <span className="text-[#6f6264]">{m.units} units</span>
+                        <span className="font-bold text-[#14090b]">{formatCurrency(m.revenue)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <div className="px-6 py-3.5 bg-[#faf8f5] border-t border-[#f3ede7] flex justify-end">
                 <button
                   onClick={() => setSelectedProduct(null)}
-                  className="px-4 py-2 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800"
+                  className="px-4 py-2 rounded-lg bg-[#14090b] text-white font-semibold text-xs hover:bg-[#2a1b1e]"
                 >
                   Close Inspection
                 </button>

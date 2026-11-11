@@ -26,7 +26,7 @@ interface RevenueChartProps {
 export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
   if (!data || data.length === 0) {
     return (
-      <div className="h-72 flex items-center justify-center text-slate-400 text-sm">
+      <div className="h-72 flex items-center justify-center text-[#a89b99] text-sm">
         No sales data available for selected period.
       </div>
     );
@@ -48,13 +48,13 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
     if (active && payload && payload.length) {
       const p = payload[0].payload;
       return (
-        <div className="bg-slate-900 text-white p-3 rounded-lg shadow-lg text-xs space-y-1">
-          <p className="font-semibold text-slate-300">{p.date}</p>
-          <p className="text-sm font-bold text-blue-400">
+        <div className="bg-[#14090b] text-white p-3 rounded-lg shadow-lg text-xs space-y-1">
+          <p className="font-semibold text-[#d4c9c2]">{p.date}</p>
+          <p className="text-sm font-bold text-[#C26679]">
             Revenue: {formatCurrency(p.revenue)}
           </p>
-          <p className="text-slate-300">Orders: {p.orders}</p>
-          <p className="text-slate-400">AOV: {formatCurrency(p.aov)}</p>
+          <p className="text-[#d4c9c2]">Orders: {p.orders}</p>
+          <p className="text-[#a89b99]">AOV: {formatCurrency(p.aov)}</p>
         </div>
       );
     }
@@ -67,8 +67,8 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
         <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#2563EB" stopOpacity={0.25} />
-              <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0} />
+              <stop offset="5%" stopColor="#7b1425" stopOpacity={0.25} />
+              <stop offset="95%" stopColor="#7b1425" stopOpacity={0.0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
@@ -89,7 +89,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
           <Area
             type="monotone"
             dataKey="revenue"
-            stroke="#2563EB"
+            stroke="#7b1425"
             strokeWidth={2.5}
             fillOpacity={1}
             fill="url(#revenueGradient)"

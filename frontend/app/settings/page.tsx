@@ -47,9 +47,9 @@ export default function SettingsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-4xl">
-        <div className="pb-2 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Store & System Settings</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+        <div className="pb-2 border-b border-[#e8e2dc]">
+          <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Store & System Settings</h2>
+          <p className="text-xs text-[#6f6264] mt-0.5">
             Configure store preferences, AI model parameters, and access team architecture
           </p>
         </div>
@@ -62,37 +62,37 @@ export default function SettingsPage() {
         )}
 
         {seedSuccess && (
-          <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-lg bg-[#FBF1F3] border border-[#EBC3CB] text-[#4D0C18] text-xs flex items-center gap-2">
             <CheckCircle2 size={16} />
             <span>{seedSuccess}</span>
           </div>
         )}
 
         {/* Store Profile */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-            <Store size={18} className="text-blue-600" />
-            <h3 className="text-sm font-bold text-slate-900">Store Profile</h3>
+        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-[#f3ede7]">
+            <Store size={18} className="text-[#7b1425]" />
+            <h3 className="text-sm font-bold text-[#14090b]">Store Profile</h3>
           </div>
 
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Store Name</label>
+                <label className="block text-xs font-semibold text-[#3b2f31] mb-1">Store Name</label>
                 <input
                   type="text"
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 text-slate-900 focus:outline-hidden"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Operating Currency</label>
+                <label className="block text-xs font-semibold text-[#3b2f31] mb-1">Operating Currency</label>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 text-slate-900 bg-slate-50 focus:outline-hidden"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] bg-[#faf8f5] focus:outline-hidden"
                 >
                   <option value="USD">USD ($ - United States Dollar)</option>
                   <option value="EUR">EUR (€ - Euro)</option>
@@ -104,7 +104,7 @@ export default function SettingsPage() {
 
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-lg bg-[#14090b] hover:bg-[#2a1b1e] text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1.5"
             >
               <Save size={14} />
               <span>Save Store Profile</span>
@@ -113,38 +113,38 @@ export default function SettingsPage() {
         </div>
 
         {/* AI Model Configuration */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-            <Sparkles size={18} className="text-blue-600" />
-            <h3 className="text-sm font-bold text-slate-900">AI Intelligence & Gemini API Configuration</h3>
+        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-[#f3ede7]">
+            <Sparkles size={18} className="text-[#7b1425]" />
+            <h3 className="text-sm font-bold text-[#14090b]">AI Intelligence & Gemini API Configuration</h3>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-[#3b2f31] mb-1">
                 Google Gemini API Key (Optional Override)
               </label>
               <div className="relative">
-                <Key size={15} className="absolute left-3 top-2.5 text-slate-400" />
+                <Key size={15} className="absolute left-3 top-2.5 text-[#a89b99]" />
                 <input
                   type="password"
                   placeholder="AIzaSy... (leave blank to use environment default or grounded demo mode)"
                   value={geminiKey}
                   onChange={(e) => setGeminiKey(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 text-slate-900 focus:outline-hidden font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] focus:outline-hidden font-mono"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[11px] text-[#a89b99] mt-1">
                 When left empty, Sellsy provides deterministic analytical synthesis using real database metrics.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Model Selection</label>
+              <label className="block text-xs font-semibold text-[#3b2f31] mb-1">Model Selection</label>
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 text-slate-900 bg-slate-50 focus:outline-hidden"
+                className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] bg-[#faf8f5] focus:outline-hidden"
               >
                 <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast, Recommended for Analytics)</option>
                 <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Strategic Analysis)</option>
@@ -154,13 +154,13 @@ export default function SettingsPage() {
         </div>
 
         {/* Evaluation & Demo Management */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-[#f3ede7]">
             <RotateCcw size={18} className="text-amber-600" />
-            <h3 className="text-sm font-bold text-slate-900">Demo Data Reset Engine</h3>
+            <h3 className="text-sm font-bold text-[#14090b]">Demo Data Reset Engine</h3>
           </div>
 
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <p className="text-xs text-[#5a4e50] leading-relaxed">
             Quickly reset or refresh the evaluators' demo database with 25+ products, 175+ orders, and verified customer RFM cohorts.
           </p>
 
@@ -175,19 +175,19 @@ export default function SettingsPage() {
         </div>
 
         {/* Team Architecture Attribution */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <Users size={18} className="text-slate-600" />
-            <h3 className="text-sm font-bold text-slate-900">Team Engineering Division (Capstone)</h3>
+        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#f3ede7]">
+            <Users size={18} className="text-[#5a4e50]" />
+            <h3 className="text-sm font-bold text-[#14090b]">Team Engineering Division (Capstone)</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="font-bold text-slate-900">Team Member 1: Frontend & Product Engineering</p>
-              <p className="text-slate-500 mt-1">Next.js 14, UI/UX Design System, Recharts, Responsive Dashboard, Authentication Interface, Client-side API Integration, Vercel Deployment.</p>
+            <div className="p-3.5 rounded-xl bg-[#faf8f5] border border-[#f3ede7]">
+              <p className="font-bold text-[#14090b]">Team Member 1: Frontend & Product Engineering</p>
+              <p className="text-[#6f6264] mt-1">Next.js 14, UI/UX Design System, Recharts, Responsive Dashboard, Authentication Interface, Client-side API Integration, Vercel Deployment.</p>
             </div>
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="font-bold text-slate-900">Team Member 2: Backend & AI Engineering</p>
-              <p className="text-slate-500 mt-1">FastAPI, SQLAlchemy, LangGraph Multi-Agent Architecture, Sellsy MCP Server, Reusable Skills, Holt Forecasting, Railway Deployment.</p>
+            <div className="p-3.5 rounded-xl bg-[#faf8f5] border border-[#f3ede7]">
+              <p className="font-bold text-[#14090b]">Team Member 2: Backend & AI Engineering</p>
+              <p className="text-[#6f6264] mt-1">FastAPI, SQLAlchemy, LangGraph Multi-Agent Architecture, Sellsy MCP Server, Reusable Skills, Holt Forecasting, Railway Deployment.</p>
             </div>
           </div>
         </div>
