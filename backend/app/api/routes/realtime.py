@@ -1,8 +1,11 @@
 import uuid
 import random
+from typing import Optional
 from datetime import datetime, timezone
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+import jwt
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query
 from sqlalchemy.orm import Session
+from app.core.config import settings
 from app.core.database import get_db, SessionLocal
 from app.core.websocket_manager import ws_manager
 from app.models import Order, OrderItem, Product, Store, User, Notification
@@ -14,7 +17,32 @@ router = APIRouter(prefix="/realtime", tags=["Real-Time Engine"])
 
 @router.websocket("/ws")
 @router.websocket("/ws/{store_id}")
-async def websocket_endpoint(websocket: WebSocket, store_id: str = "default"):
+async def websocket_endpoint(
+    websocket: WebSocket,
+    store_id: str = "default",
+    token: Optional[str] = Query(None)
+):
+    # Verify auth token
+    if not token:
+        # Check Authorization header / query
+        auth_header = websocket.headers.get("authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+
+    if not token:
+        await websocket.close(code=1008, reason="Authentication required")
+        return
+
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
+            await websocket.close(code=1008, reason="Authentication failed: invalid subject")
+            return
+    except Exception:
+        await websocket.close(code=1008, reason="Authentication failed: invalid or expired token")
+        return
+
     await ws_manager.connect(websocket, store_id)
     try:
         while True:

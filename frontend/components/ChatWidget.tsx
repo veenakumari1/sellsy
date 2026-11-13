@@ -142,7 +142,10 @@ const Icon = {
 };
 
 export default function ChatWidget({ endpoint }: { endpoint?: string }) {
-  const url = endpoint ?? process.env.NEXT_PUBLIC_CHAT_URL;
+  const url =
+    endpoint ??
+    process.env.NEXT_PUBLIC_CHAT_URL ??
+    `${(process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/+$/, "")}/api/chat`;
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);

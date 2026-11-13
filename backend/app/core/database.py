@@ -1,10 +1,14 @@
 import os
+import logging
+import time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from app.core.config import settings
 
-# Adjust sqlite database URL for SQLAlchemy if needed
-database_url = settings.DATABASE_URL
+logger = logging.getLogger("sellsy.database")
+
+# Adjust database URL for SQLAlchemy if needed
+database_url = settings.DATABASE_URL or "sqlite:///./sellsy.db"
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -29,6 +33,33 @@ def get_db():
     finally:
         db.close()
 
-def init_db():
+def init_db(max_retries: int = 5, retry_delay: float = 2.0):
+    """
+    Initializes database tables with retry logic to withstand startup connection delays in containers.
+    """
     from app import models  # noqa: F401
-    Base.metadata.create_all(bind=engine)
+    
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info(f"Connecting to database and initializing schema (attempt {attempt}/{max_retries})...")
+            Base.metadata.create_all(bind=engine)
+            logger.info("Database schema initialized successfully.")
+
+            # Ensure default achievement definitions exist
+            try:
+                from app.services.gamification_service import GamificationService
+                with SessionLocal() as db:
+                    GamificationService.ensure_definitions(db)
+                logger.info("Default gamification definitions verified.")
+            except Exception as e:
+                logger.warning(f"Gamification definition check notice: {e}")
+
+            return
+        except Exception as e:
+            last_err = e
+            logger.warning(f"Database initialization attempt {attempt} failed: {e}")
+            if attempt < max_retries:
+                time.sleep(retry_delay)
+
+    logger.error(f"Could not initialize database after {max_retries} attempts: {last_err}")

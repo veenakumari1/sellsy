@@ -1,4 +1,4 @@
-const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const DEFAULT_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
 
 interface RequestOptions extends RequestInit {
   forceRefresh?: boolean;
@@ -20,7 +20,7 @@ export class ApiClient {
     return DEFAULT_BASE_URL;
   }
 
-  private static getToken(): string | null {
+  public static getToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("sellsy_token");
   }
@@ -155,21 +155,32 @@ export class ApiClient {
             this.resolvedBaseUrl = fallbackUrl.replace(endpoint, "");
           } catch (fallbackErr: any) {
             console.error(`[API] Fallback connection failed at ${fallbackUrl}:`, fallbackErr);
-            throw new Error("We couldn't load your data right now. Please try again.");
+            throw new Error(`Unable to connect to the backend server at ${primaryUrl}. Please verify the backend is running.`);
           }
         } else {
-          throw new Error("We couldn't load your data right now. Please try again.");
+          throw new Error(`Unable to connect to the backend server at ${primaryUrl}. Please verify the backend is running.`);
         }
       }
 
       if (!response.ok) {
+        let serverDetail = "";
         try {
           const errorData = await response.json();
           console.error(`[API Error ${response.status}] ${response.url}`, errorData);
+          if (typeof errorData?.detail === "string") {
+            serverDetail = errorData.detail;
+          } else if (Array.isArray(errorData?.detail)) {
+            serverDetail = errorData.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
+          } else if (errorData?.message) {
+            serverDetail = errorData.message;
+          }
         } catch {
-       console.error(`[API Error ${response.status}] ${response.url}: ${response.statusText}`);
+          console.error(`[API Error ${response.status}] ${response.url}: ${response.statusText}`);
         }
-        throw new Error(`We couldn't load your data right now. [${response.status}] ${response.url}`);
+        const message = serverDetail 
+          ? `[${response.status}] ${serverDetail}` 
+          : `Request failed with status ${response.status} (${response.statusText || response.url})`;
+        throw new Error(message);
       }
 
       const data = await response.json();

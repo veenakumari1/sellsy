@@ -37,10 +37,19 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/health", tags=["Health"])
 def health_check():
+    db_status = "ok"
+    try:
+        from sqlalchemy import text
+        from app.core.database import engine
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
     return {
         "status": "healthy",
         "service": "Sellsy Intelligence Backend",
-        "version": settings.VERSION
+        "version": settings.VERSION,
+        "database": db_status
     }
 
 @app.get("/", tags=["Root"])
