@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
+    # Server Port
+    PORT: int = int(os.getenv("PORT", 8000))
+    
     # Security
     SECRET_KEY: str = os.getenv("SECRET_KEY", "sellsy_super_secret_production_key_change_in_prod_2026")
     ALGORITHM: str = "HS256"

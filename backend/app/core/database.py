@@ -8,19 +8,36 @@ from app.core.config import settings
 logger = logging.getLogger("sellsy.database")
 
 # Adjust database URL for SQLAlchemy if needed
-database_url = settings.DATABASE_URL or "sqlite:///./sellsy.db"
-if database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
+raw_url = (settings.DATABASE_URL or "").strip()
+if not raw_url:
+    raw_url = "sqlite:///./sellsy.db"
+
+# Normalize postgres schemes so SQLAlchemy 2.0 uses psycopg2 explicitly
+if raw_url.startswith("postgres://"):
+    database_url = raw_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif raw_url.startswith("postgresql://") and not raw_url.startswith("postgresql+"):
+    database_url = raw_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+else:
+    database_url = raw_url
 
 connect_args = {}
 if database_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 
-engine = create_engine(
-    database_url,
-    connect_args=connect_args,
-    pool_pre_ping=True
-)
+try:
+    engine = create_engine(
+        database_url,
+        connect_args=connect_args,
+        pool_pre_ping=True
+    )
+except Exception as e:
+    logger.error(f"Failed to create engine with database_url '{database_url}': {e}. Falling back to local SQLite.")
+    database_url = "sqlite:///./sellsy.db"
+    engine = create_engine(
+        database_url,
+        connect_args={"check_same_thread": False},
+        pool_pre_ping=True
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -33,7 +50,7 @@ def get_db():
     finally:
         db.close()
 
-def init_db(max_retries: int = 5, retry_delay: float = 2.0):
+def init_db(max_retries: int = 3, retry_delay: float = 1.0):
     """
     Initializes database tables with retry logic to withstand startup connection delays in containers.
     """
