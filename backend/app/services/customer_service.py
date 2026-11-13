@@ -21,12 +21,15 @@ class CustomerService:
         total_customers = len(customers)
 
         if total_customers == 0:
+            default_rec = ["Start acquiring customers by connecting your store or importing customer data."]
             return CustomerInsightsOut(
                 total_customers=0,
                 repeat_purchase_rate=0.0,
+                repeat_purchase_rate_pct=0.0,
                 avg_customer_ltv=0.0,
                 segments=[],
-                retention_recommendations=["Start acquiring customers by connecting your store or importing customer data."]
+                retention_recommendations=default_rec,
+                recommendations=default_rec
             )
 
         repeat_customers = [c for c in customers if c.orders_count >= 2]
@@ -83,9 +86,11 @@ class CustomerService:
         return CustomerInsightsOut(
             total_customers=total_customers,
             repeat_purchase_rate=repeat_rate,
+            repeat_purchase_rate_pct=repeat_rate,
             avg_customer_ltv=avg_ltv,
             segments=segment_summaries,
-            retention_recommendations=recommendations
+            retention_recommendations=recommendations,
+            recommendations=recommendations
         )
 
     @staticmethod

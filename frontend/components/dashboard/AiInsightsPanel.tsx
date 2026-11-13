@@ -23,7 +23,7 @@ export const AiInsightsPanel: React.FC<AiInsightsPanelProps> = ({ insights }) =>
     return (
       <div className="bg-white rounded-xl border border-[#e8e2dc] p-6 text-center text-[#6f6264]">
         <Sparkles size={24} className="mx-auto text-[#A3243A] mb-2" />
-        <p className="text-sm font-medium">No active AI alerts. Store operations are performing optimally.</p>
+        <p className="text-sm font-medium">No alerts right now. Your store is running smoothly.</p>
       </div>
     );
   }
@@ -51,21 +51,21 @@ export const AiInsightsPanel: React.FC<AiInsightsPanelProps> = ({ insights }) =>
             <Sparkles size={16} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[#14090b]">AI Business Intelligence Engine</h3>
-            <p className="text-xs text-[#6f6264]">Synthesized directly from verified store transactions</p>
+            <h3 className="text-sm font-bold text-[#14090b]">AI Insights</h3>
+            <p className="text-xs text-[#6f6264]">Suggestions based on your store data</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f3ede7] text-[11px] font-semibold text-[#3b2f31]">
           <ShieldCheck size={13} className="text-emerald-600" />
-          <span>Grounded Database Evidence</span>
+          <span>Store data</span>
         </div>
       </div>
 
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {insights.map((ins) => (
           <div
             key={ins.id}
-            className="flex flex-col justify-between p-4 rounded-xl border border-[#e8e2dc]/80 bg-[#faf8f5]/50 hover:bg-[#faf8f5]/90 transition-all hover:border-[#EBC3CB] shadow-2xs"
+            className="flex flex-col justify-between p-4 rounded-xl border border-[#e8e2dc]/80 bg-[#faf8f5]/50 hover:bg-[#faf8f5]/90 transition-all hover:border-[#EBC3CB] shadow-2xs h-full"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">

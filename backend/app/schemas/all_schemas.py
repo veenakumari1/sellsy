@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 # ----------------- User & Auth -----------------
 class UserCreate(BaseModel):
@@ -134,9 +134,11 @@ class CustomerSegmentSummary(BaseModel):
 class CustomerInsightsOut(BaseModel):
     total_customers: int
     repeat_purchase_rate: float
+    repeat_purchase_rate_pct: Optional[float] = None
     avg_customer_ltv: float
     segments: List[CustomerSegmentSummary]
     retention_recommendations: List[str]
+    recommendations: Optional[List[str]] = None
 
 # ----------------- Order -----------------
 class OrderItemOut(BaseModel):
@@ -359,3 +361,71 @@ class CsvImportResult(BaseModel):
     successful_records: int
     failed_records: int
     errors: List[str] = []
+
+# ----------------- Notifications -----------------
+class NotificationOut(BaseModel):
+    id: str
+    title: str
+    message: str
+    category: str
+    is_read: bool
+    link: Optional[str] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class NotificationListResponse(BaseModel):
+    notifications: List[NotificationOut]
+    unread_count: int
+
+# ----------------- Gamification -----------------
+class AchievementOut(BaseModel):
+    id: str
+    key: str
+    title: str
+    description: str
+    category: str
+    icon_name: str
+    points_reward: int
+    is_unlocked: bool = False
+    current_progress: int = 0
+    target_progress: int = 1
+    unlocked_at: Optional[datetime] = None
+
+class GamificationActivityOut(BaseModel):
+    id: str
+    activity_type: str
+    points_earned: int
+    description: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class LeaderboardUserOut(BaseModel):
+    rank: int
+    user_id: str
+    name: str
+    store_name: str
+    points: int
+    level: int
+    rank_title: str
+    badge_count: int
+    is_current_user: bool = False
+
+class GamificationOverviewOut(BaseModel):
+    total_points: int
+    level: int
+    rank_title: str
+    streak_days: int
+    points_to_next_level: int
+    next_level_points: int
+    level_progress_pct: float
+    completed_achievements_count: int
+    total_achievements_count: int
+    achievements: List[AchievementOut]
+    recent_activities: List[GamificationActivityOut]
+
+class ClaimTaskRequest(BaseModel):
+    task_key: str
+    task_title: str
+

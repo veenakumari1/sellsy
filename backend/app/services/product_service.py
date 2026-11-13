@@ -1,13 +1,13 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta, timezone
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, desc
 from app.models import Product, ProductCategory, OrderItem, Order
 from app.schemas import ProductOut, ProductDetailOut, CategoryOut
 
 def _to_naive_utc(dt: datetime) -> datetime:
     if dt is None:
-        return datetime.utcnow()
+        return datetime.now(timezone.utc).replace(tzinfo=None)
     if dt.tzinfo is not None:
         return dt.astimezone(timezone.utc).replace(tzinfo=None)
     return dt
@@ -26,7 +26,7 @@ class ProductService:
         revenue = sum(i.quantity * i.price - i.total_discount for i in items)
 
         # Check velocity delta (last 30 days vs prior 30 days)
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         thirty_days_ago = now - timedelta(days=30)
         sixty_days_ago = now - timedelta(days=60)
 
@@ -52,6 +52,78 @@ class ProductService:
         }
 
     @staticmethod
+    def _compute_batch_product_stats(
+        db: Session,
+        store_id: str,
+        products: List[Product]
+    ) -> Dict[str, Dict[str, Any]]:
+        if not products:
+            return {}
+
+        product_ids = [p.id for p in products]
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        thirty_days_ago = now - timedelta(days=30)
+        sixty_days_ago = now - timedelta(days=60)
+
+        results = db.query(
+            OrderItem.product_id,
+            OrderItem.quantity,
+            OrderItem.price,
+            OrderItem.total_discount,
+            Order.created_at
+        ).join(Order, Order.id == OrderItem.order_id).filter(
+            OrderItem.product_id.in_(product_ids),
+            Order.store_id == store_id,
+            Order.financial_status != "refunded"
+        ).all()
+
+        stats_map: Dict[str, Dict[str, Any]] = {
+            pid: {"units": 0, "rev": 0.0, "recent": 0, "prev": 0}
+            for pid in product_ids
+        }
+
+        for row in results:
+            pid = row.product_id
+            if pid not in stats_map:
+                continue
+            qty = row.quantity or 0
+            price = row.price or 0.0
+            discount = row.total_discount or 0.0
+            order_dt = _to_naive_utc(row.created_at)
+
+            s = stats_map[pid]
+            s["units"] += qty
+            s["rev"] += (qty * price - discount)
+            if order_dt >= thirty_days_ago:
+                s["recent"] += qty
+            elif sixty_days_ago <= order_dt < thirty_days_ago:
+                s["prev"] += qty
+
+        final_stats: Dict[str, Dict[str, Any]] = {}
+        for p in products:
+            s = stats_map[p.id]
+            units_sold = s["units"]
+            revenue = s["rev"]
+            recent_units = s["recent"]
+            prev_units = s["prev"]
+
+            status = "stable"
+            if prev_units > 5 and recent_units < prev_units * 0.65:
+                status = "declining"
+            elif recent_units >= 15 or revenue > 2000.0:
+                status = "top_performer"
+            elif p.cost_price > 0 and (p.price - p.cost_price) / p.price > 0.6 and units_sold < 15:
+                status = "opportunity"
+
+            final_stats[p.id] = {
+                "units_sold": units_sold,
+                "revenue": round(revenue, 2),
+                "status": status
+            }
+
+        return final_stats
+
+    @staticmethod
     def get_products(
         db: Session,
         store_id: str,
@@ -61,16 +133,18 @@ class ProductService:
         skip: int = 0,
         limit: int = 50
     ) -> List[ProductOut]:
-        query = db.query(Product).filter(Product.store_id == store_id)
+        query = db.query(Product).options(joinedload(Product.category)).filter(Product.store_id == store_id)
         if category_id:
             query = query.filter(Product.category_id == category_id)
         if search:
             query = query.filter(Product.title.ilike(f"%{search}%") | Product.sku.ilike(f"%{search}%"))
 
         products = query.all()
+        stats_by_product = ProductService._compute_batch_product_stats(db, store_id, products)
+
         out_list = []
         for p in products:
-            stats = ProductService._compute_product_stats(db, store_id, p)
+            stats = stats_by_product.get(p.id, {"units_sold": 0, "revenue": 0.0, "status": "stable"})
             cat_out = CategoryOut(id=p.category.id, name=p.category.name, slug=p.category.slug) if p.category else None
             out_list.append(ProductOut(
                 id=p.id,

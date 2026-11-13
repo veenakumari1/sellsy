@@ -1,44 +1,43 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ApiClient } from "@/lib/api";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import {
-  LineChart,
-  AreaChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend
-} from "recharts";
-import {
-  TrendingUp,
-  Calendar,
   Sparkles,
-  ShieldCheck,
   AlertCircle,
   HelpCircle,
-  RefreshCw,
-  SlidersHorizontal
+  RefreshCw
 } from "lucide-react";
+
+const ForecastChart = dynamic(
+  () => import("@/components/dashboard/ForecastChart").then((mod) => mod.ForecastChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-80 rounded-lg bg-[#faf8f5] animate-pulse" />,
+  }
+);
 
 export default function ForecastingPage() {
   const [horizon, setHorizon] = useState(30);
-  const [forecast, setForecast] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [forecast, setForecast] = useState<any>(() => ApiClient.getCached("/api/v1/forecasts?days_ahead=30"));
+  const [loading, setLoading] = useState(() => !ApiClient.getCached("/api/v1/forecasts?days_ahead=30"));
+  const [error, setError] = useState<string | null>(null);
 
-  const loadForecast = async (daysAhead: number) => {
-    setLoading(true);
+  const loadForecast = async (daysAhead: number, force = false) => {
+    const cached = ApiClient.getCached(`/api/v1/forecasts?days_ahead=${daysAhead}`);
+    if (force || !cached) {
+      setLoading(true);
+    }
+    setError(null);
     try {
-      const data = await ApiClient.getForecast(daysAhead);
+      const data = await ApiClient.getForecast(daysAhead, force);
       setForecast(data);
     } catch (e) {
       console.error(e);
+      setError("We couldn't load your forecast right now. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -76,111 +75,109 @@ export default function ForecastingPage() {
     return [...hist, ...proj];
   }, [forecast]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const p = payload[0].payload;
-      return (
-        <div className="bg-[#14090b] text-white p-3 rounded-lg shadow-lg text-xs space-y-1">
-          <p className="font-semibold text-[#d4c9c2]">Date: {p.date}</p>
-          {p.actualRevenue !== null && (
-            <p className="text-[#C26679] font-bold">
-              Actual Sales: {formatCurrency(p.actualRevenue)}
-            </p>
-          )}
-          {p.projectedRevenue !== null && (
-            <>
-              <p className="text-emerald-400 font-bold">
-                Projected: {formatCurrency(p.projectedRevenue)}
-              </p>
-              <p className="text-[#a89b99]">
-                Range: {formatCurrency(p.lowerBound)} – {formatCurrency(p.upperBound)}
-              </p>
-            </>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e8e2dc]">
           <div>
-            <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Sales Forecasting & Demand Modeling</h2>
+            <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Sales Forecast</h2>
             <p className="text-xs text-[#6f6264] mt-0.5">
-              Statistical exponential smoothing projections grounded in verified historical transaction velocities
+              What you can expect to sell in the coming weeks
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
             {[30, 60, 90].map((h) => (
               <button
                 key={h}
                 onClick={() => setHorizon(h)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                className={`h-10 sm:h-9 min-h-[40px] inline-flex items-center justify-center px-3 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
                   horizon === h
                     ? "bg-[#7b1425] text-white shadow-xs"
                     : "bg-white border border-[#e8e2dc] text-[#5a4e50] hover:bg-[#faf8f5]"
                 }`}
               >
-                {h}-Day Outlook
+                Next {h} Days
               </button>
             ))}
           </div>
         </div>
 
-        {loading ? (
-          <div className="py-24 flex flex-col items-center justify-center text-[#a89b99] space-y-3">
-            <RefreshCw size={28} className="animate-spin text-[#7b1425]" />
-            <p className="text-sm font-medium">Calibrating Holt exponential smoothing models...</p>
+        {error && !forecast ? (
+          <div className="p-6 bg-white rounded-xl border border-[#e8e2dc] text-center space-y-3">
+            <p className="text-sm text-[#5a4e50]">{error}</p>
+            <button
+              onClick={() => loadForecast(horizon, true)}
+              className="px-4 py-2 bg-[#7b1425] text-white text-xs font-semibold rounded-lg hover:bg-[#600f1c] transition-colors"
+            >
+              Try again
+            </button>
+          </div>
+        ) : loading && !forecast ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs h-24 animate-pulse">
+                  <div className="h-3 w-24 bg-[#f3ede7] rounded mb-3" />
+                  <div className="h-6 w-20 bg-[#f3ede7] rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="bg-white p-6 rounded-xl border border-[#e8e2dc]/90 shadow-xs h-80 animate-pulse" />
           </div>
         ) : forecast && forecast.is_sufficient_data ? (
           <>
             {/* KPI Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs">
-                <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider">Projected Revenue</p>
-                <p className="text-2xl font-bold text-[#14090b] mt-1">
-                  {formatCurrency(forecast.total_projected_revenue)}
-                </p>
-                <p className="text-xs text-[#6f6264] mt-1">Next {horizon} days expected turnover</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs flex flex-col justify-between h-full">
+                <div>
+                  <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider truncate">Expected sales</p>
+                  <p className="text-2xl font-bold text-[#14090b] mt-1 whitespace-nowrap">
+                    {formatCurrency(forecast.total_projected_revenue)}
+                  </p>
+                </div>
+                <p className="text-xs text-[#6f6264] mt-2 truncate">Estimated sales over next {horizon} days</p>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs">
-                <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider">Fulfillment Demand</p>
-                <p className="text-2xl font-bold text-[#14090b] mt-1">
-                  ~{formatNumber(forecast.total_projected_orders)} orders
-                </p>
-                <p className="text-xs text-[#6f6264] mt-1">Estimated warehouse fulfillment volume</p>
+              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs flex flex-col justify-between h-full">
+                <div>
+                  <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider truncate">Expected orders</p>
+                  <p className="text-2xl font-bold text-[#14090b] mt-1 whitespace-nowrap">
+                    ~{formatNumber(forecast.total_projected_orders)} orders
+                  </p>
+                </div>
+                <p className="text-xs text-[#6f6264] mt-2 truncate">Estimated orders to fulfill</p>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs">
-                <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider">Average Daily Projection</p>
-                <p className="text-2xl font-bold text-[#14090b] mt-1">
-                  {formatCurrency(forecast.average_daily_projected)}
-                </p>
-                <p className="text-xs text-[#6f6264] mt-1">Expected daily baseline</p>
+              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs flex flex-col justify-between h-full">
+                <div>
+                  <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider truncate">Average daily sales</p>
+                  <p className="text-2xl font-bold text-[#14090b] mt-1 whitespace-nowrap">
+                    {formatCurrency(forecast.average_daily_projected)}
+                  </p>
+                </div>
+                <p className="text-xs text-[#6f6264] mt-2 truncate">Estimated daily sales</p>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs">
-                <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider">Confidence Level</p>
-                <p className="text-2xl font-bold text-emerald-600 mt-1">
-                  {forecast.confidence_level_pct}% Certainty
-                </p>
-                <p className="text-xs text-[#6f6264] mt-1">Statistical Gaussian error interval</p>
+              <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs flex flex-col justify-between h-full">
+                <div>
+                  <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider truncate">Accuracy estimate</p>
+                  <p className="text-2xl font-bold text-emerald-600 mt-1 whitespace-nowrap">
+                    {forecast.confidence_level_pct}%
+                  </p>
+                </div>
+                <p className="text-xs text-[#6f6264] mt-2 truncate">Based on past sales patterns</p>
               </div>
             </div>
 
-            {/* AI Sales Prediction Agent Explanation */}
+            {/* AI Sales Forecast Summary */}
             <div className="p-5 rounded-xl bg-gradient-to-r from-[#FBF1F3]/70 via-[#FBF1F3]/40 to-white border border-[#EBC3CB]/80 shadow-xs">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 text-[#380911] font-bold text-sm">
                   <Sparkles size={16} className="text-[#7b1425]" />
-                  <span>Sales Prediction Agent: Forecast Synthesis</span>
+                  <span>Forecast summary</span>
                 </div>
                 <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#F6E1E5] text-[#4D0C18] uppercase tracking-wide">
-                  {forecast.trend_direction} Trajectory
+                  {forecast.trend_direction} trend
                 </span>
               </div>
               <p className="text-xs text-[#3b2f31] leading-relaxed">
@@ -189,48 +186,31 @@ export default function ForecastingPage() {
               <div className="mt-3 flex items-center gap-2 text-[11px] text-[#6f6264]">
                 <HelpCircle size={13} className="text-[#a89b99]" />
                 <span>
-                  Methodology: {forecast.methodology}. Projections are mathematical estimates, not guaranteed outcomes.
+                  Forecasts are calculated from your previous sales history to help you plan stock and promotions.
                 </span>
               </div>
             </div>
 
             {/* Continuous Chart: Historical Actuals + Statistical Forecast */}
-            <div className="bg-white p-6 rounded-xl border border-[#e8e2dc]/90 shadow-xs">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#e8e2dc]/90 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[#14090b]">Historical vs Projected Revenue</h3>
+                  <h3 className="text-sm font-bold text-[#14090b]">Past and expected sales</h3>
                   <p className="text-xs text-[#6f6264]">
-                    Solid blue represents verified historical sales; dashed green reflects statistical projection with 80% confidence bands
+                    Solid line is past sales; dashed line is your forecast
                   </p>
                 </div>
               </div>
 
-              <div className="w-full h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={combinedChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="forecastArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={{ stroke: "#E2E8F0" }} tickLine={false} dy={8} />
-                    <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}`} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="actualRevenue" stroke="#7b1425" strokeWidth={2.5} fill="#FBF1F3" fillOpacity={0.4} name="Actual Revenue" />
-                    <Area type="monotone" dataKey="projectedRevenue" stroke="#10B981" strokeWidth={2.5} strokeDasharray="5 5" fill="url(#forecastArea)" name="Projected Revenue" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+              <ForecastChart data={combinedChartData} />
             </div>
           </>
         ) : (
           <div className="bg-white p-12 rounded-2xl border border-[#e8e2dc] text-center max-w-lg mx-auto">
             <AlertCircle size={36} className="text-amber-500 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-[#14090b]">Insufficient Historical Sales Data</h3>
+            <h3 className="text-base font-bold text-[#14090b]">More sales data needed</h3>
             <p className="text-xs text-[#6f6264] mt-2 leading-relaxed">
-              {forecast?.insufficient_data_reason || "Sellsy requires at least 15 completed transactions to construct reliable statistical time-series forecasts."}
+              {forecast?.insufficient_data_reason || "Sellsy needs at least 15 completed orders to generate an accurate forecast for your store."}
             </p>
           </div>
         )}

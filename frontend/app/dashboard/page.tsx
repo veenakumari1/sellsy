@@ -1,30 +1,46 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { KpiCard } from "@/components/dashboard/KpiCard";
-import { RevenueChart } from "@/components/dashboard/RevenueChart";
-import { CategoryDonut } from "@/components/dashboard/CategoryDonut";
 import { TopProductsTable } from "@/components/dashboard/TopProductsTable";
 import { RecentOrdersTable } from "@/components/dashboard/RecentOrdersTable";
 import { AiInsightsPanel } from "@/components/dashboard/AiInsightsPanel";
 import { ApiClient } from "@/lib/api";
-import { DollarSign, ShoppingBag, CreditCard, Users, ArrowUpRight, Percent, RefreshCw } from "lucide-react";
+import { realtimeClient } from "@/lib/realtime";
+import { DollarSign, ShoppingBag, CreditCard, Users, ArrowUpRight, Percent, RefreshCw, Zap } from "lucide-react";
+
+const RevenueChart = dynamic(() => import("@/components/dashboard/RevenueChart").then((m) => m.RevenueChart), {
+  ssr: false,
+  loading: () => <div className="h-72 flex items-center justify-center text-[#a89b99] text-xs">Loading chart...</div>,
+});
+
+const CategoryDonut = dynamic(() => import("@/components/dashboard/CategoryDonut").then((m) => m.CategoryDonut), {
+  ssr: false,
+  loading: () => <div className="h-64 flex items-center justify-center text-[#a89b99] text-xs">Loading chart...</div>,
+});
 
 export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(() => ApiClient.getCached("/api/v1/analytics/overview"));
+  const [loading, setLoading] = useState(() => !ApiClient.getCached("/api/v1/analytics/overview"));
   const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(30);
+  const [livePulse, setLivePulse] = useState(false);
+  const [simulating, setSimulating] = useState(false);
 
-  const loadDashboard = async () => {
-    setLoading(true);
+  const loadDashboard = async (force = false) => {
+    if (force || !ApiClient.getCached("/api/v1/analytics/overview")) {
+      setLoading(true);
+    }
     setError(null);
     try {
-      const overview = await ApiClient.getOverview();
+      const overview = await ApiClient.getOverview(force);
       setData(overview);
     } catch (err: any) {
-      setError(err.message || "Failed to load store overview.");
+      if (!data) {
+        setError(err.message || "Failed to load store overview.");
+      }
     } finally {
       setLoading(false);
     }
@@ -32,40 +48,91 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboard();
+
+    // Subscribe to live WebSocket metric updates and notifications
+    if (realtimeClient) {
+      const unsubscribe = realtimeClient.subscribe((event) => {
+        if (event.type === "METRIC_UPDATE" || event.type === "NOTIFICATION") {
+          // Silent real-time background update without flash or spinner
+          ApiClient.getOverview(true)
+            .then((newData) => {
+              setData(newData);
+              setLivePulse(true);
+              setTimeout(() => setLivePulse(false), 2000);
+            })
+            .catch(() => {});
+        }
+      });
+      return () => unsubscribe();
+    }
   }, []);
+
+  const handleSimulateOrder = async () => {
+    setSimulating(true);
+    try {
+      await ApiClient.simulateLiveOrder();
+    } catch (err) {
+      console.error("Order simulation failed", err);
+    } finally {
+      setSimulating(false);
+    }
+  };
 
   return (
     <DashboardLayout daysFilter={days} onDaysChange={setDays}>
       <div className="space-y-6">
-        {/* Banner with refresh and status */}
+        {/* Banner with simple language */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e8e2dc]">
           <div>
-            <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Executive Performance Hub</h2>
+            <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Home</h2>
             <p className="text-xs text-[#6f6264] mt-0.5">
-              Comprehensive store performance metrics and autonomous AI agent diagnostics
+              Here&apos;s how your store is doing
             </p>
           </div>
-          <button
-            onClick={loadDashboard}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e8e2dc] bg-white hover:bg-[#faf8f5] text-xs font-semibold text-[#3b2f31] shadow-2xs transition-colors self-start sm:self-auto"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-            <span>Refresh Analytics</span>
-          </button>
+          {process.env.NODE_ENV === "development" && (
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+              <button
+                onClick={handleSimulateOrder}
+                disabled={simulating}
+                className="h-10 sm:h-9 min-h-[40px] inline-flex items-center gap-1.5 px-3 rounded-lg border border-[#7b1425]/30 bg-white hover:bg-[#FBF1F3] text-xs font-semibold text-[#7b1425] shadow-2xs transition-colors self-start sm:self-auto disabled:opacity-50 whitespace-nowrap"
+                title="Test real-time WebSocket order ingestion & live broadcast"
+              >
+                <Zap size={13} className={simulating ? "animate-spin flex-shrink-0" : "flex-shrink-0"} />
+                <span>Simulate Order</span>
+              </button>
+              <button
+                onClick={() => loadDashboard(true)}
+                disabled={loading}
+                className="h-10 sm:h-9 min-h-[40px] inline-flex items-center gap-1.5 px-3 rounded-lg border border-[#e8e2dc] bg-white hover:bg-[#faf8f5] text-xs font-semibold text-[#3b2f31] shadow-2xs transition-colors self-start sm:self-auto whitespace-nowrap"
+              >
+                <RefreshCw size={13} className={loading ? "animate-spin flex-shrink-0" : "flex-shrink-0"} />
+                <span>Refresh Analytics</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {error && (
           <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={loadDashboard} className="font-bold underline ml-2">Retry</button>
+            <button onClick={() => loadDashboard(true)} className="font-bold underline ml-2 hover:text-rose-900">Try again</button>
           </div>
         )}
 
         {loading && !data ? (
-          <div className="py-24 flex flex-col items-center justify-center text-[#a89b99] space-y-3">
-            <RefreshCw size={28} className="animate-spin text-[#7b1425]" />
-            <p className="text-sm font-medium">Aggregating store metrics & running AI agents...</p>
+          <div className="space-y-6 animate-pulse">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl border border-[#e8e2dc]/80 p-5 h-28 flex flex-col justify-between">
+                  <div className="h-3 w-20 bg-[#f3ede7] rounded" />
+                  <div className="h-7 w-24 bg-[#f3ede7] rounded" />
+                  <div className="h-3 w-16 bg-[#f3ede7] rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="bg-white rounded-xl border border-[#e8e2dc]/80 p-6 h-48 flex items-center justify-center text-xs text-[#a89b99]">
+              Loading store details...
+            </div>
           </div>
         ) : data ? (
           <>
@@ -125,30 +192,34 @@ export default function DashboardPage() {
             <AiInsightsPanel insights={data.ai_insights} />
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
               {/* Revenue Timeline */}
-              <div className="lg:col-span-2 bg-white rounded-xl border border-[#e8e2dc]/90 p-6 shadow-xs">
+              <div className="lg:col-span-2 bg-white rounded-xl border border-[#e8e2dc]/90 p-4 sm:p-6 shadow-xs flex flex-col justify-between h-full">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-sm font-bold text-[#14090b]">Revenue Timeline</h3>
                     <p className="text-xs text-[#6f6264]">Chronological daily gross sales over selected period</p>
                   </div>
                 </div>
-                <RevenueChart data={data.trends} />
+                <div className="flex-1 flex flex-col justify-center">
+                  <RevenueChart data={data.trends} />
+                </div>
               </div>
 
               {/* Category Breakdown */}
-              <div className="bg-white rounded-xl border border-[#e8e2dc]/90 p-6 shadow-xs flex flex-col justify-between">
+              <div className="bg-white rounded-xl border border-[#e8e2dc]/90 p-4 sm:p-6 shadow-xs flex flex-col justify-between h-full">
                 <div>
                   <h3 className="text-sm font-bold text-[#14090b]">Revenue by Category</h3>
                   <p className="text-xs text-[#6f6264] mb-4">Gross sales contribution by collection</p>
+                </div>
+                <div className="flex-1 flex items-center justify-center">
                   <CategoryDonut data={data.category_distribution} />
                 </div>
               </div>
             </div>
 
             {/* Tables Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
               <TopProductsTable products={data.top_products} />
               <RecentOrdersTable orders={data.recent_orders} />
             </div>

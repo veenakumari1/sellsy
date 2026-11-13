@@ -245,14 +245,29 @@ void main(){
 
 const WORD = 'Sellsy'.split('');
 
+const shouldSkipIntro = () => {
+  if (typeof window === 'undefined') return false;
+  try {
+    if (sessionStorage.getItem('sellsyIntroSeen') === 'true') return true;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+  } catch (e) {}
+  return false;
+};
+
 /* ---------------- component ---------------- */
 export default function SellsyIntro({
   phase = 'splash',
+  once = true,
   onEnter: propOnEnter,
   onDone = () => {},
   duration = 4.5,
   logoTime = 3,
 }) {
+  const [alreadySeen] = useState(() => {
+    if (!once) return false;
+    return shouldSkipIntro();
+  });
+
   const [internalPhase, setInternalPhase] = useState('splash');
   const currentPhase = propOnEnter ? phase : internalPhase;
 
@@ -270,8 +285,22 @@ export default function SellsyIntro({
   const l1 = useRef(null), l2 = useRef(null), cap = useRef(null), glow = useRef(null),
     cross = useRef(null), hint = useRef(null), nameEl = useRef(null);
 
+  const markIntroSeen = () => {
+    try {
+      sessionStorage.setItem('sellsyIntroSeen', 'true');
+    } catch (e) {}
+  };
+
+  // If already seen, immediately trigger onDone
+  useEffect(() => {
+    if (alreadySeen) {
+      doneRef.current?.();
+    }
+  }, [alreadySeen]);
+
   // ENTER click handler: unlocks audio and enters intro
   const handleEnter = () => {
+    markIntroSeen();
     const s = createSound(setSnd, logoTime, duration) || NOOP;
     sndRef.current = s;
     s.resume();
@@ -284,17 +313,18 @@ export default function SellsyIntro({
 
   // Keyboard Enter on splash gate
   useEffect(() => {
-    if (currentPhase !== 'splash') return;
+    if (alreadySeen || currentPhase !== 'splash') return;
     const k = (e) => {
       if (e.key === 'Enter') handleEnter();
     };
     window.addEventListener('keydown', k);
     return () => window.removeEventListener('keydown', k);
-  }, [currentPhase]);
+  }, [currentPhase, alreadySeen]);
 
   // When phase changes to 'intro', record that intro animation is active
   useEffect(() => {
     if (currentPhase === 'intro') {
+      markIntroSeen();
       setStartedIntro(true);
     }
   }, [currentPhase]);
@@ -435,6 +465,7 @@ export default function SellsyIntro({
     const exit = () => {
       if (finished) return;
       finished = true;
+      markIntroSeen();
       sound.finale();
       setLeaving(true);
       if (doneRef.current) {
@@ -541,6 +572,22 @@ export default function SellsyIntro({
     };
   }, [startedIntro, duration, logoTime]);
 
+  useEffect(() => {
+    if (!startedIntro) return;
+    const onNavAway = () => markIntroSeen();
+    window.addEventListener('beforeunload', onNavAway);
+    window.addEventListener('pagehide', onNavAway);
+    return () => {
+      window.removeEventListener('beforeunload', onNavAway);
+      window.removeEventListener('pagehide', onNavAway);
+    };
+  }, [startedIntro]);
+
+  // If already seen in this session or prefers-reduced-motion, do not render
+  if (alreadySeen) {
+    return null;
+  }
+
   // STAGE 1: Splash gate (first thing visible on load)
   if (currentPhase === 'splash') {
     return (
@@ -604,7 +651,7 @@ export default function SellsyIntro({
               <span className={`sv-eq${snd !== 'off' ? ' on' : ''}`}><i /><i /><i /><i /></span>
               {snd === 'off' ? 'SOUND OFF' : 'SOUND ON'}
             </button>
-            <a href="#skip" onClick={(e) => { e.preventDefault(); exitRef.current(); }}>SKIP INTRO<b /></a>
+            <a href="#skip" onClick={(e) => { e.preventDefault(); markIntroSeen(); exitRef.current(); }}>SKIP INTRO<b /></a>
           </nav>
         </header>
 

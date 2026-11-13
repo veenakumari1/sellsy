@@ -7,33 +7,32 @@ import {
   BotMessageSquare,
   Sparkles,
   Send,
-  User,
   Wrench,
   ChevronDown,
   ChevronRight,
   Plus,
   RefreshCw,
   MessageSquare,
-  CheckCircle2,
   ShieldCheck
 } from "lucide-react";
 
 export default function AssistantPage() {
-  const [conversations, setConversations] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<any[]>(() => ApiClient.getCached("/api/v1/assistant/conversations") || []);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [expandedTools, setExpandedTools] = useState<Record<string, boolean>>({});
+  const [showMobileHistory, setShowMobileHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedQuestions = [
     "Why are my sales dropping and what should I do?",
     "What were my best-selling products this month?",
-    "Which products should I promote to grow AOV?",
+    "Which products should I promote to grow order value?",
     "How many returning customers do I have?",
     "What is my expected revenue next month?",
-    "Give me an executive growth strategy for this quarter"
+    "Give me growth suggestions for this quarter"
   ];
 
   const loadConversations = async () => {
@@ -50,6 +49,7 @@ export default function AssistantPage() {
 
   const selectConversation = async (convId: string) => {
     setActiveConvId(convId);
+    setShowMobileHistory(false);
     try {
       const conv = await ApiClient.getConversation(convId);
       setMessages(conv.messages || []);
@@ -61,6 +61,7 @@ export default function AssistantPage() {
   const startNewConversation = () => {
     setActiveConvId(null);
     setMessages([]);
+    setShowMobileHistory(false);
   };
 
   useEffect(() => {
@@ -93,10 +94,11 @@ export default function AssistantPage() {
       }
       setMessages((prev) => [...prev, response.message]);
     } catch (e: any) {
+      console.error("Assistant chat error", e);
       const errorMsg = {
         id: `err-${Date.now()}`,
         role: "assistant",
-        content: `Error contacting agent team: ${e.message || "Failed to execute multi-agent workflow"}`,
+        content: "We couldn't connect to your assistant right now. Please try again.",
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -111,30 +113,34 @@ export default function AssistantPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8.5rem)]">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-[calc(100dvh-7.5rem)] lg:h-[calc(100vh-8.5rem)] min-w-0">
         {/* Left Sessions Column */}
-        <div className="w-full lg:w-72 bg-white rounded-2xl border border-[#e8e2dc]/90 p-4 shadow-xs flex flex-col justify-between overflow-hidden">
+        <div
+          className={`w-full lg:w-72 bg-white rounded-2xl border border-[#e8e2dc]/90 p-4 shadow-xs flex-col justify-between overflow-hidden flex-shrink-0 ${
+            showMobileHistory ? "flex max-h-[50vh] lg:max-h-none" : "hidden lg:flex"
+          }`}
+        >
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-[#f3ede7]">
               <div className="flex items-center gap-2">
                 <BotMessageSquare size={18} className="text-[#7b1425]" />
-                <h3 className="text-sm font-bold text-[#14090b]">Intelligence Sessions</h3>
+                <h3 className="text-sm font-bold text-[#14090b]">Past chats</h3>
               </div>
               <button
                 onClick={startNewConversation}
-                className="p-1.5 rounded-lg bg-[#FBF1F3] text-[#7b1425] hover:bg-[#F6E1E5] transition-colors"
-                title="New Session"
+                className="p-1.5 rounded-lg bg-[#FBF1F3] text-[#7b1425] hover:bg-[#F6E1E5] transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+                title="New chat"
               >
                 <Plus size={16} />
               </button>
             </div>
 
-            <div className="mt-3 space-y-1 overflow-y-auto max-h-[calc(100vh-18rem)]">
+            <div className="mt-3 space-y-1 overflow-y-auto max-h-[35vh] lg:max-h-[calc(100vh-18rem)]">
               {conversations.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => selectConversation(c.id)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center gap-2.5 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center gap-2.5 min-h-[40px] ${
                     activeConvId === c.id
                       ? "bg-[#FBF1F3] text-[#4D0C18] font-semibold border border-[#EBC3CB]/60"
                       : "text-[#5a4e50] hover:bg-[#faf8f5]"
@@ -145,37 +151,56 @@ export default function AssistantPage() {
                 </button>
               ))}
               {conversations.length === 0 && (
-                <p className="text-xs text-[#a89b99] p-3 text-center">No past sessions yet.</p>
+                <p className="text-xs text-[#a89b99] p-3 text-center">No past chats yet.</p>
               )}
             </div>
           </div>
 
           <div className="pt-3 border-t border-[#f3ede7] text-[11px] text-[#a89b99] flex items-center gap-1.5">
             <ShieldCheck size={14} className="text-emerald-600" />
-            <span>Multi-Agent LangGraph System</span>
+            <span>Store AI Assistant</span>
           </div>
         </div>
 
         {/* Right Active Chat Workspace */}
-        <div className="flex-1 bg-white rounded-2xl border border-[#e8e2dc]/90 shadow-xs flex flex-col overflow-hidden">
+        <div className="flex-1 bg-white rounded-2xl border border-[#e8e2dc]/90 shadow-xs flex flex-col overflow-hidden min-w-0 h-full">
           {/* Header */}
-          <div className="px-6 py-3.5 border-b border-[#f3ede7] flex items-center justify-between bg-[#faf8f5]/50">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#7b1425] flex items-center justify-center text-white">
+          <div className="px-4 sm:px-6 py-3.5 border-b border-[#f3ede7] flex items-center justify-between bg-[#faf8f5]/50 flex-wrap gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-[#7b1425] flex items-center justify-center text-white flex-shrink-0">
                 <Sparkles size={16} />
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-[#14090b]">Sellsy Multi-Agent Orchestrator</h3>
-                <p className="text-[11px] text-[#6f6264]">Autonomous workflow backed by official Python MCP tools</p>
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-[#14090b] truncate">Store Assistant</h3>
+                <p className="text-[11px] text-[#6f6264] truncate hidden sm:block">Ask anything about your store, sales, or products</p>
               </div>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-              Database Grounded
-            </span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowMobileHistory(!showMobileHistory)}
+                className="lg:hidden h-8 px-2.5 rounded-lg border border-[#e8e2dc] bg-white text-xs font-semibold text-[#5a4e50] hover:text-[#7b1425] flex items-center gap-1.5 transition-colors min-h-[36px]"
+                aria-label="Toggle chat history"
+              >
+                <BotMessageSquare size={14} className="text-[#7b1425]" />
+                <span>{showMobileHistory ? "Chat" : "History"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={startNewConversation}
+                className="lg:hidden h-8 w-8 rounded-lg bg-[#FBF1F3] text-[#7b1425] flex items-center justify-center min-h-[36px] min-w-[36px]"
+                title="New chat"
+              >
+                <Plus size={15} />
+              </button>
+              <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                Store data
+              </span>
+            </div>
           </div>
 
           {/* Messages Scroll Area */}
-          <div className="flex-1 p-6 overflow-y-auto space-y-5">
+          <div className="flex-1 p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5">
             {messages.length === 0 ? (
               <div className="py-12 max-w-xl mx-auto text-center space-y-4">
                 <div className="w-12 h-12 rounded-2xl bg-[#FBF1F3] text-[#7b1425] flex items-center justify-center mx-auto">
@@ -184,20 +209,20 @@ export default function AssistantPage() {
                 <div>
                   <h4 className="text-base font-bold text-[#14090b]">How can Sellsy help your store today?</h4>
                   <p className="text-xs text-[#6f6264] mt-1 leading-relaxed">
-                    Ask questions regarding revenue trends, best selling products, customer churn, or marketing playbooks. The AI orchestrator will delegate tasks to specialized agents and query verified database tools.
+                    Ask questions about your sales, top products, returning buyers, or marketing ideas.
                   </p>
                 </div>
 
                 <div className="pt-2">
                   <p className="text-[11px] uppercase font-bold text-[#a89b99] tracking-wider mb-2">
-                    Suggested Questions:
+                    Suggested questions:
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {suggestedQuestions.map((q, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleSend(q)}
-                        className="px-3 py-1.5 rounded-lg border border-[#e8e2dc] hover:border-[#DC9AA7] bg-[#faf8f5] hover:bg-[#FBF1F3]/50 text-[#3b2f31] hover:text-[#620F1E] text-xs text-left transition-colors font-medium shadow-2xs"
+                        className="px-3 py-1.5 rounded-lg border border-[#e8e2dc] hover:border-[#DC9AA7] bg-[#faf8f5] hover:bg-[#FBF1F3]/50 text-[#3b2f31] hover:text-[#620F1E] text-xs text-left transition-colors font-medium shadow-2xs min-h-[36px]"
                       >
                         {q}
                       </button>
@@ -217,7 +242,7 @@ export default function AssistantPage() {
                     </div>
                   )}
 
-                  <div className={`max-w-2xl space-y-2 ${m.role === "user" ? "items-end" : "items-start"}`}>
+                  <div className={`w-full max-w-full sm:max-w-2xl space-y-2 ${m.role === "user" ? "items-end" : "items-start"}`}>
                     {/* Tool Invocations Badge */}
                     {m.tool_calls && m.tool_calls.length > 0 && (
                       <div className="space-y-1.5 mb-2">
@@ -235,7 +260,7 @@ export default function AssistantPage() {
                               >
                                 <div className="flex items-center gap-1.5">
                                   <Wrench size={12} className="text-[#7b1425]" />
-                                  <span className="font-semibold text-[#14090b]">MCP Tool:</span>
+                                  <span className="font-semibold text-[#14090b]">Tool used:</span>
                                   <span className="text-[#620F1E]">{tc.tool_name}()</span>
                                 </div>
                                 {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -288,7 +313,7 @@ export default function AssistantPage() {
                 </div>
                 <div className="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e8e2dc] text-xs text-[#5a4e50] flex items-center gap-2">
                   <RefreshCw size={13} className="animate-spin text-[#7b1425]" />
-                  <span>AI Agents collaborating & invoking MCP tools...</span>
+                  <span>Thinking...</span>
                 </div>
               </div>
             )}
@@ -296,7 +321,7 @@ export default function AssistantPage() {
           </div>
 
           {/* Input Footer */}
-          <div className="p-4 border-t border-[#f3ede7] bg-white">
+          <div className="p-3 sm:p-4 border-t border-[#f3ede7] bg-white sticky bottom-0 z-10">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -306,16 +331,16 @@ export default function AssistantPage() {
             >
               <input
                 type="text"
-                placeholder="Ask about sales, best products, at-risk buyers, or marketing playbooks..."
+                placeholder="Ask anything about your store..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-[#e8e2dc] focus:outline-hidden focus:ring-2 focus:ring-[#7b1425]/20 focus:border-[#7b1425] text-xs text-[#14090b] shadow-2xs"
+                className="h-10 flex-1 px-3 sm:px-4 rounded-xl border border-[#e8e2dc] focus:outline-hidden focus:ring-2 focus:ring-[#7b1425]/20 focus:border-[#7b1425] text-xs text-[#14090b] shadow-2xs min-h-[40px]"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
-                className="px-4 py-2.5 rounded-xl bg-[#7b1425] hover:bg-[#620F1E] text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                className="h-10 px-3.5 sm:px-4 rounded-xl bg-[#7b1425] hover:bg-[#620F1E] text-white text-xs font-semibold shadow-xs transition-colors inline-flex items-center justify-center gap-1.5 disabled:opacity-50 flex-shrink-0 min-h-[40px]"
               >
                 <span>Send</span>
                 <Send size={14} />

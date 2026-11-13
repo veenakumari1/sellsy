@@ -30,12 +30,31 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://sellsy.vercel.app",
-        "*"
+        "https://sellsy.vercel.app"
     ]
 
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str], None]) -> List[str]:
+        raw = os.getenv("CORS_ORIGINS") or os.getenv("BACKEND_CORS_ORIGINS") or v
+        if isinstance(raw, str):
+            if raw.strip().startswith("["):
+                import json
+                try:
+                    return json.loads(raw)
+                except Exception:
+                    pass
+            return [i.strip() for i in raw.split(",") if i.strip()]
+        elif isinstance(raw, (list, tuple)):
+            return list(raw)
+        return [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://sellsy.vercel.app"
+        ]
+
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", ".env.local"),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="allow"

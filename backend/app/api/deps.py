@@ -13,10 +13,6 @@ def get_current_user(
     token: Optional[str] = Depends(oauth2_scheme)
 ) -> User:
     if not token:
-        # Fall back to demo user if unauthenticated for smooth demo experience
-        demo_user = db.query(User).filter(User.email == "demo@sellsy.io").first()
-        if demo_user:
-            return demo_user
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication token is missing or invalid.",
@@ -25,10 +21,6 @@ def get_current_user(
 
     payload = decode_access_token(token)
     if not payload:
-        # If token expired or invalid, check demo user
-        demo_user = db.query(User).filter(User.email == "demo@sellsy.io").first()
-        if demo_user:
-            return demo_user
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired authentication credentials.",

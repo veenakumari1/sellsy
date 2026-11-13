@@ -28,6 +28,10 @@ class User(Base):
     stores = relationship("Store", back_populates="user", cascade="all, delete-orphan")
     conversations = relationship("AiConversation", back_populates="user", cascade="all, delete-orphan")
     reports = relationship("GeneratedReport", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    gamification = relationship("UserGamification", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
+    activities = relationship("GamificationActivity", back_populates="user", cascade="all, delete-orphan")
 
 class Store(Base):
     __tablename__ = "stores"
@@ -37,7 +41,7 @@ class Store(Base):
     name = Column(String(255), nullable=False)
     currency = Column(String(10), default="USD")
     domain = Column(String(255), nullable=True)
-    platform = Column(String(50), default="demo")  # demo, shopify, csv, manual
+    platform = Column(String(50), default="manual")  # shopify, csv, manual
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
@@ -51,6 +55,8 @@ class Store(Base):
     conversations = relationship("AiConversation", back_populates="store", cascade="all, delete-orphan")
     reports = relationship("GeneratedReport", back_populates="store", cascade="all, delete-orphan")
     import_jobs = relationship("ImportJob", back_populates="store", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="store", cascade="all, delete-orphan")
+    gamification = relationship("UserGamification", back_populates="store", uselist=False, cascade="all, delete-orphan")
 
 class StoreIntegration(Base):
     __tablename__ = "store_integrations"
@@ -245,3 +251,75 @@ class ImportJob(Base):
     created_at = Column(DateTime, default=utc_now)
 
     store = relationship("Store", back_populates="import_jobs")
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=True, index=True)
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    category = Column(String(50), default="sales")  # order, sales, product_alert, inventory_alert, ai_insight, gamification
+    is_read = Column(Boolean, default=False, index=True)
+    link = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=utc_now, index=True)
+
+    user = relationship("User", back_populates="notifications")
+    store = relationship("Store", back_populates="notifications")
+
+class UserGamification(Base):
+    __tablename__ = "user_gamification"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=True, index=True)
+    total_points = Column(Integer, default=0, index=True)
+    level = Column(Integer, default=1)
+    rank_title = Column(String(100), default="Commerce Novice")
+    streak_days = Column(Integer, default=1)
+    last_active_at = Column(DateTime, default=utc_now)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+    user = relationship("User", back_populates="gamification")
+    store = relationship("Store", back_populates="gamification")
+
+class AchievementDefinition(Base):
+    __tablename__ = "achievement_definitions"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    key = Column(String(100), unique=True, nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    category = Column(String(50), default="business")
+    icon_name = Column(String(50), default="award")
+    points_reward = Column(Integer, default=50)
+    target_progress = Column(Integer, default=1)
+    created_at = Column(DateTime, default=utc_now)
+
+class UserAchievement(Base):
+    __tablename__ = "user_achievements"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    achievement_id = Column(String(36), ForeignKey("achievement_definitions.id", ondelete="CASCADE"), nullable=False, index=True)
+    is_unlocked = Column(Boolean, default=False)
+    current_progress = Column(Integer, default=0)
+    unlocked_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=utc_now)
+
+    user = relationship("User", back_populates="achievements")
+    achievement = relationship("AchievementDefinition")
+
+class GamificationActivity(Base):
+    __tablename__ = "gamification_activities"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    activity_type = Column(String(100), nullable=False)
+    points_earned = Column(Integer, nullable=False)
+    description = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=utc_now, index=True)
+
+    user = relationship("User", back_populates="activities")

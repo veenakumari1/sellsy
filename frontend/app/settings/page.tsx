@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ApiClient } from "@/lib/api";
 import {
@@ -10,20 +10,24 @@ import {
   Shield,
   Key,
   Users,
-  RotateCcw,
   CheckCircle2,
   Save,
   HelpCircle
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const [storeName, setStoreName] = useState("Aura Living Essentials");
+  const [storeName, setStoreName] = useState("My Store");
   const [currency, setCurrency] = useState("USD");
   const [geminiKey, setGeminiKey] = useState("");
   const [model, setModel] = useState("gemini-1.5-flash");
   const [saved, setSaved] = useState(false);
-  const [seeding, setSeeding] = useState(false);
-  const [seedSuccess, setSeedSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    ApiClient.getActiveStore().then((st: any) => {
+      if (st?.name) setStoreName(st.name);
+      if (st?.currency) setCurrency(st.currency);
+    }).catch(() => {});
+  }, []);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,22 +35,9 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const handleReSeed = async () => {
-    setSeeding(true);
-    setSeedSuccess(null);
-    try {
-      await fetch("http://127.0.0.1:8000/api/v1/seed/demo", { method: "POST" });
-      setSeedSuccess("Demo database re-seeded successfully with 25+ products and 175+ orders.");
-    } catch (e: any) {
-      alert("Failed to reseed database");
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-6 w-full">
         <div className="pb-2 border-b border-[#e8e2dc]">
           <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Store & System Settings</h2>
           <p className="text-xs text-[#6f6264] mt-0.5">
@@ -61,15 +52,8 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {seedSuccess && (
-          <div className="p-3 rounded-lg bg-[#FBF1F3] border border-[#EBC3CB] text-[#4D0C18] text-xs flex items-center gap-2">
-            <CheckCircle2 size={16} />
-            <span>{seedSuccess}</span>
-          </div>
-        )}
-
         {/* Store Profile */}
-        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-4">
+        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-4 sm:p-6 shadow-xs space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[#f3ede7]">
             <Store size={18} className="text-[#7b1425]" />
             <h3 className="text-sm font-bold text-[#14090b]">Store Profile</h3>
@@ -83,7 +67,7 @@ export default function SettingsPage() {
                   type="text"
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] focus:outline-hidden"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] focus:outline-hidden min-h-[40px]"
                 />
               </div>
 
@@ -92,7 +76,7 @@ export default function SettingsPage() {
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] bg-[#faf8f5] focus:outline-hidden"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] bg-[#faf8f5] focus:outline-hidden min-h-[40px]"
                 >
                   <option value="USD">USD ($ - United States Dollar)</option>
                   <option value="EUR">EUR (€ - Euro)</option>
@@ -104,7 +88,7 @@ export default function SettingsPage() {
 
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-[#14090b] hover:bg-[#2a1b1e] text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1.5"
+              className="h-10 px-4 rounded-lg bg-[#14090b] hover:bg-[#2a1b1e] text-white font-semibold text-xs shadow-xs transition-colors inline-flex items-center gap-1.5 min-h-[40px]"
             >
               <Save size={14} />
               <span>Save Store Profile</span>
@@ -113,7 +97,7 @@ export default function SettingsPage() {
         </div>
 
         {/* AI Model Configuration */}
-        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-4">
+        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-4 sm:p-6 shadow-xs space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[#f3ede7]">
             <Sparkles size={18} className="text-[#7b1425]" />
             <h3 className="text-sm font-bold text-[#14090b]">AI Intelligence & Gemini API Configuration</h3>
@@ -125,13 +109,13 @@ export default function SettingsPage() {
                 Google Gemini API Key (Optional Override)
               </label>
               <div className="relative">
-                <Key size={15} className="absolute left-3 top-2.5 text-[#a89b99]" />
+                <Key size={15} className="absolute left-3 top-3 text-[#a89b99]" />
                 <input
                   type="password"
-                  placeholder="AIzaSy... (leave blank to use environment default or grounded demo mode)"
+                  placeholder="AIzaSy... (leave blank to use environment default)"
                   value={geminiKey}
                   onChange={(e) => setGeminiKey(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] focus:outline-hidden font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] focus:outline-hidden font-mono min-h-[40px]"
                 />
               </div>
               <p className="text-[11px] text-[#a89b99] mt-1">
@@ -144,7 +128,7 @@ export default function SettingsPage() {
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] bg-[#faf8f5] focus:outline-hidden"
+                className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] bg-[#faf8f5] focus:outline-hidden min-h-[40px]"
               >
                 <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast, Recommended for Analytics)</option>
                 <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Strategic Analysis)</option>
@@ -153,29 +137,8 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Evaluation & Demo Management */}
-        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-[#f3ede7]">
-            <RotateCcw size={18} className="text-amber-600" />
-            <h3 className="text-sm font-bold text-[#14090b]">Demo Data Reset Engine</h3>
-          </div>
-
-          <p className="text-xs text-[#5a4e50] leading-relaxed">
-            Quickly reset or refresh the evaluators' demo database with 25+ products, 175+ orders, and verified customer RFM cohorts.
-          </p>
-
-          <button
-            onClick={handleReSeed}
-            disabled={seeding}
-            className="px-4 py-2.5 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold text-xs shadow-2xs transition-colors flex items-center gap-2 disabled:opacity-50"
-          >
-            <RotateCcw size={14} className={seeding ? "animate-spin" : ""} />
-            <span>{seeding ? "Re-seeding database..." : "Re-seed Demo Database"}</span>
-          </button>
-        </div>
-
         {/* Team Architecture Attribution */}
-        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-6 shadow-xs space-y-3">
+        <div className="bg-white rounded-2xl border border-[#e8e2dc]/90 p-4 sm:p-6 shadow-xs space-y-3">
           <div className="flex items-center gap-2 pb-2 border-b border-[#f3ede7]">
             <Users size={18} className="text-[#5a4e50]" />
             <h3 className="text-sm font-bold text-[#14090b]">Team Engineering Division (Capstone)</h3>

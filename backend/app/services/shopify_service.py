@@ -27,8 +27,8 @@ class ShopifyService:
             db.add(integration)
 
         integration.shop_domain = clean_domain
-        integration.access_token = access_token or "shpat_demo_mock_token_sellsy"
-        integration.api_key = api_key or "shpca_demo_mock_key"
+        integration.access_token = access_token or "shpat_mock_token_sellsy"
+        integration.api_key = api_key or "shpca_mock_key"
         integration.status = "connected"
         integration.last_synced_at = datetime.now(timezone.utc)
         integration.metadata_json = {
@@ -63,8 +63,8 @@ class ShopifyService:
 
         if not integration:
             return {
-                "platform": store.platform if store else "demo",
-                "status": "connected" if store and store.platform == "demo" else "disconnected",
+                "platform": store.platform if store else "shopify",
+                "status": "connected" if store and store.platform == "shopify" else "disconnected",
                 "shop_domain": store.domain if store else None,
                 "last_synced_at": None,
                 "products_count": prods_count,

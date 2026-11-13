@@ -54,13 +54,6 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
     token = create_access_token(user.id)
     return Token(access_token=token, token_type="bearer", user=UserOut.model_validate(user))
 
-@router.post("/demo-login", response_model=Token)
-def demo_login(db: Session = Depends(get_db)):
-    from app.services.seed_service import seed_demo_store
-    user = seed_demo_store(db)
-    token = create_access_token(user.id)
-    return Token(access_token=token, token_type="bearer", user=UserOut.model_validate(user))
-
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: User = Depends(get_current_user)):
     return UserOut.model_validate(current_user)

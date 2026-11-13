@@ -13,6 +13,11 @@ from app.models.entities import (
     AiMessage,
     GeneratedReport,
     ImportJob,
+    Notification,
+    UserGamification,
+    AchievementDefinition,
+    UserAchievement,
+    GamificationActivity,
     generate_uuid,
     utc_now
 )
@@ -32,6 +37,11 @@ __all__ = [
     "AiMessage",
     "GeneratedReport",
     "ImportJob",
+    "Notification",
+    "UserGamification",
+    "AchievementDefinition",
+    "UserAchievement",
+    "GamificationActivity",
     "generate_uuid",
     "utc_now"
 ]

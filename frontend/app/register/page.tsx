@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiClient } from "@/lib/api";
+import { Logo } from "@/components/Logo";
 import { User, Lock, Mail, AlertCircle } from "lucide-react";
 
 export default function RegisterPage() {
@@ -31,12 +32,11 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-[#faf8f5] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#7b1425] flex items-center justify-center text-white font-bold text-xl shadow-sm">
-            S
-          </div>
-          <span className="font-extrabold text-2xl text-[#14090b] tracking-tight">Sellsy</span>
-        </Link>
+        <div className="flex justify-center mb-4">
+          <Link href="/" className="inline-flex items-center">
+            <Logo size={36} />
+          </Link>
+        </div>
         <h2 className="text-2xl font-bold text-[#14090b] tracking-tight">
           Create Your Merchant Account
         </h2>

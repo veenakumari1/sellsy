@@ -1,6 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter_Tight, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { SmoothScroll } from "@/components/SmoothScroll";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -40,7 +47,7 @@ export default function RootLayout({
       className={`${fraunces.variable} ${interTight.variable} ${plexMono.variable}`}
     >
       <body className="bg-paper text-ink font-sans antialiased min-h-screen">
-        {children}
+        <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
   );

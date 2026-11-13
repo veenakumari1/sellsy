@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import SellsyIntro from "@/components/intro/SellsyIntro";
 import ChatWidget from "@/components/ChatWidget";
+import { Logo } from "@/components/Logo";
+import { Reveal } from "@/components/Reveal";
+
 /*
   Theme: white · burgundy · black
   paper #faf8f5 | ink #14090b | burgundy #7b1425 | burgundy-light #a3243a | mute #6f6264
@@ -53,15 +56,6 @@ const steps = [
   { n: "3", title: "Decide", text: "Get clear, number-backed recommendations and ask follow-up questions in plain language." },
 ];
 
-function Wordmark({ size = 28 }: { size?: number }) {
-  return (
-    <span style={{ ...display, fontStyle: "italic", fontWeight: 800, fontSize: size, lineHeight: 1, letterSpacing: "-0.03em", color: "#14090b" }}>
-      <span style={{ color: "#7b1425" }}>S</span>ell<span>s</span>
-      <span style={{ color: "#7b1425" }}>y</span>
-    </span>
-  );
-}
-
 function Kicker({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
   return (
     <p style={mono} className={`text-[11px] uppercase tracking-[0.16em] font-medium ${light ? "text-[#faf8f5]/80" : "text-[#7b1425]"}`}>
@@ -70,8 +64,35 @@ function Kicker({ children, light = false }: { children: React.ReactNode; light?
   );
 }
 
+const shouldSkipIntro = () => {
+  if (typeof window === "undefined") return false;
+  try {
+    if (sessionStorage.getItem("sellsyIntroSeen") === "true") return true;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
+  } catch (e) {}
+  return false;
+};
+
 export default function LandingPage() {
-  const [phase, setPhase] = useState<"splash" | "intro" | "done">("splash");
+  const [phase, setPhase] = useState<"splash" | "intro" | "done">(() => {
+    return shouldSkipIntro() ? "done" : "splash";
+  });
+
+  useEffect(() => {
+    const markSeen = () => {
+      try {
+        sessionStorage.setItem("sellsyIntroSeen", "true");
+      } catch (e) {}
+    };
+
+    window.addEventListener("beforeunload", markSeen);
+    window.addEventListener("pagehide", markSeen);
+
+    return () => {
+      window.removeEventListener("beforeunload", markSeen);
+      window.removeEventListener("pagehide", markSeen);
+    };
+  }, []);
 
   useEffect(() => {
     if (phase !== "done") {
@@ -90,14 +111,16 @@ export default function LandingPage() {
       <link rel="stylesheet" href={FONT_URL} />
       <SellsyIntro
         phase={phase}
+        once={true}
         onEnter={() => setPhase("intro")}
         onDone={() => setPhase("done")}
       />
 
-      {/* Chat widget: intro khatam hone ke baad dikhega */}
+      {/* Chat widget: "Ask Sellsy" button */}
       {phase === "done" && <ChatWidget />}
 
       <div
+        suppressHydrationWarning
         className="min-h-screen bg-[#faf8f5] text-[#14090b] flex flex-col"
         style={{
           display: phase === "done" ? "flex" : "none",
@@ -107,7 +130,7 @@ export default function LandingPage() {
         <header className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#14090b]/10">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <Wordmark size={30} />
+              <Logo size={30} />
               <span style={mono} className="hidden sm:inline text-[10px] uppercase tracking-[0.14em] text-[#6f6264] border-l border-[#14090b]/20 pl-3">
                 AI Platform
               </span>
@@ -125,7 +148,7 @@ export default function LandingPage() {
                 Sign In
               </Link>
               <Link
-                href="/dashboard"
+                href="/demo"
                 className="px-4 py-2 text-sm font-semibold rounded-full bg-[#14090b] hover:bg-[#7b1425] text-white transition-colors flex items-center gap-1.5"
               >
                 <span>Explore Demo</span>
@@ -135,7 +158,7 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* 2. Hero */}
+        {/* 2. Hero Section - Untouched */}
         <section className="relative pt-24 pb-20 px-6 text-center overflow-hidden">
           <div
             aria-hidden
@@ -173,124 +196,142 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 3. Capabilities */}
+        {/* 3. Capabilities - Reveal & Stagger */}
         <section id="features" className="py-24 bg-white border-y border-[#14090b]/10 px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-2xl mb-16">
-              <Kicker>Built for modern e-commerce</Kicker>
-              <h2 style={display} className="mt-3 text-4xl sm:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
-                Every tool you need to <span className="italic font-extrabold text-[#7b1425]">drive revenue.</span>
-              </h2>
-              <p className="text-base text-[#14090b]/65 mt-4">
-                Replace fragmented spreadsheets and disconnected dashboards with real-time intelligence backed by mathematical proof.
-              </p>
-            </div>
+            <Reveal>
+              <div className="max-w-2xl mb-16">
+                <Kicker>Built for modern e-commerce</Kicker>
+                <h2 style={display} className="mt-3 text-4xl sm:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
+                  Every tool you need to <span className="italic font-extrabold text-[#7b1425]">drive revenue.</span>
+                </h2>
+                <p className="text-base text-[#14090b]/65 mt-4">
+                  Replace fragmented spreadsheets and disconnected dashboards with real-time intelligence backed by mathematical proof.
+                </p>
+              </div>
+            </Reveal>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-14">
               {features.map(({ icon: Icon, title, text }, i) => (
-                <div key={title} className="border-t border-[#14090b] pt-6 group">
-                  <div className="flex items-center justify-between">
-                    <span style={display} className="italic text-3xl font-extrabold text-[#7b1425]">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <Icon size={20} className="text-[#14090b]/50 group-hover:text-[#7b1425] transition-colors" />
+                <Reveal key={title} delay={i * 0.08}>
+                  <div className="border-t border-[#14090b] pt-6 group">
+                    <div className="flex items-center justify-between">
+                      <span style={display} className="italic text-3xl font-extrabold text-[#7b1425]">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <Icon size={20} className="text-[#14090b]/50 group-hover:text-[#7b1425] transition-colors" />
+                    </div>
+                    <h3 style={display} className="mt-5 text-2xl font-semibold tracking-[-0.01em]">{title}</h3>
+                    <p className="mt-2 text-sm text-[#14090b]/65 leading-relaxed">{text}</p>
                   </div>
-                  <h3 style={display} className="mt-5 text-2xl font-semibold tracking-[-0.01em]">{title}</h3>
-                  <p className="mt-2 text-sm text-[#14090b]/65 leading-relaxed">{text}</p>
-                </div>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        {/* 4. Multi-agent engine */}
+        {/* 4. Multi-agent engine - Reveal & Stagger */}
         <section id="agents" className="py-24 px-6 bg-[#f3ede7]">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-2xl mb-14">
-              <Kicker>LangGraph multi-agent architecture</Kicker>
-              <h2 style={display} className="mt-3 text-4xl sm:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
-                Specialized AI agents, <span className="italic font-extrabold text-[#7b1425]">working in harmony.</span>
-              </h2>
-              <p className="text-base text-[#14090b]/65 mt-4">
-                Instead of a generic chatbot, Sellsy routes your questions through specialized autonomous agents governed by a Central Orchestrator.
-              </p>
-            </div>
+            <Reveal>
+              <div className="max-w-2xl mb-14">
+                <Kicker>LangGraph multi-agent architecture</Kicker>
+                <h2 style={display} className="mt-3 text-4xl sm:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
+                  Specialized AI agents, <span className="italic font-extrabold text-[#7b1425]">working in harmony.</span>
+                </h2>
+                <p className="text-base text-[#14090b]/65 mt-4">
+                  Instead of a generic chatbot, Sellsy routes your questions through specialized autonomous agents governed by a Central Orchestrator.
+                </p>
+              </div>
+            </Reveal>
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              {agents.map((a) => (
-                <div key={a.n} className="bg-white p-6 rounded-xl border border-[#14090b]/10 hover:border-[#7b1425] transition-colors">
-                  <span style={display} className="italic text-4xl font-extrabold text-[#7b1425]">{a.n}</span>
-                  <h4 className="text-sm font-bold mt-4">{a.name}</h4>
-                  <p className="text-xs text-[#14090b]/65 mt-1.5 leading-relaxed">{a.text}</p>
-                </div>
+              {agents.map((a, i) => (
+                <Reveal key={a.n} delay={i * 0.08}>
+                  <div className="bg-white p-6 rounded-xl border border-[#14090b]/10 hover:border-[#7b1425] transition-colors h-full">
+                    <span style={display} className="italic text-4xl font-extrabold text-[#7b1425]">{a.n}</span>
+                    <h4 className="text-sm font-bold mt-4">{a.name}</h4>
+                    <p className="text-xs text-[#14090b]/65 mt-1.5 leading-relaxed">{a.text}</p>
+                  </div>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        {/* 5. How it works */}
+        {/* 5. How it works - Reveal & Stagger */}
         <section id="how-it-works" className="py-24 px-6 bg-white border-y border-[#14090b]/10">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-2xl mb-14">
-              <Kicker>How it works</Kicker>
-              <h2 style={display} className="mt-3 text-4xl sm:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
-                From raw data to <span className="italic font-extrabold text-[#7b1425]">clear decisions.</span>
-              </h2>
-            </div>
+            <Reveal>
+              <div className="max-w-2xl mb-14">
+                <Kicker>How it works</Kicker>
+                <h2 style={display} className="mt-3 text-4xl sm:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
+                  From raw data to <span className="italic font-extrabold text-[#7b1425]">clear decisions.</span>
+                </h2>
+              </div>
+            </Reveal>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {steps.map((s) => (
-                <div key={s.n} className="flex gap-5">
-                  <span style={display} className="italic text-7xl font-extrabold leading-none text-[#7b1425]">{s.n}</span>
-                  <div className="pt-2">
-                    <h3 style={display} className="text-2xl font-semibold">{s.title}</h3>
-                    <p className="mt-2 text-sm text-[#14090b]/65 leading-relaxed">{s.text}</p>
+              {steps.map((s, i) => (
+                <Reveal key={s.n} delay={i * 0.08}>
+                  <div className="flex gap-5">
+                    <span style={display} className="italic text-7xl font-extrabold leading-none text-[#7b1425]">{s.n}</span>
+                    <div className="pt-2">
+                      <h3 style={display} className="text-2xl font-semibold">{s.title}</h3>
+                      <p className="mt-2 text-sm text-[#14090b]/65 leading-relaxed">{s.text}</p>
+                    </div>
                   </div>
-                </div>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        {/* 6. Integrations */}
+        {/* 6. Integrations - Reveal */}
         <section id="integrations" className="py-20 px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 style={display} className="text-3xl sm:text-4xl font-semibold tracking-[-0.02em]">Seamless data ingestion</h2>
-            <p className="text-sm text-[#14090b]/65 mt-3 max-w-2xl mx-auto">
-              Connect your Shopify storefront in seconds, or upload your historical product, order, and customer CSV files with auto-detected mapping.
-            </p>
+            <Reveal>
+              <h2 style={display} className="text-3xl sm:text-4xl font-semibold tracking-[-0.02em]">Seamless data ingestion</h2>
+              <p className="text-sm text-[#14090b]/65 mt-3 max-w-2xl mx-auto">
+                Connect your Shopify storefront in seconds, or upload your historical product, order, and customer CSV files with auto-detected mapping.
+              </p>
+            </Reveal>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              {[
-                { icon: Plug, label: "Shopify API Integration" },
-                { icon: FileSpreadsheet, label: "CSV Auto-Mapping Ingestion" },
-                { icon: Zap, label: "Model Context Protocol (MCP)" },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-white border border-[#14090b]/15">
-                  <Icon size={17} className="text-[#7b1425]" />
-                  <span className="text-xs font-bold">{label}</span>
-                </div>
-              ))}
-            </div>
+            <Reveal delay={0.1}>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                {[
+                  { icon: Plug, label: "Shopify API Integration" },
+                  { icon: FileSpreadsheet, label: "CSV Auto-Mapping Ingestion" },
+                  { icon: Zap, label: "Model Context Protocol (MCP)" },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-white border border-[#14090b]/15">
+                    <Icon size={17} className="text-[#7b1425]" />
+                    <span className="text-xs font-bold">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
           </div>
         </section>
 
-        {/* 7. CTA */}
+        {/* 7. CTA - Reveal */}
         <section className="py-24 bg-[#7b1425] text-[#faf8f5] px-6 text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 style={display} className="text-4xl sm:text-6xl font-semibold tracking-[-0.03em] leading-[1.04]">
-              Ready to unlock your store's <span className="italic font-extrabold">true potential?</span>
-            </h2>
-            <p className="mt-5 text-[#faf8f5]/80 text-base">
-              Join forward-thinking e-commerce merchants making data-driven decisions every day.
-            </p>
-            <div className="mt-9 flex justify-center">
-              <Link
-                href="/dashboard"
-                className="px-8 py-3.5 rounded-full bg-[#faf8f5] text-[#7b1425] font-bold text-sm hover:bg-[#14090b] hover:text-white transition-colors"
-              >
-                Explore Live Sellsy Dashboard
-              </Link>
-            </div>
+            <Reveal>
+              <h2 style={display} className="text-4xl sm:text-6xl font-semibold tracking-[-0.03em] leading-[1.04]">
+                Ready to unlock your store's <span className="italic font-extrabold">true potential?</span>
+              </h2>
+              <p className="mt-5 text-[#faf8f5]/80 text-base">
+                Join forward-thinking e-commerce merchants making data-driven decisions every day.
+              </p>
+              <div className="mt-9 flex justify-center">
+                <Link
+                  href="/dashboard"
+                  className="px-8 py-3.5 rounded-full bg-[#faf8f5] text-[#7b1425] font-bold text-sm hover:bg-[#14090b] hover:text-white transition-colors"
+                >
+                  Explore Live Sellsy Dashboard
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </section>
 
@@ -298,7 +339,7 @@ export default function LandingPage() {
         <footer className="mt-auto py-8 bg-[#faf8f5] text-[#6f6264] text-xs px-6 border-t border-[#14090b]/10">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Wordmark size={24} />
+              <Logo size={24} />
               <span>• Understand your store. Make smarter decisions.</span>
             </div>
             <p>© 2026 Sellsy Inc. Enterprise Capstone Platform.</p>
