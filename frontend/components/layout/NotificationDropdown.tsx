@@ -145,7 +145,7 @@ export const NotificationDropdown: React.FC = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white border border-[#14090b]/10 rounded-xl shadow-xl z-50 overflow-hidden text-[#14090b]">
+        <div className="absolute -right-10 sm:right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white border border-[#14090b]/10 rounded-xl shadow-xl z-50 overflow-hidden text-[#14090b]">
           {/* Header */}
           <div className="px-4 py-3 border-b border-[#f3ede7] flex items-center justify-between bg-[#faf8f5]">
             <div className="flex items-center gap-2">
@@ -169,7 +169,7 @@ export const NotificationDropdown: React.FC = () => {
           </div>
 
           {/* List */}
-          <div className="max-h-80 overflow-y-auto divide-y divide-[#f3ede7]">
+          <div className="max-h-[70vh] overflow-y-auto divide-y divide-[#f3ede7]">
             {notifications.length > 0 ? (
               notifications.map((n) => (
                 <div
