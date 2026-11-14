@@ -104,7 +104,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="h-16 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#14090b]/10 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-20">
+    <header className="h-16 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#14090b]/10 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-20 flex-shrink-0">
       {/* Page Title & Store Indicator */}
       <div className="flex items-center gap-2 sm:gap-4 min-w-0">
         {/* Mobile Hamburger Button */}

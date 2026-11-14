@@ -151,12 +151,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Desktop Sidebar (hidden on mobile, visible on md and up) */}
       <aside
         className={cn(
-          "hidden md:flex h-screen sticky top-0 flex-col bg-white border-r border-[#e8e2dc] z-30 transition-all duration-200 select-none",
+          "hidden md:flex h-full flex-col bg-white border-r border-[#e8e2dc] z-30 transition-all duration-200 select-none flex-shrink-0",
           collapsed ? "w-20" : "w-64"
         )}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-[#f3ede7]">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#f3ede7] flex-shrink-0">
           <Link href="/" className="flex flex-col justify-center gap-1 overflow-hidden">
             {collapsed ? (
               <Wordmark size={30} compact />
@@ -184,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation List */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 min-h-0 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain" data-lenis-prevent>
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -231,7 +231,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* User & Store Status Footer */}
-        <div className="p-3 border-t border-[#f3ede7] bg-[#faf8f5]/50">
+        <div className="p-3 border-t border-[#f3ede7] bg-[#faf8f5]/50 flex-shrink-0">
           {!collapsed ? (
             <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#e8e2dc]/60">
               <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
@@ -288,12 +288,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Slide-in Drawer (below md only) */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white z-50 md:hidden flex flex-col shadow-2xl transition-transform duration-300 ease-in-out select-none",
+          "fixed inset-y-0 left-0 w-72 max-w-[85vw] h-full h-dvh bg-white z-50 md:hidden flex flex-col shadow-2xl transition-transform duration-300 ease-in-out select-none",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Mobile Drawer Header with Logo and Close 'X' Button */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-[#f3ede7]">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#f3ede7] flex-shrink-0">
           <Link
             href="/"
             onClick={onCloseMobile}
@@ -318,7 +318,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Mobile Navigation List */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 min-h-0 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain" data-lenis-prevent>
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -362,7 +362,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Mobile User & Store Status Footer */}
-        <div className="p-3 border-t border-[#f3ede7] bg-[#faf8f5]/50">
+        <div className="p-3 border-t border-[#f3ede7] bg-[#faf8f5]/50 flex-shrink-0">
           <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#e8e2dc]/60">
             <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
               <div className="w-8 h-8 rounded-full bg-[#7b1425] flex items-center justify-center font-bold text-white text-xs flex-shrink-0">

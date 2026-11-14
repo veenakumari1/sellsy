@@ -40,14 +40,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#faf8f5] text-[#14090b]">
+    <div className="flex h-screen h-dvh overflow-hidden bg-[#faf8f5] text-[#14090b]" data-lenis-prevent>
       <Sidebar
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(!collapsed)}
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
       />
-      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden" data-lenis-prevent>
         <Navbar
           daysFilter={daysFilter}
           onDaysChange={onDaysChange}
