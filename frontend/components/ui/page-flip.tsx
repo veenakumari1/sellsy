@@ -50,6 +50,8 @@ export interface PageFlipProps {
   pages?: ReactNode[];
   /** Called with the spread index after a page settles. */
   onSpreadChange?: (spread: number) => void;
+  /** Called when a page turn starts. */
+  onFlipStart?: () => void;
   /** Programmatically jump to a target spread index. */
   targetSpread?: number | null;
   /** Whether to show the bottom pagination navigation buttons. */
@@ -218,6 +220,7 @@ const PageFlip = forwardRef<PageFlipHandle, PageFlipProps>(function PageFlip(
   {
     pages = [],
     onSpreadChange,
+    onFlipStart,
     targetSpread,
     showControls = false,
     className,
@@ -248,6 +251,8 @@ const PageFlip = forwardRef<PageFlipHandle, PageFlipProps>(function PageFlip(
   const committingRef = useRef(false);
   const onSpreadChangeRef = useRef(onSpreadChange);
   onSpreadChangeRef.current = onSpreadChange;
+  const onFlipStartRef = useRef(onFlipStart);
+  onFlipStartRef.current = onFlipStart;
 
   const spreads = single ? pages.length : Math.floor(pages.length / 2) + 1;
 
@@ -343,6 +348,7 @@ const PageFlip = forwardRef<PageFlipHandle, PageFlipProps>(function PageFlip(
       if (!(canTurn(dir) && size.w) || committingRef.current) {
         return;
       }
+      onFlipStartRef.current?.();
       if (reduceMotion) {
         setSpread((s) => {
           const next = s + dir;
@@ -365,6 +371,7 @@ const PageFlip = forwardRef<PageFlipHandle, PageFlipProps>(function PageFlip(
     (targetSpread: number) => {
       const clamped = Math.max(0, Math.min(spreads - 1, targetSpread));
       if (clamped === spread || committingRef.current) return;
+      onFlipStartRef.current?.();
       if (reduceMotion) {
         setSpread(clamped);
         onSpreadChangeRef.current?.(clamped);
@@ -423,6 +430,7 @@ const PageFlip = forwardRef<PageFlipHandle, PageFlipProps>(function PageFlip(
     if (!canTurn(dir)) {
       return;
     }
+    onFlipStartRef.current?.();
     if (reduceMotion) {
       go(dir);
       return;
