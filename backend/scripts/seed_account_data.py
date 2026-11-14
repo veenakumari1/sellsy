@@ -2,17 +2,17 @@
 """
 Seed Account Data Script for Sellsy
 Usage:
-    python scripts/seed_account_data.py --email sarah@gmail.com [--reset]
+    python scripts/seed_account_data.py --email sarah@gmail.com [--reset] [--days 7] [--scale 1.0]
 
-Fills an existing user's active store with realistic e-commerce sample data:
-- 6 Categories
-- 25 Products with realistic prices, costs, SKUs, and low-stock items
-- 40 Customers with realistic contact info and calculated segments
-- 200 Orders spread across the last 90 days with line items, tax, and realistic statuses
-- AI Insights for marketing, sales, products, and customers
-- Notifications and Gamification data (points, level, achievements, activities)
+Fills an existing user's active store with a realistic, compact e-commerce dataset (PKR):
+- 3 Categories
+- 8 Products with realistic prices (Rs 800 - Rs 15,000), costs (55-75%), and low-stock items
+- 12 Customers with Pakistani names and +92 03XX phone numbers
+- ~30 Orders spread over the last 7 days (weighted towards weekends), with real line items and statuses
+- Updated customer metrics (total_spent, orders_count, segment, order dates)
+- 3-4 Notifications and small gamification progression (level 1-2, ~95 points, unlocked badges)
 
-Works identically on SQLite locally and on PostgreSQL when DATABASE_URL is set to Railway.
+Works identically on SQLite locally and on PostgreSQL when DATABASE_URL points to Railway.
 Idempotent: skips if the store already has products or orders, unless --reset is passed.
 """
 
@@ -28,7 +28,7 @@ backend_dir = Path(__file__).resolve().parent.parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
-from app.core.database import SessionLocal, engine, database_url
+from app.core.database import SessionLocal, engine, database_url, Base
 from app.models import (
     User, Store, ProductCategory, Product, Customer, Order, OrderItem,
     AiInsight, Notification, UserGamification, AchievementDefinition,
@@ -37,108 +37,132 @@ from app.models import (
 from app.services.gamification_service import GamificationService
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Seed realistic sample data into an existing Sellsy account.")
+    parser = argparse.ArgumentParser(description="Seed realistic compact sample data into an existing Sellsy account.")
     parser.add_argument("--email", required=True, help="Email address of the target user (e.g. sarah@gmail.com)")
     parser.add_argument("--reset", action="store_true", help="Delete existing data for this store before seeding")
+    parser.add_argument("--days", type=int, default=7, help="Number of historical days for orders (default: 7)")
+    parser.add_argument("--scale", type=float, default=1.0, help="Scale multiplier for data volume (default: 1.0)")
     return parser.parse_args()
 
+# 3 Categories
 CATEGORIES_DATA = [
-    {"name": "Ceramics & Pottery", "slug": "ceramics-pottery"},
-    {"name": "Home Fragrance & Candles", "slug": "home-fragrance-candles"},
-    {"name": "Linens & Bedding", "slug": "linens-bedding"},
-    {"name": "Kitchen & Tableware", "slug": "kitchen-tableware"},
-    {"name": "Lighting & Lamps", "slug": "lighting-lamps"},
-    {"name": "Decorative Accents", "slug": "decorative-accents"},
+    {"name": "Apparel & Textiles", "slug": "apparel-textiles"},
+    {"name": "Home & Living", "slug": "home-living"},
+    {"name": "Leather & Accessories", "slug": "leather-accessories"},
 ]
 
+# 8 Products: price Rs 800 to Rs 15,000, cost 55-75% of price, couple with low stock
 PRODUCTS_DATA = [
-    # Ceramics & Pottery
-    {"cat": "Ceramics & Pottery", "title": "Minimalist Matte White Vase", "price": 6500.0, "cost": 4200.0, "sku": "CER-VAS-001", "qty": 18, "desc": "Hand-turned stoneware vase with a tactile matte chalk glaze."},
-    {"cat": "Ceramics & Pottery", "title": "Handcrafted Terracotta Planter", "price": 3800.0, "cost": 2400.0, "sku": "CER-PLT-002", "qty": 4, "desc": "Unglazed organic terracotta planter with natural drainage saucer."}, # Low stock
-    {"cat": "Ceramics & Pottery", "title": "Speckled Ceramic Mug Set of 4", "price": 4200.0, "cost": 2600.0, "sku": "CER-MUG-003", "qty": 35, "desc": "Artisanal stoneware coffee mugs fired with natural iron speckles."},
-    {"cat": "Ceramics & Pottery", "title": "Ribbed Stoneware Pitcher", "price": 5400.0, "cost": 3400.0, "sku": "CER-PIT-004", "qty": 14, "desc": "Sculptural water and beverage pitcher with ergonomic curved handle."},
-    {"cat": "Ceramics & Pottery", "title": "Organic Glazed Serving Platter", "price": 7800.0, "cost": 4900.0, "sku": "CER-PLT-005", "qty": 22, "desc": "Wide-rimmed center table platter finished in reactive sage glaze."},
+    # Apparel & Textiles
+    {
+        "cat": "Apparel & Textiles",
+        "title": "Embroidered Lawn Kurta",
+        "price": 4500.0,
+        "cost": 2700.0, # 60%
+        "sku": "APP-KUR-001",
+        "qty": 24,
+        "desc": "Hand-embroidered breathable summer lawn kurta with delicate needlework along the neckline."
+    },
+    {
+        "cat": "Apparel & Textiles",
+        "title": "Handwoven Cotton Shawl",
+        "price": 6800.0,
+        "cost": 4200.0, # 61.8%
+        "sku": "APP-SHW-002",
+        "qty": 4, # Low stock
+        "desc": "Traditional hand-spun soft cotton wrap finished with organic fringe tassels."
+    },
 
-    # Home Fragrance & Candles
-    {"cat": "Home Fragrance & Candles", "title": "Amber & Smoked Cedar Soy Candle", "price": 2800.0, "cost": 1700.0, "sku": "CAN-AMB-001", "qty": 42, "desc": "100% soy wax candle hand-poured in reusable amber apothecary glass."},
-    {"cat": "Home Fragrance & Candles", "title": "Wild Bergamot Reed Diffuser", "price": 3600.0, "cost": 2200.0, "sku": "CAN-DIF-002", "qty": 5, "desc": "Slow-evaporating botanical fragrance blend with natural rattan reeds."}, # Low stock
-    {"cat": "Home Fragrance & Candles", "title": "Palo Santo & Sage Room Spray", "price": 1950.0, "cost": 1200.0, "sku": "CAN-SPR-003", "qty": 30, "desc": "Aromatherapeutic mist infused with organic essential oils and floral water."},
-    {"cat": "Home Fragrance & Candles", "title": "Hinoki Wood Sculptural Candle", "price": 3200.0, "cost": 2000.0, "sku": "CAN-HIN-004", "qty": 25, "desc": "Geometric cast wax candle scented with calming Japanese cypress."},
+    # Home & Living
+    {
+        "cat": "Home & Living",
+        "title": "Block-Printed Cushion Cover",
+        "price": 1450.0,
+        "cost": 870.0, # 60%
+        "sku": "HOM-CSH-001",
+        "qty": 35,
+        "desc": "Artisanal wooden block-printed 18x18 inch cotton cushion cover in indigo motifs."
+    },
+    {
+        "cat": "Home & Living",
+        "title": "Brass Tabletop Planter",
+        "price": 3900.0,
+        "cost": 2450.0, # 62.8%
+        "sku": "HOM-PLN-002",
+        "qty": 5, # Low stock
+        "desc": "Hand-hammered warm brass planter with protective clear coat and indoor drainage plate."
+    },
+    {
+        "cat": "Home & Living",
+        "title": "Handmade Ceramic Chai Cups (Set of 4)",
+        "price": 2800.0,
+        "cost": 1680.0, # 60%
+        "sku": "HOM-CUP-003",
+        "qty": 18,
+        "desc": "Artisan terracotta and stoneware glazed tea cups fired with earthy reactive mineral glazes."
+    },
 
-    # Linens & Bedding
-    {"cat": "Linens & Bedding", "title": "Washed Belgian Linen Duvet Cover", "price": 22500.0, "cost": 14500.0, "sku": "LIN-DUV-001", "qty": 12, "desc": "Pre-washed breathable flax linen duvet cover with natural mother-of-pearl buttons."},
-    {"cat": "Linens & Bedding", "title": "French Flax Linen Pillowcase Pair", "price": 5500.0, "cost": 3500.0, "sku": "LIN-PIL-002", "qty": 38, "desc": "Pair of envelope-closure standard pillowcases made from European flax."},
-    {"cat": "Linens & Bedding", "title": "Waffle Weave Cotton Throw Blanket", "price": 8900.0, "cost": 5600.0, "sku": "LIN-BLN-003", "qty": 20, "desc": "Heavyweight breathable organic cotton throw in earthy warm oatmeal."},
-    {"cat": "Linens & Bedding", "title": "Raw Hem Linen Table Runner", "price": 3900.0, "cost": 2400.0, "sku": "LIN-TAB-004", "qty": 16, "desc": "Relaxed fringed border dining table runner washed for antique softness."},
-
-    # Kitchen & Tableware
-    {"cat": "Kitchen & Tableware", "title": "Matte Black Cutlery 20-Piece Set", "price": 14500.0, "cost": 9200.0, "sku": "KIT-CUT-001", "qty": 15, "desc": "Forged 18/10 stainless steel flatware service for four with PVD titanium finish."},
-    {"cat": "Kitchen & Tableware", "title": "Olive Wood Cutting & Charcuterie Board", "price": 5800.0, "cost": 3600.0, "sku": "KIT-BRD-002", "qty": 6, "desc": "Sustainably harvested Mediterranean olive wood board with live bark edge."}, # Low stock
-    {"cat": "Kitchen & Tableware", "title": "Fluted Coupe Cocktail Glasses Set of 4", "price": 4900.0, "cost": 3100.0, "sku": "KIT-GLS-003", "qty": 28, "desc": "Lead-free crystal coupe glasses featuring delicate vertical optic ridges."},
-    {"cat": "Kitchen & Tableware", "title": "Japanese Chef Santoku Knife", "price": 16500.0, "cost": 10500.0, "sku": "KIT-KNF-004", "qty": 11, "desc": "VG-10 core Damascus steel 7-inch multipurpose culinary chef knife."},
-
-    # Lighting & Lamps
-    {"cat": "Lighting & Lamps", "title": "Brushed Brass Table Lamp", "price": 18500.0, "cost": 11800.0, "sku": "LIT-TAB-001", "qty": 8, "desc": "Weighted solid brass desk lamp with adjustable cantilever arm and dimmer dial."},
-    {"cat": "Lighting & Lamps", "title": "Ribbed Opal Glass Pendant Light", "price": 19500.0, "cost": 12400.0, "sku": "LIT-PEN-002", "qty": 7, "desc": "Hand-blown matte opal glass sphere pendant with braided fabric cord."}, # Low stock
-    {"cat": "Lighting & Lamps", "title": "Sculptural Travertine Sconce", "price": 15800.0, "cost": 10200.0, "sku": "LIT-SCN-003", "qty": 10, "desc": "Natural honed Italian travertine wall light casting indirect ambient glow."},
-    {"cat": "Lighting & Lamps", "title": "Rechargeable Cordless Lantern", "price": 8500.0, "cost": 5300.0, "sku": "LIT-LAN-004", "qty": 24, "desc": "Portable IP54 rated indoor/outdoor LED lantern with touch stepless dimming."},
-
-    # Decorative Accents
-    {"cat": "Decorative Accents", "title": "Travertine Geometric Bookends", "price": 7900.0, "cost": 5000.0, "sku": "DEC-BOK-001", "qty": 14, "desc": "Solid architectural stone bookends cut from unfilled natural travertine."},
-    {"cat": "Decorative Accents", "title": "Hand-Woven Jute Storage Basket", "price": 3800.0, "cost": 2400.0, "sku": "DEC-BSK-002", "qty": 32, "desc": "Sturdy braided golden jute floor basket with integrated carrying handles."},
-    {"cat": "Decorative Accents", "title": "Fluted Brass Pillar Candlestick", "price": 2900.0, "cost": 1800.0, "sku": "DEC-CDL-003", "qty": 26, "desc": "Heavy turned unlacquered brass candlestick designed to age with rich patina."},
-    {"cat": "Decorative Accents", "title": "Curved Walnut Wall Mirror", "price": 24500.0, "cost": 15500.0, "sku": "DEC-MIR-004", "qty": 9, "desc": "Solid American black walnut statement mirror with soft rounded pill silhouette."},
+    # Leather & Accessories
+    {
+        "cat": "Leather & Accessories",
+        "title": "Full-Grain Leather Wallet",
+        "price": 3200.0,
+        "cost": 1950.0, # 60.9%
+        "sku": "LEA-WLT-001",
+        "qty": 30,
+        "desc": "Vegetable-tanned cowhide bifold wallet with 8 card slots and currency divider."
+    },
+    {
+        "cat": "Leather & Accessories",
+        "title": "Executive Leather Messenger Bag",
+        "price": 14500.0,
+        "cost": 9200.0, # 63.4%
+        "sku": "LEA-BAG-002",
+        "qty": 9,
+        "desc": "Handcrafted premium buffalo leather 15-inch laptop briefcase with antique brass hardware."
+    },
+    {
+        "cat": "Leather & Accessories",
+        "title": "Handcrafted Jute Cardholder",
+        "price": 950.0,
+        "cost": 550.0, # 57.9%
+        "sku": "LEA-CRD-003",
+        "qty": 40,
+        "desc": "Minimalist pocket card sleeve crafted from natural treated jute with leather trim."
+    },
 ]
 
+# 12 Pakistani Customers with +92 03XX mobile numbers
 CUSTOMERS_DATA = [
-    ("Marcus", "Vance", "marcus.vance@gmail.com", "+1 (555) 234-8901"),
-    ("Emily", "Chen", "emily.chen@outlook.com", "+1 (555) 890-1234"),
-    ("David", "Kowalski", "d.kowalski@yahoo.com", "+1 (555) 456-7890"),
-    ("Sophia", "Martinez", "sophia.mtz@gmail.com", "+1 (555) 345-6789"),
-    ("Oliver", "Wright", "oliver.wright@icloud.com", "+1 (555) 678-9012"),
-    ("Hannah", "Abbott", "hannah.abbott@gmail.com", "+1 (555) 789-0123"),
-    ("Lucas", "Bennett", "lbennett@enterprise.com", "+1 (555) 901-2345"),
-    ("Aria", "Patel", "aria.patel@designhub.io", "+1 (555) 012-3456"),
-    ("Ethan", "Sullivan", "ethan.sullivan@gmail.com", "+1 (555) 123-4567"),
-    ("Chloe", "Morrison", "chloe.m@coastal.com", "+1 (555) 234-5678"),
-    ("Alexander", "Hayes", "alex.hayes@gmail.com", "+1 (555) 345-6780"),
-    ("Mia", "Torres", "mia.torres@gmail.com", "+1 (555) 456-7891"),
-    ("James", "Sterling", "james.sterling@outlook.com", "+1 (555) 567-8902"),
-    ("Isabella", "Rossi", "isabella.rossi@studio.it", "+1 (555) 678-9013"),
-    ("Benjamin", "Foster", "ben.foster@gmail.com", "+1 (555) 789-0124"),
-    ("Charlotte", "Kim", "charlotte.kim@gmail.com", "+1 (555) 890-1235"),
-    ("Daniel", "Nielsen", "daniel.nielsen@nordic.com", "+1 (555) 901-2346"),
-    ("Amelia", "Brooks", "amelia.brooks@gmail.com", "+1 (555) 012-3457"),
-    ("Henry", "Sinclair", "henry.sinclair@gmail.com", "+1 (555) 123-4568"),
-    ("Evelyn", "Ward", "evelyn.ward@gmail.com", "+1 (555) 234-5679"),
-    ("Sebastian", "Cole", "sebastian.cole@gmail.com", "+1 (555) 345-6781"),
-    ("Harper", "Diaz", "harper.diaz@yahoo.com", "+1 (555) 456-7892"),
-    ("Jack", "Calloway", "jack.calloway@gmail.com", "+1 (555) 567-8903"),
-    ("Ella", "Monroe", "ella.monroe@gmail.com", "+1 (555) 678-9014"),
-    ("Liam", "Fitzgerald", "liam.fitz@gmail.com", "+1 (555) 789-0125"),
-    ("Grace", "O'Connor", "grace.oc@gmail.com", "+1 (555) 890-1236"),
-    ("Samuel", "Rhodes", "samuel.rhodes@gmail.com", "+1 (555) 901-2347"),
-    ("Victoria", "Vargas", "victoria.vargas@gmail.com", "+1 (555) 012-3458"),
-    ("Owen", "Mercer", "owen.mercer@gmail.com", "+1 (555) 123-4569"),
-    ("Penelope", "Dunn", "penelope.dunn@gmail.com", "+1 (555) 234-5670"),
-    ("Caleb", "Holloway", "caleb.h@gmail.com", "+1 (555) 345-6782"),
-    ("Layla", "Santos", "layla.santos@gmail.com", "+1 (555) 456-7893"),
-    ("Noah", "Castillo", "noah.castillo@gmail.com", "+1 (555) 567-8904"),
-    ("Zoe", "Kaufman", "zoe.kaufman@gmail.com", "+1 (555) 678-9015"),
-    ("Leo", "Reyes", "leo.reyes@gmail.com", "+1 (555) 789-0126"),
-    ("Stella", "Garner", "stella.garner@gmail.com", "+1 (555) 890-1237"),
-    ("Julian", "Perez", "julian.perez@gmail.com", "+1 (555) 901-2348"),
-    ("Audrey", "Vaughn", "audrey.vaughn@gmail.com", "+1 (555) 012-3459"),
-    ("Theodore", "Lang", "theo.lang@gmail.com", "+1 (555) 123-4560"),
-    ("Scarlett", "Frost", "scarlett.frost@gmail.com", "+1 (555) 234-5671"),
+    ("Tariq", "Mehmood", "tariq.mehmood@gmail.com", "+92 300 8472910"),
+    ("Ayesha", "Khan", "ayesha.khan@outlook.com", "+92 321 4567891"),
+    ("Bilal", "Ahmed", "bilal.ahmed@yahoo.com", "+92 333 5129843"),
+    ("Fatima", "Zahra", "fatima.zahra@gmail.com", "+92 345 6789012"),
+    ("Usman", "Ali", "usman.ali@gmail.com", "+92 301 2345678"),
+    ("Sana", "Malik", "sana.malik@outlook.com", "+92 322 8765432"),
+    ("Hamza", "Siddiqui", "hamza.siddiqui@gmail.com", "+92 334 9876543"),
+    ("Zainab", "Bibi", "zainab.bibi@yahoo.com", "+92 312 3456789"),
+    ("Omer", "Farooq", "omer.farooq@gmail.com", "+92 302 4567890"),
+    ("Mariam", "Javed", "mariam.javed@gmail.com", "+92 323 5678901"),
+    ("Hassan", "Raza", "hassan.raza@outlook.com", "+92 335 6789012"),
+    ("Hina", "Qureshi", "hina.qureshi@gmail.com", "+92 346 7890123"),
 ]
 
 def seed():
     args = parse_args()
     target_email = args.email.strip().lower()
+    days = max(1, args.days)
+    scale = max(0.1, args.scale)
 
-    print(f"Connecting to database: {database_url.split('@')[-1] if '@' in database_url else database_url}")
-    
+    masked_url = database_url.split('@')[-1] if '@' in database_url else database_url
+    print(f"Connecting to database: {masked_url}")
+
+    # Ensure tables exist (helpful for fresh Postgres instances)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Notice: Table inspection/creation: {e}")
+
     with SessionLocal() as db:
         # 1. Locate User
         user = db.query(User).filter(User.email == target_email).first()
@@ -192,8 +216,8 @@ def seed():
                 db.commit()
                 print("Existing store data cleared.")
 
-        # 4. Create Categories
-        print("Seeding 6 product categories...")
+        # 4. Create Categories (3)
+        print(f"Seeding {len(CATEGORIES_DATA)} product categories...")
         cat_map = {}
         for cat_info in CATEGORIES_DATA:
             cat = ProductCategory(
@@ -205,8 +229,8 @@ def seed():
             db.flush()
             cat_map[cat_info["name"]] = cat.id
 
-        # 5. Create Products
-        print("Seeding 25 products with realistic SKUs, prices and inventory...")
+        # 5. Create Products (8)
+        print(f"Seeding {len(PRODUCTS_DATA)} products (prices Rs 800 - Rs 15,000, 55-75% costs, low stock)...")
         product_objs = []
         for p_info in PRODUCTS_DATA:
             prod = Product(
@@ -224,8 +248,8 @@ def seed():
             product_objs.append(prod)
         db.flush()
 
-        # 6. Create Customers
-        print("Seeding 40 customer records...")
+        # 6. Create Customers (12)
+        print(f"Seeding {len(CUSTOMERS_DATA)} Pakistani customers (+92 03XX)...")
         customer_objs = []
         for fn, ln, email, phone in CUSTOMERS_DATA:
             cust = Customer(
@@ -242,89 +266,93 @@ def seed():
             customer_objs.append(cust)
         db.flush()
 
-        # 7. Create ~200 Orders across the last 90 days
-        print("Generating 200 orders spread across the last 90 days...")
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
-        start_date = now - timedelta(days=89)
+        # 7. Create Orders spread over the last `days` (default 7 days)
+        # Base target: ~30 orders over 7 days, scaled with `scale` and proportional to `days`
+        target_total_orders = max(5, int(round(30 * (days / 7.0) * scale)))
+        print(f"Generating ~{target_total_orders} orders over the last {days} days (scale: {scale})...")
 
-        # Distribute order frequency across customers to create realistic segments:
-        # 6 VIPs (6-9 orders), 14 Returning (3-5 orders), 16 Single-buyers (1 order), 4 Inactive (0 orders)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        start_date = now - timedelta(days=days - 1)
+
+        # Distribute orders per day, weighting weekend days (Saturday=5, Sunday=6) higher
+        order_dates = []
+        day_weights = []
+        for day_offset in range(days):
+            current_day = start_date + timedelta(days=day_offset)
+            weekday = current_day.weekday()
+            # Weekends get ~1.5x - 1.8x volume
+            weight = 1.6 if weekday in (5, 6) else 1.0
+            day_weights.append((day_offset, weight))
+
+        total_weight = sum(w for _, w in day_weights)
+        for day_offset, weight in day_weights:
+            day_orders_count = int(round((weight / total_weight) * target_total_orders))
+            for _ in range(day_orders_count):
+                order_time = start_date + timedelta(
+                    days=day_offset,
+                    hours=random.randint(9, 22),
+                    minutes=random.randint(0, 59),
+                    seconds=random.randint(0, 59)
+                )
+                if order_time <= now:
+                    order_dates.append(order_time)
+
+        # Ensure order count is close to target
+        if not order_dates:
+            order_dates = [now - timedelta(hours=i * 4) for i in range(target_total_orders)]
+        order_dates.sort()
+        actual_order_count = len(order_dates)
+
+        # Assign customers to create realistic segments:
+        # 2 VIP/High Value (4-6 orders), 4 Returning (2-3 orders), 5 New (1 order), 1 Inactive (0 orders)
         cust_order_targets = {}
         for idx, cust in enumerate(customer_objs):
-            if idx < 6:
-                cust_order_targets[cust.id] = random.randint(6, 9)
-            elif idx < 20:
-                cust_order_targets[cust.id] = random.randint(3, 5)
-            elif idx < 36:
+            if idx < 2:
+                cust_order_targets[cust.id] = random.randint(4, 5)
+            elif idx < 6:
+                cust_order_targets[cust.id] = random.randint(2, 3)
+            elif idx < 11:
                 cust_order_targets[cust.id] = 1
             else:
                 cust_order_targets[cust.id] = 0
 
-        # Build list of (customer, timestamp) tuples with natural growth across 90 days:
-        # Month 1: 1-2 orders/day, Month 2: 2-3 orders/day, Month 3: 2-4 orders/day
-        order_dates = []
-        for day_offset in range(90):
-            if day_offset < 30:
-                count = random.choices([1, 2], weights=[0.6, 0.4])[0]
-            elif day_offset < 60:
-                count = random.choices([1, 2, 3], weights=[0.25, 0.55, 0.20])[0]
-            else:
-                count = random.choices([2, 3, 4], weights=[0.25, 0.55, 0.20])[0]
-
-            for _ in range(count):
-                order_time = start_date + timedelta(
-                    days=day_offset,
-                    hours=random.randint(8, 22),
-                    minutes=random.randint(0, 59),
-                    seconds=random.randint(0, 59)
-                )
-                order_dates.append(order_time)
-
-        # Target ~200 orders (adjust if slightly off)
-        if len(order_dates) > 205:
-            order_dates = order_dates[:205]
-        total_seeded_orders = len(order_dates)
-        order_dates.sort()
-
-        # Build customer pool according to targets
         cust_pool = []
         for cust_id, target in cust_order_targets.items():
             cust_pool.extend([cust_id] * target)
-        
-        # Adjust pool size to match total_seeded_orders
-        while len(cust_pool) < total_seeded_orders:
-            cust_pool.append(random.choice(customer_objs[:20]).id)
-        if len(cust_pool) > total_seeded_orders:
-            cust_pool = cust_pool[:total_seeded_orders]
+
+        # Adjust pool size to match actual order count
+        while len(cust_pool) < actual_order_count:
+            cust_pool.append(random.choice(customer_objs[:6]).id)
+        if len(cust_pool) > actual_order_count:
+            cust_pool = cust_pool[:actual_order_count]
         random.shuffle(cust_pool)
 
-        customer_map = {c.id: c for c in customer_objs}
         customer_order_records = {c.id: [] for c in customer_objs}
 
         for idx, order_time in enumerate(order_dates):
             order_num = f"#{1001 + idx}"
             chosen_cust_id = cust_pool[idx]
-            
-            # Status distribution: 88% paid, 8% pending, 4% refunded
+
+            # Mix: mostly paid (~88%), few pending (~7%), few refunded (~5%)
             roll = random.random()
             if roll < 0.88:
                 fin_status = "paid"
                 ful_status = "fulfilled"
-            elif roll < 0.96:
+            elif roll < 0.95:
                 fin_status = "pending"
                 ful_status = "unfulfilled"
             else:
                 fin_status = "refunded"
                 ful_status = "fulfilled"
 
-            # 1 to 3 items per order
-            num_items = random.choices([1, 2, 3], weights=[0.55, 0.35, 0.10])[0]
-            selected_prods = random.sample(product_objs, num_items)
+            # 1 to 2 items per order
+            num_items = random.choices([1, 2], weights=[0.75, 0.25])[0]
+            selected_prods = random.sample(product_objs, min(num_items, len(product_objs)))
 
             subtotal = 0.0
             order_items_to_add = []
             for p in selected_prods:
-                qty = random.choices([1, 2, 3], weights=[0.75, 0.20, 0.05])[0]
+                qty = random.choices([1, 2], weights=[0.85, 0.15])[0]
                 item_price = p.price
                 subtotal += (item_price * qty)
                 order_items_to_add.append({
@@ -334,7 +362,7 @@ def seed():
                 })
 
             subtotal = round(subtotal, 2)
-            tax = round(subtotal * 0.07, 2)
+            tax = round(subtotal * 0.05, 2)
             total = round(subtotal + tax, 2)
 
             order = Order(
@@ -369,60 +397,57 @@ def seed():
         for cust in customer_objs:
             orders = customer_order_records[cust.id]
             valid_orders = [o for o in orders if o[2] != "refunded"]
-            
+
             cust.orders_count = len(orders)
             cust.total_spent = round(sum(o[1] for o in valid_orders), 2)
-            
+
             if orders:
                 cust.first_order_at = min(o[0] for o in orders)
                 cust.last_order_at = max(o[0] for o in orders)
-                
-                # Assign segment
-                if cust.total_spent >= 50000.0 or cust.orders_count >= 5:
+
+                if cust.total_spent >= 20000.0 or cust.orders_count >= 4:
                     cust.segment = "high_value"
                 elif cust.orders_count >= 2:
                     cust.segment = "returning"
-                elif cust.last_order_at < (now - timedelta(days=45)):
-                    cust.segment = "at_risk"
                 else:
                     cust.segment = "new"
             else:
                 cust.segment = "inactive"
 
-        # 9. Create AI Insights
+        # 9. Create AI Insights (PKR)
         print("Creating AI strategic insights...")
         insights_data = [
             {
                 "category": "sales",
-                "title": "AOV Expansion on Weekend Collections",
-                "observation": "Saturday & Sunday checkout baskets average Rs 14,500, outperforming weekday averages by +22%.",
-                "impact": "Potential +Rs 380,000/mo incremental revenue through weekend bundles.",
-                "rec": "Activate weekend-exclusive multi-item incentives and curated room set discounts starting Friday afternoon.",
-                "confidence": 0.94
+                "title": "Weekend Revenue Lift on Handwoven Apparel",
+                "observation": "Saturday & Sunday checkout baskets average Rs 8,500, outperforming weekday averages by +18%.",
+                "impact": "Opportunity for +Rs 45,000 weekly incremental revenue via weekend bundles.",
+                "rec": "Offer a weekend styling combo of Handwoven Cotton Shawl with Block-Printed Cushions.",
+                "confidence": 0.92
             },
             {
                 "category": "products",
-                "title": "High Margin Opportunity in Linens",
-                "observation": "Washed Belgian Linen Duvet Cover maintains a 64% gross margin and 94% 5-star customer rating.",
-                "impact": "Strongest lifetime value predictor across store catalog.",
-                "rec": "Promote Linen collections in post-purchase welcome sequence to accelerate second order velocity.",
-                "confidence": 0.91
+                "title": "Low Stock Alert: Handwoven Cotton Shawl",
+                "observation": "Handwoven Cotton Shawl inventory has dropped to 4 units with steady demand.",
+                "impact": "Risk of stockout within 4-5 days.",
+                "rec": "Reorder 20 units from artisan supplier to prevent revenue loss.",
+                "confidence": 0.95
             },
             {
                 "category": "customers",
-                "title": "VIP Retention Stability",
-                "observation": "Top 15% VIP shoppers account for 44% of cumulative store revenue with a 68-day repeat purchase cycle.",
-                "impact": "Core foundation of baseline revenue predictable for next quarter.",
-                "rec": "Launch an exclusive VIP tiered preview for upcoming seasonal home fragrance releases.",
-                "confidence": 0.89
+                "title": "Repeat Buyer Momentum",
+                "observation": "Returning shoppers have generated 48% of total revenue in the last 7 days.",
+                "impact": "High customer retention rate despite early store lifecycle.",
+                "rec": "Send thank-you discount codes for next purchase to first-time buyers.",
+                "confidence": 0.88
             },
             {
                 "category": "marketing",
-                "title": "Inventory Rebalancing on Planters",
-                "observation": "Handcrafted Terracotta Planter has fallen to 4 units in stock while demand velocity remains elevated.",
-                "impact": "Stockout projected within 6 days without immediate replenishment.",
-                "rec": "Place restock order of 40 units immediately and activate backorder notification signup on product page.",
-                "confidence": 0.96
+                "title": "Leather Goods Cross-Sell Opportunity",
+                "observation": "Customers purchasing Kurta show high affinity for Full-Grain Leather Wallet.",
+                "impact": "Could increase average order value by +25%.",
+                "rec": "Show leather accessories as recommended add-ons on the checkout page.",
+                "confidence": 0.90
             }
         ]
         for ins in insights_data:
@@ -434,17 +459,16 @@ def seed():
                 impact=ins["impact"],
                 actionable_recommendation=ins["rec"],
                 confidence_score=ins["confidence"],
-                created_at=now - timedelta(days=2)
+                created_at=now - timedelta(days=1)
             ))
 
-        # 10. Create Notifications
-        print("Creating notifications for store events...")
+        # 10. Create Notifications (3-4 notifications)
+        print("Creating store notifications...")
         notifs_data = [
-            ("order", "New Order #1200 Received", "Marcus Vance placed an order for Washed Belgian Linen Duvet Cover (Rs 23,625).", "/sales", False, 1),
-            ("inventory_alert", "Low Stock Alert: Terracotta Planter", "Handcrafted Terracotta Planter is down to 4 units in stock.", "/products", False, 3),
-            ("ai_insight", "AI Growth Strategy Ready", "Weekend AOV patterns identified an incremental revenue opportunity of +Rs 380,000/mo.", "/marketing", False, 5),
-            ("gamification", "Achievement Unlocked: Catalog Master", "Your store catalog now has over 20 active products (+150 Points!).", "/rewards", True, 8),
-            ("sales", "Weekly Sales Target Reached", "Sarah's Store generated over Rs 500,000 in weekly revenue.", "/sales", True, 12),
+            ("order", "New Order #1028 Received", "Ayesha Khan placed an order for Embroidered Lawn Kurta (Rs 4,725).", "/sales", False, 2),
+            ("inventory_alert", "Low Stock Alert: Cotton Shawl", "Handwoven Cotton Shawl is down to 4 units in stock.", "/products", False, 5),
+            ("ai_insight", "AI Sales Tip Available", "Weekend sales surge identified. Check your sales forecast and recommendations.", "/marketing", False, 14),
+            ("gamification", "Achievement Unlocked: First Sale", "Congratulations on recording your initial store transactions (+50 Points!).", "/rewards", True, 36),
         ]
         for cat, title, msg, link, is_read, hours_ago in notifs_data:
             db.add(Notification(
@@ -458,32 +482,32 @@ def seed():
                 created_at=now - timedelta(hours=hours_ago)
             ))
 
-        # 11. Create Gamification Data
+        # 11. Create Gamification Data (small amounts: level 1, ~95 pts, 2 achievements)
         print("Configuring gamification profile and achievements...")
         GamificationService.ensure_definitions(db)
-        
+
         ug = db.query(UserGamification).filter(UserGamification.user_id == user.id).first()
         if not ug:
             ug = UserGamification(
                 user_id=user.id,
                 store_id=store.id,
-                total_points=350,
-                level=3,
-                rank_title="Growth Strategist",
-                streak_days=6,
+                total_points=95,
+                level=1,
+                rank_title="Rising Merchant",
+                streak_days=3,
                 last_active_at=now
             )
             db.add(ug)
         else:
-            ug.total_points = 350
-            ug.level = 3
-            ug.rank_title = "Growth Strategist"
-            ug.streak_days = 6
+            ug.total_points = 95
+            ug.level = 1
+            ug.rank_title = "Rising Merchant"
+            ug.streak_days = 3
             ug.last_active_at = now
         db.flush()
 
-        # Unlock initial achievements
-        achievements_to_unlock = ["store_starter", "catalog_master", "first_hundred_k"]
+        # Unlock a couple of initial achievements
+        achievements_to_unlock = ["store_starter", "first_sale"]
         for key in achievements_to_unlock:
             ad = db.query(AchievementDefinition).filter(AchievementDefinition.key == key).first()
             if ad:
@@ -497,19 +521,18 @@ def seed():
                         achievement_id=ad.id,
                         is_unlocked=True,
                         current_progress=ad.target_progress,
-                        unlocked_at=now - timedelta(days=random.randint(5, 40))
+                        unlocked_at=now - timedelta(days=2)
                     )
                     db.add(ua)
                 else:
                     ua.is_unlocked = True
                     ua.current_progress = ad.target_progress
 
-        # Add gamification activities
+        # Add a few gamification activities (small amounts)
         activities_data = [
-            ("store_registered", 100, "Connected storefront to Sellsy intelligence engine", 60),
-            ("catalog_synced", 150, "Successfully published 25 catalog products", 45),
-            ("orders_milestone", 50, "Surpassed 100 processed store transactions", 20),
-            ("streak_bonus", 50, "Maintained active 5-day sales review streak", 3)
+            ("store_registered", 50, "Connected storefront to Sellsy intelligence engine", 6),
+            ("first_sale", 25, "Recorded first customer transaction", 4),
+            ("daily_review", 20, "Checked store analytics dashboard", 1)
         ]
         for act_type, pts, desc, days_ago in activities_data:
             db.add(GamificationActivity(
@@ -523,6 +546,7 @@ def seed():
         db.commit()
 
         # 12. Final summary
+        final_categories = db.query(ProductCategory).filter(ProductCategory.store_id == store.id).count()
         final_products = db.query(Product).filter(Product.store_id == store.id).count()
         final_orders = db.query(Order).filter(Order.store_id == store.id).count()
         final_customers = db.query(Customer).filter(Customer.store_id == store.id).count()
@@ -532,12 +556,12 @@ def seed():
         print(f" SUCCESS: Store '{store.name}' seeded successfully!")
         print(f" - Account:        {user.email} (ID: {user.id})")
         print(f" - Active Store:   {store.name} (ID: {store.id})")
-        print(f" - Categories:     {len(CATEGORIES_DATA)}")
+        print(f" - Categories:     {final_categories}")
         print(f" - Products:       {final_products}")
         print(f" - Customers:      {final_customers}")
-        print(f" - Orders:         {final_orders} (over 90 days)")
+        print(f" - Orders:         {final_orders} (over last {days} days)")
         print(f" - Notifications:  {final_notifs}")
-        print(f" - Gamification:   Level 3 (350 Points, 3 Badges Unlocked)")
+        print(f" - Gamification:   Level 1 (95 Points, 2 Achievements Unlocked)")
         print("=======================================================\n")
 
 if __name__ == "__main__":
