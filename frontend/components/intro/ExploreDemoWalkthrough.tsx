@@ -94,15 +94,9 @@ function playPaperSwish(ctx: AudioContext) {
     const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
     const data = buffer.getChannelData(0);
 
-    // Filtered noise with soft pink/paper texture
-    let b0 = 0, b1 = 0, b2 = 0;
+    // Filtered noise with paper friction texture
     for (let i = 0; i < bufferSize; i++) {
-      const white = Math.random() * 2 - 1;
-      b0 = 0.99765 * b0 + white * 0.0990460;
-      b1 = 0.96300 * b1 + white * 0.2965164;
-      b2 = 0.57000 * b2 + white * 1.0526913;
-      const pink = b0 + b1 + b2 + white * 0.1848;
-      data[i] = pink * 0.22;
+      data[i] = Math.random() * 2 - 1;
     }
 
     const source = ctx.createBufferSource();
@@ -114,17 +108,17 @@ function playPaperSwish(ctx: AudioContext) {
     const centerFreq = 1600 + (Math.random() - 0.5) * 800; // 1200 - 2000 Hz
     filter.frequency.setValueAtTime(centerFreq, now);
     filter.frequency.exponentialRampToValueAtTime(
-      Math.max(300, centerFreq * 0.65),
+      Math.max(350, centerFreq * 0.65),
       now + duration
     );
-    filter.Q.setValueAtTime(1.4, now);
+    filter.Q.setValueAtTime(1.3, now);
 
-    // Gain envelope: quick attack (~35ms), smooth decay, base gain ~0.25 with slight random volume
+    // Gain envelope: quick attack (~30ms), smooth decay, base gain ~0.25 with slight random volume
     const gainNode = ctx.createGain();
     const baseGain = 0.25;
-    const randomGain = baseGain * (0.88 + Math.random() * 0.24); // ~0.22 - 0.28
+    const peakGain = baseGain * (0.88 + Math.random() * 0.24); // ~0.22 - 0.28
     gainNode.gain.setValueAtTime(0.0001, now);
-    gainNode.gain.linearRampToValueAtTime(randomGain, now + 0.035);
+    gainNode.gain.linearRampToValueAtTime(peakGain, now + 0.03);
     gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
     source.connect(filter);
@@ -142,7 +136,6 @@ export default function ExploreDemoWalkthrough() {
   const router = useRouter();
   const [currentSpread, setCurrentSpread] = useState(0);
   const [targetSpread, setTargetSpread] = useState<number | null>(null);
-  const [isSingle, setIsSingle] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [bookWidth, setBookWidth] = useState<number>(0);
 
@@ -173,20 +166,17 @@ export default function ExploreDemoWalkthrough() {
 
   // Unlock AudioContext on first user gesture (pointerdown/touchstart/keydown, capture phase)
   useEffect(() => {
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-
     const handleUserGesture = () => {
       getOrCreateAudioContext();
     };
 
-    overlay.addEventListener("pointerdown", handleUserGesture, { capture: true });
-    overlay.addEventListener("touchstart", handleUserGesture, { capture: true });
+    window.addEventListener("pointerdown", handleUserGesture, { capture: true });
+    window.addEventListener("touchstart", handleUserGesture, { capture: true });
     window.addEventListener("keydown", handleUserGesture, { capture: true });
 
     return () => {
-      overlay.removeEventListener("pointerdown", handleUserGesture, { capture: true });
-      overlay.removeEventListener("touchstart", handleUserGesture, { capture: true });
+      window.removeEventListener("pointerdown", handleUserGesture, { capture: true });
+      window.removeEventListener("touchstart", handleUserGesture, { capture: true });
       window.removeEventListener("keydown", handleUserGesture, { capture: true });
     };
   }, [getOrCreateAudioContext]);
@@ -265,16 +255,6 @@ export default function ExploreDemoWalkthrough() {
     playFlipSound();
   }, [playFlipSound]);
 
-  // Responsive narrow check
-  useEffect(() => {
-    const checkWidth = () => {
-      setIsSingle(window.innerWidth < 520);
-    };
-    checkWidth();
-    window.addEventListener("resize", checkWidth);
-    return () => window.removeEventListener("resize", checkWidth);
-  }, []);
-
   // Lock body scroll on this page
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
@@ -337,6 +317,7 @@ export default function ExploreDemoWalkthrough() {
     }
   };
 
+  const isSingle = (bookWidth > 0 ? bookWidth : (typeof window !== "undefined" ? window.innerWidth : 1200)) < 520;
   const lastTarget = isSingle ? 5 : 3;
   const isLastSpread = currentSpread >= lastTarget;
 
@@ -528,85 +509,86 @@ export default function ExploreDemoWalkthrough() {
         </div>
       </div>,
     ];
-  }, [isSingle]);
+  }, []);
 
   return (
     <div
       ref={overlayRef}
+      style={{ height: "100dvh" }}
       className="h-screen h-dvh bg-[#faf8f5] flex flex-col justify-between select-none relative overflow-hidden"
     >
-        {/* Background ambient gradient glow */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 70% at 50% -10%, rgba(123,20,37,.10), rgba(123,20,37,0) 70%)",
-          }}
-        />
+      {/* Background ambient gradient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 70% at 50% -10%, rgba(123,20,37,.10), rgba(123,20,37,0) 70%)",
+        }}
+      />
 
-        {/* Top Header */}
-        <header className="relative z-10 max-w-5xl w-full mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0">
-          <Link href="/" className="inline-flex items-center">
-            <Logo size={30} />
-          </Link>
+      {/* Top Header */}
+      <header className="relative z-10 max-w-5xl w-full mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0">
+        <Link href="/" className="inline-flex items-center">
+          <Logo size={30} />
+        </Link>
 
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Mute/Unmute sound button */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Mute/Unmute sound button */}
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+            title={isMuted ? "Unmute sound" : "Mute sound"}
+            className="text-xs font-semibold text-[#6f6264] hover:text-[#7b1425] px-3.5 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#e8e2dc] transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            <span>{isMuted ? "Muted" : "Sound"}</span>
+          </button>
+
+          {!isLastSpread && (
             <button
               type="button"
-              onClick={toggleMute}
-              aria-label={isMuted ? "Unmute sound" : "Mute sound"}
-              title={isMuted ? "Unmute sound" : "Mute sound"}
-              className="text-xs font-semibold text-[#6f6264] hover:text-[#7b1425] px-3.5 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#e8e2dc] transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+              onClick={handleSkip}
+              className="text-xs font-semibold text-[#6f6264] hover:text-[#7b1425] px-3.5 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#e8e2dc] transition-all cursor-pointer shadow-xs"
             >
-              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-              <span>{isMuted ? "Muted" : "Sound"}</span>
+              Skip to end
             </button>
+          )}
 
-            {!isLastSpread && (
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="text-xs font-semibold text-[#6f6264] hover:text-[#7b1425] px-3.5 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#e8e2dc] transition-all cursor-pointer shadow-xs"
-              >
-                Skip to end
-              </button>
-            )}
-
-            <Link
-              href="/"
-              className="text-xs font-semibold text-[#6f6264] hover:text-[#7b1425] px-3.5 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#e8e2dc] transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <X size={14} />
-              <span>Close</span>
-            </Link>
-          </div>
-        </header>
-
-        {/* Main Book Container */}
-        <main
-          ref={containerRef}
-          className="relative z-10 flex-1 min-h-0 flex items-center justify-center px-4 w-full max-w-5xl mx-auto overflow-hidden"
-        >
-          <div
-            style={{ width: bookWidth > 0 ? `${bookWidth}px` : undefined }}
-            className="w-full max-w-4xl flex justify-center items-center"
+          <Link
+            href="/"
+            className="text-xs font-semibold text-[#6f6264] hover:text-[#7b1425] px-3.5 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#e8e2dc] transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <PageFlip
-              pages={bookPages}
-              targetSpread={targetSpread}
-              onSpreadChange={onSpreadChange}
-              onFlipStart={handleFlipStart}
-              className="w-full"
-            />
-          </div>
-        </main>
+            <X size={14} />
+            <span>Close</span>
+          </Link>
+        </div>
+      </header>
 
-        {/* Bottom Footer Note with 24px bottom breathing room */}
-        <footer className="relative z-10 pt-1 pb-6 text-center text-[11px] sm:text-xs text-[#a89b99] shrink-0">
-          Click or drag page corners to flip · Press Esc to close
-        </footer>
-      </div>
+      {/* Main Book Container */}
+      <main
+        ref={containerRef}
+        className="relative z-10 flex-1 min-h-0 flex items-center justify-center px-4 w-full max-w-5xl mx-auto overflow-hidden"
+      >
+        <div
+          style={{ width: bookWidth > 0 ? `${bookWidth}px` : undefined }}
+          className="w-full max-w-4xl flex justify-center items-center"
+        >
+          <PageFlip
+            pages={bookPages}
+            targetSpread={targetSpread}
+            onSpreadChange={onSpreadChange}
+            onFlipStart={handleFlipStart}
+            className="w-full"
+          />
+        </div>
+      </main>
+
+      {/* Bottom Footer Note with 24px bottom breathing room */}
+      <footer className="relative z-10 pt-1 pb-6 text-center text-[11px] sm:text-xs text-[#a89b99] shrink-0">
+        Click or drag page corners to flip · Press Esc to close
+      </footer>
+    </div>
   );
 }
