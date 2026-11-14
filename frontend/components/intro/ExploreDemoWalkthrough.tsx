@@ -275,15 +275,33 @@ export default function ExploreDemoWalkthrough() {
         </button>
       </div>,
 
-      // Page 6: Plain maroon blank page to balance two-page spreads
+      // Page 6: Plain maroon back cover to balance two-page spreads
       <div
         key="blank-last"
         className="flex size-full flex-col items-center justify-center p-6 sm:p-10 text-center select-none relative overflow-hidden bg-[#7b1425] text-white"
       >
-        <div className="opacity-20 flex flex-col items-center gap-2.5">
-          <Logo size={36} />
-          <span style={monoFont} className="text-[10px] tracking-[0.25em] uppercase font-medium text-white">
-            Sellsy Platform
+        <div className="flex flex-col items-center gap-3">
+          <span
+            style={{
+              fontFamily: 'var(--font-fraunces), "Fraunces", Georgia, serif',
+              fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144',
+              fontStyle: "italic",
+              fontWeight: 800,
+              fontSize: 38,
+              lineHeight: 1.2,
+              letterSpacing: "-0.02em",
+              color: "#ffffff",
+              display: "inline-block",
+            }}
+            className="px-4 text-white"
+          >
+            Sellsy
+          </span>
+          <span
+            style={monoFont}
+            className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-medium text-white/75"
+          >
+            SELLSY PLATFORM
           </span>
         </div>
       </div>,
