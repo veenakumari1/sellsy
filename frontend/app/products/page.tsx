@@ -129,7 +129,7 @@ export default function ProductsPage() {
                 <div>
                   <p className="text-xs font-bold text-amber-950">Top seller: Ultrasonic Aroma Diffuser</p>
                   <p className="text-xs text-amber-900 mt-0.5 leading-relaxed">
-                    Over $3,150.00 in sales with strong weekend demand. Make sure stock stays above 50 units.
+                    Over Rs 315,000 in sales with strong weekend demand. Make sure stock stays above 50 units.
                   </p>
                 </div>
               </div>

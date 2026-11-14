@@ -83,7 +83,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
             tick={{ fontSize: 11, fill: "#94A3B8" }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(val) => `$${val}`}
+            tickFormatter={(val) => formatCurrency(val)}
           />
           <Tooltip content={<CustomTooltip />} />
           <Area

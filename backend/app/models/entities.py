@@ -39,7 +39,7 @@ class Store(Base):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
-    currency = Column(String(10), default="USD")
+    currency = Column(String(10), default="PKR")
     domain = Column(String(255), nullable=True)
     platform = Column(String(50), default="manual")  # shopify, csv, manual
     created_at = Column(DateTime, default=utc_now)
@@ -141,7 +141,7 @@ class Order(Base):
     total_discounts = Column(Float, default=0.0)
     financial_status = Column(String(50), default="paid")  # paid, pending, refunded
     fulfillment_status = Column(String(50), default="fulfilled")  # fulfilled, unfulfilled, partial
-    currency = Column(String(10), default="USD")
+    currency = Column(String(10), default="PKR")
     created_at = Column(DateTime, default=utc_now, index=True)
 
     store = relationship("Store", back_populates="orders")

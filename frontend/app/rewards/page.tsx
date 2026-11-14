@@ -5,7 +5,7 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ApiClient } from "@/lib/api";
 import { realtimeClient } from "@/lib/realtime";
-import { formatNumber, formatDate } from "@/lib/utils";
+import { formatNumber, formatDate, formatCurrency } from "@/lib/utils";
 import {
   Trophy,
   Award,
@@ -149,7 +149,7 @@ export default function RewardsPage() {
     try {
       const res = await ApiClient.simulateLiveOrder();
       const amt = res.total != null ? res.total : (res.order?.total_amount || 0);
-      showToast(`Live order ${res.order_number || ""} simulated ($${amt})! Real-time metric & points broadcast dispatched.`);
+      showToast(`Live order ${res.order_number || ""} simulated (${formatCurrency(amt)})! Real-time metric & points broadcast dispatched.`);
       await loadData(true);
     } catch (err) {
       console.error("Simulation error", err);

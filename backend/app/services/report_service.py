@@ -75,12 +75,12 @@ class ReportService:
             writer.writerow(["Repeat Purchase Rate", f"{cust_insights.repeat_purchase_rate}%", "-", "Calculated cohort repeat rate"])
             writer.writerow([])
             writer.writerow(["--- TOP PERFORMING PRODUCTS (Catalog Data) ---"])
-            writer.writerow(["SKU", "Title", "Price ($)", "Units Sold", "Total Revenue ($)", "Status"])
+            writer.writerow(["SKU", "Title", "Price (Rs)", "Units Sold", "Total Revenue (Rs)", "Status"])
             for p in top_prods:
                 writer.writerow([p.sku, p.title, p.price, p.units_sold, p.revenue_generated, p.velocity_status])
             writer.writerow([])
             writer.writerow(["--- CUSTOMER SEGMENTS (RFM Analysis) ---"])
-            writer.writerow(["Segment", "Customer Count", "Total Revenue ($)", "Avg Spend ($)", "% of Base"])
+            writer.writerow(["Segment", "Customer Count", "Total Revenue (Rs)", "Avg Spend (Rs)", "% of Base"])
             for s in cust_insights.segments:
                 writer.writerow([s.display_name, s.count, s.total_revenue, s.avg_spend, f"{s.percentage_of_customers}%"])
             writer.writerow([])
@@ -159,7 +159,7 @@ class ReportService:
             ["Total Orders", str(kpis.total_orders.value), f"{kpis.total_orders.delta_pct:+}%", str(kpis.total_orders.subtext)],
             ["Average Order Value", str(kpis.average_order_value.value), f"{kpis.average_order_value.delta_pct:+}%", str(kpis.average_order_value.subtext)],
             ["Repeat Purchase Rate", f"{cust_insights.repeat_purchase_rate}%", "-", "Calculated from confirmed buyer cohorts"],
-            ["Average Customer LTV", f"${cust_insights.avg_customer_ltv:,.2f}", "-", "Total spend / Total shoppers"]
+            ["Average Customer LTV", f"Rs {cust_insights.avg_customer_ltv:,.0f}", "-", "Total spend / Total shoppers"]
         ]
         t_kpi = Table(kpi_data, colWidths=[140, 110, 90, 200])
         t_kpi.setStyle(TableStyle([
@@ -181,9 +181,9 @@ class ReportService:
             prod_data.append([
                 p.title[:28],
                 p.sku or "-",
-                f"${p.price:.2f}",
+                f"Rs {p.price:,.0f}",
                 str(p.units_sold),
-                f"${p.revenue_generated:,.2f}",
+                f"Rs {p.revenue_generated:,.0f}",
                 p.velocity_status.upper()
             ])
         t_prod = Table(prod_data, colWidths=[180, 80, 60, 50, 90, 80])
@@ -205,8 +205,8 @@ class ReportService:
             seg_data.append([
                 s.display_name,
                 str(s.count),
-                f"${s.total_revenue:,.2f}",
-                f"${s.avg_spend:.2f}",
+                f"Rs {s.total_revenue:,.0f}",
+                f"Rs {s.avg_spend:,.0f}",
                 f"{s.percentage_of_customers}%"
             ])
         t_seg = Table(seg_data, colWidths=[150, 70, 110, 100, 110])

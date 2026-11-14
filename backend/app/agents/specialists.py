@@ -10,7 +10,7 @@ def run_sales_agent(state: AgentState) -> AgentState:
     state["tool_calls_executed"].append({
         "tool_name": "get_sales_summary",
         "arguments": {"store_id": store_id, "days": 30},
-        "output_summary": f"Revenue: ${summary['total_revenue']:,.2f}, Orders: {summary['total_orders']}, AOV: ${summary['average_order_value']:.2f}, Growth: {summary['revenue_growth_pct']}%"
+        "output_summary": f"Revenue: Rs {summary['total_revenue']:,.0f}, Orders: {summary['total_orders']}, AOV: Rs {summary['average_order_value']:.0f}, Growth: {summary['revenue_growth_pct']}%"
     })
     state["tool_calls_executed"].append({
         "tool_name": "get_revenue_trends",
@@ -25,9 +25,9 @@ def run_sales_agent(state: AgentState) -> AgentState:
 
     analysis = (
         f"**Sales Analysis Report:**\n"
-        f"- **Gross Revenue (Last 30 Days):** ${rev:,.2f} ({growth:+}% vs prior period)\n"
+        f"- **Gross Revenue (Last 30 Days):** Rs {rev:,.0f} ({growth:+}% vs prior period)\n"
         f"- **Order Volume:** {orders} fulfilled orders\n"
-        f"- **Average Order Value (AOV):** ${aov:.2f}\n"
+        f"- **Average Order Value (AOV):** Rs {aov:.0f}\n"
     )
     if growth >= 0:
         analysis += f"- **Driver:** Positive momentum driven by steady order velocity and consistent weekend volume spikes.\n"
@@ -48,7 +48,7 @@ def run_product_agent(state: AgentState) -> AgentState:
     state["tool_calls_executed"].append({
         "tool_name": "get_top_products",
         "arguments": {"store_id": store_id, "limit": 5},
-        "output_summary": f"Top item: {top_prods[0]['title'] if top_prods else 'None'} (${top_prods[0]['revenue_generated'] if top_prods else 0:,.2f})"
+        "output_summary": f"Top item: {top_prods[0]['title'] if top_prods else 'None'} (Rs {top_prods[0]['revenue_generated'] if top_prods else 0:,.0f})"
     })
 
     top_item = top_prods[0] if top_prods else None
@@ -57,8 +57,8 @@ def run_product_agent(state: AgentState) -> AgentState:
     prod_text = "**Product Intelligence Report:**\n"
     if top_item:
         prod_text += (
-            f"- **Star SKU:** `{top_item['title']}` (${top_item['price']:.2f}) with "
-            f"{top_item['units_sold']} units sold generating ${top_item['revenue_generated']:,.2f} in sales.\n"
+            f"- **Star SKU:** `{top_item['title']}` (Rs {top_item['price']:.0f}) with "
+            f"{top_item['units_sold']} units sold generating Rs {top_item['revenue_generated']:,.0f} in sales.\n"
         )
     if len(top_prods) > 1:
         prod_text += f"- **Catalog Drivers:** Followed by `{top_prods[1]['title']}` and `{top_prods[2]['title']}`.\n"
@@ -82,7 +82,7 @@ def run_customer_agent(state: AgentState) -> AgentState:
     state["tool_calls_executed"].append({
         "tool_name": "get_customer_insights",
         "arguments": {"store_id": store_id},
-        "output_summary": f"Total: {insights['total_customers']}, Repeat Rate: {insights['repeat_purchase_rate_pct']}%, Avg LTV: ${insights['avg_customer_ltv']:.2f}"
+        "output_summary": f"Total: {insights['total_customers']}, Repeat Rate: {insights['repeat_purchase_rate_pct']}%, Avg LTV: Rs {insights['avg_customer_ltv']:.0f}"
     })
 
     rpr = insights["repeat_purchase_rate_pct"]
@@ -96,7 +96,7 @@ def run_customer_agent(state: AgentState) -> AgentState:
         f"**Customer Behavior Report:**\n"
         f"- **Active Shoppers:** {total_c} registered customers\n"
         f"- **Repeat Purchase Rate:** {rpr}% (cohort benchmark ~25-30%)\n"
-        f"- **Average Lifetime Value (LTV):** ${ltv:.2f}\n"
+        f"- **Average Lifetime Value (LTV):** Rs {ltv:.0f}\n"
         f"- **Cohort Health:** {vip_count} High-Value VIP patrons, {at_risk_count} At-Risk buyers requiring retention triggers.\n"
     )
 
@@ -115,13 +115,13 @@ def run_prediction_agent(state: AgentState) -> AgentState:
     state["tool_calls_executed"].append({
         "tool_name": "get_sales_forecast",
         "arguments": {"store_id": store_id, "days_ahead": 30},
-        "output_summary": f"Projected: ${forecast['total_projected_revenue']:,.2f}, Orders: {forecast['total_projected_orders']}, Trend: {forecast['trend_direction']}"
+        "output_summary": f"Projected: Rs {forecast['total_projected_revenue']:,.0f}, Orders: {forecast['total_projected_orders']}, Trend: {forecast['trend_direction']}"
     })
 
     pred_text = (
         f"**Sales Forecasting Report (30-Day Outlook):**\n"
-        f"- **Projected Revenue:** ${forecast['total_projected_revenue']:,.2f}\n"
-        f"- **Expected Orders:** ~{forecast['total_projected_orders']} orders (~${forecast['average_daily_projected']:.2f}/day)\n"
+        f"- **Projected Revenue:** Rs {forecast['total_projected_revenue']:,.0f}\n"
+        f"- **Expected Orders:** ~{forecast['total_projected_orders']} orders (~Rs {forecast['average_daily_projected']:.0f}/day)\n"
         f"- **Trend Trajectory:** {forecast['trend_direction']}\n"
         f"- **Confidence:** {forecast['confidence_level_pct']}% Gaussian confidence interval\n"
         f"- **Methodology:** {forecast['methodology']}\n"

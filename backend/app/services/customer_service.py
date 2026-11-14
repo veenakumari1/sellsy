@@ -76,7 +76,7 @@ class CustomerService:
             )
         if vip_seg and vip_seg.count > 0:
             recommendations.append(
-                f"Grant VIP early access or custom loyalty tier perks to your {vip_seg.count} highest-spending patrons ($ {vip_seg.avg_spend:,.2f} average lifetime spend)."
+                f"Grant VIP early access or custom loyalty tier perks to your {vip_seg.count} highest-spending patrons (Rs {vip_seg.avg_spend:,.0f} average lifetime spend)."
             )
         if new_seg and new_seg.count > 0:
             recommendations.append(

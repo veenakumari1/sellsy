@@ -47,7 +47,7 @@ def get_current_store(
         store = Store(
             user_id=current_user.id,
             name=f"{current_user.full_name or 'My'} Store",
-            currency="USD",
+            currency="PKR",
             platform="manual"
         )
         db.add(store)

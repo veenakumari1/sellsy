@@ -53,41 +53,41 @@ CATEGORIES_DATA = [
 
 PRODUCTS_DATA = [
     # Ceramics & Pottery
-    {"cat": "Ceramics & Pottery", "title": "Minimalist Matte White Vase", "price": 64.0, "cost": 22.0, "sku": "CER-VAS-001", "qty": 18, "desc": "Hand-turned stoneware vase with a tactile matte chalk glaze."},
-    {"cat": "Ceramics & Pottery", "title": "Handcrafted Terracotta Planter", "price": 48.0, "cost": 16.0, "sku": "CER-PLT-002", "qty": 4, "desc": "Unglazed organic terracotta planter with natural drainage saucer."}, # Low stock
-    {"cat": "Ceramics & Pottery", "title": "Speckled Ceramic Mug Set of 4", "price": 52.0, "cost": 18.0, "sku": "CER-MUG-003", "qty": 35, "desc": "Artisanal stoneware coffee mugs fired with natural iron speckles."},
-    {"cat": "Ceramics & Pottery", "title": "Ribbed Stoneware Pitcher", "price": 58.0, "cost": 20.0, "sku": "CER-PIT-004", "qty": 14, "desc": "Sculptural water and beverage pitcher with ergonomic curved handle."},
-    {"cat": "Ceramics & Pottery", "title": "Organic Glazed Serving Platter", "price": 78.0, "cost": 28.0, "sku": "CER-PLT-005", "qty": 22, "desc": "Wide-rimmed center table platter finished in reactive sage glaze."},
+    {"cat": "Ceramics & Pottery", "title": "Minimalist Matte White Vase", "price": 6500.0, "cost": 4200.0, "sku": "CER-VAS-001", "qty": 18, "desc": "Hand-turned stoneware vase with a tactile matte chalk glaze."},
+    {"cat": "Ceramics & Pottery", "title": "Handcrafted Terracotta Planter", "price": 3800.0, "cost": 2400.0, "sku": "CER-PLT-002", "qty": 4, "desc": "Unglazed organic terracotta planter with natural drainage saucer."}, # Low stock
+    {"cat": "Ceramics & Pottery", "title": "Speckled Ceramic Mug Set of 4", "price": 4200.0, "cost": 2600.0, "sku": "CER-MUG-003", "qty": 35, "desc": "Artisanal stoneware coffee mugs fired with natural iron speckles."},
+    {"cat": "Ceramics & Pottery", "title": "Ribbed Stoneware Pitcher", "price": 5400.0, "cost": 3400.0, "sku": "CER-PIT-004", "qty": 14, "desc": "Sculptural water and beverage pitcher with ergonomic curved handle."},
+    {"cat": "Ceramics & Pottery", "title": "Organic Glazed Serving Platter", "price": 7800.0, "cost": 4900.0, "sku": "CER-PLT-005", "qty": 22, "desc": "Wide-rimmed center table platter finished in reactive sage glaze."},
 
     # Home Fragrance & Candles
-    {"cat": "Home Fragrance & Candles", "title": "Amber & Smoked Cedar Soy Candle", "price": 36.0, "cost": 11.0, "sku": "CAN-AMB-001", "qty": 42, "desc": "100% soy wax candle hand-poured in reusable amber apothecary glass."},
-    {"cat": "Home Fragrance & Candles", "title": "Wild Bergamot Reed Diffuser", "price": 44.0, "cost": 14.0, "sku": "CAN-DIF-002", "qty": 5, "desc": "Slow-evaporating botanical fragrance blend with natural rattan reeds."}, # Low stock
-    {"cat": "Home Fragrance & Candles", "title": "Palo Santo & Sage Room Spray", "price": 28.0, "cost": 8.5, "sku": "CAN-SPR-003", "qty": 30, "desc": "Aromatherapeutic mist infused with organic essential oils and floral water."},
-    {"cat": "Home Fragrance & Candles", "title": "Hinoki Wood Sculptural Candle", "price": 42.0, "cost": 13.0, "sku": "CAN-HIN-004", "qty": 25, "desc": "Geometric cast wax candle scented with calming Japanese cypress."},
+    {"cat": "Home Fragrance & Candles", "title": "Amber & Smoked Cedar Soy Candle", "price": 2800.0, "cost": 1700.0, "sku": "CAN-AMB-001", "qty": 42, "desc": "100% soy wax candle hand-poured in reusable amber apothecary glass."},
+    {"cat": "Home Fragrance & Candles", "title": "Wild Bergamot Reed Diffuser", "price": 3600.0, "cost": 2200.0, "sku": "CAN-DIF-002", "qty": 5, "desc": "Slow-evaporating botanical fragrance blend with natural rattan reeds."}, # Low stock
+    {"cat": "Home Fragrance & Candles", "title": "Palo Santo & Sage Room Spray", "price": 1950.0, "cost": 1200.0, "sku": "CAN-SPR-003", "qty": 30, "desc": "Aromatherapeutic mist infused with organic essential oils and floral water."},
+    {"cat": "Home Fragrance & Candles", "title": "Hinoki Wood Sculptural Candle", "price": 3200.0, "cost": 2000.0, "sku": "CAN-HIN-004", "qty": 25, "desc": "Geometric cast wax candle scented with calming Japanese cypress."},
 
     # Linens & Bedding
-    {"cat": "Linens & Bedding", "title": "Washed Belgian Linen Duvet Cover", "price": 195.0, "cost": 75.0, "sku": "LIN-DUV-001", "qty": 12, "desc": "Pre-washed breathable flax linen duvet cover with natural mother-of-pearl buttons."},
-    {"cat": "Linens & Bedding", "title": "French Flax Linen Pillowcase Pair", "price": 55.0, "cost": 19.0, "sku": "LIN-PIL-002", "qty": 38, "desc": "Pair of envelope-closure standard pillowcases made from European flax."},
-    {"cat": "Linens & Bedding", "title": "Waffle Weave Cotton Throw Blanket", "price": 88.0, "cost": 32.0, "sku": "LIN-BLN-003", "qty": 20, "desc": "Heavyweight breathable organic cotton throw in earthy warm oatmeal."},
-    {"cat": "Linens & Bedding", "title": "Raw Hem Linen Table Runner", "price": 46.0, "cost": 15.0, "sku": "LIN-TAB-004", "qty": 16, "desc": "Relaxed fringed border dining table runner washed for antique softness."},
+    {"cat": "Linens & Bedding", "title": "Washed Belgian Linen Duvet Cover", "price": 22500.0, "cost": 14500.0, "sku": "LIN-DUV-001", "qty": 12, "desc": "Pre-washed breathable flax linen duvet cover with natural mother-of-pearl buttons."},
+    {"cat": "Linens & Bedding", "title": "French Flax Linen Pillowcase Pair", "price": 5500.0, "cost": 3500.0, "sku": "LIN-PIL-002", "qty": 38, "desc": "Pair of envelope-closure standard pillowcases made from European flax."},
+    {"cat": "Linens & Bedding", "title": "Waffle Weave Cotton Throw Blanket", "price": 8900.0, "cost": 5600.0, "sku": "LIN-BLN-003", "qty": 20, "desc": "Heavyweight breathable organic cotton throw in earthy warm oatmeal."},
+    {"cat": "Linens & Bedding", "title": "Raw Hem Linen Table Runner", "price": 3900.0, "cost": 2400.0, "sku": "LIN-TAB-004", "qty": 16, "desc": "Relaxed fringed border dining table runner washed for antique softness."},
 
     # Kitchen & Tableware
-    {"cat": "Kitchen & Tableware", "title": "Matte Black Cutlery 20-Piece Set", "price": 125.0, "cost": 48.0, "sku": "KIT-CUT-001", "qty": 15, "desc": "Forged 18/10 stainless steel flatware service for four with PVD titanium finish."},
-    {"cat": "Kitchen & Tableware", "title": "Olive Wood Cutting & Charcuterie Board", "price": 62.0, "cost": 24.0, "sku": "KIT-BRD-002", "qty": 6, "desc": "Sustainably harvested Mediterranean olive wood board with live bark edge."}, # Low stock
-    {"cat": "Kitchen & Tableware", "title": "Fluted Coupe Cocktail Glasses Set of 4", "price": 56.0, "cost": 19.0, "sku": "KIT-GLS-003", "qty": 28, "desc": "Lead-free crystal coupe glasses featuring delicate vertical optic ridges."},
-    {"cat": "Kitchen & Tableware", "title": "Japanese Chef Santoku Knife", "price": 140.0, "cost": 52.0, "sku": "KIT-KNF-004", "qty": 11, "desc": "VG-10 core Damascus steel 7-inch multipurpose culinary chef knife."},
+    {"cat": "Kitchen & Tableware", "title": "Matte Black Cutlery 20-Piece Set", "price": 14500.0, "cost": 9200.0, "sku": "KIT-CUT-001", "qty": 15, "desc": "Forged 18/10 stainless steel flatware service for four with PVD titanium finish."},
+    {"cat": "Kitchen & Tableware", "title": "Olive Wood Cutting & Charcuterie Board", "price": 5800.0, "cost": 3600.0, "sku": "KIT-BRD-002", "qty": 6, "desc": "Sustainably harvested Mediterranean olive wood board with live bark edge."}, # Low stock
+    {"cat": "Kitchen & Tableware", "title": "Fluted Coupe Cocktail Glasses Set of 4", "price": 4900.0, "cost": 3100.0, "sku": "KIT-GLS-003", "qty": 28, "desc": "Lead-free crystal coupe glasses featuring delicate vertical optic ridges."},
+    {"cat": "Kitchen & Tableware", "title": "Japanese Chef Santoku Knife", "price": 16500.0, "cost": 10500.0, "sku": "KIT-KNF-004", "qty": 11, "desc": "VG-10 core Damascus steel 7-inch multipurpose culinary chef knife."},
 
     # Lighting & Lamps
-    {"cat": "Lighting & Lamps", "title": "Brushed Brass Table Lamp", "price": 165.0, "cost": 62.0, "sku": "LIT-TAB-001", "qty": 8, "desc": "Weighted solid brass desk lamp with adjustable cantilever arm and dimmer dial."},
-    {"cat": "Lighting & Lamps", "title": "Ribbed Opal Glass Pendant Light", "price": 180.0, "cost": 68.0, "sku": "LIT-PEN-002", "qty": 7, "desc": "Hand-blown matte opal glass sphere pendant with braided fabric cord."}, # Low stock
-    {"cat": "Lighting & Lamps", "title": "Sculptural Travertine Sconce", "price": 145.0, "cost": 54.0, "sku": "LIT-SCN-003", "qty": 10, "desc": "Natural honed Italian travertine wall light casting indirect ambient glow."},
-    {"cat": "Lighting & Lamps", "title": "Rechargeable Cordless Lantern", "price": 85.0, "cost": 31.0, "sku": "LIT-LAN-004", "qty": 24, "desc": "Portable IP54 rated indoor/outdoor LED lantern with touch stepless dimming."},
+    {"cat": "Lighting & Lamps", "title": "Brushed Brass Table Lamp", "price": 18500.0, "cost": 11800.0, "sku": "LIT-TAB-001", "qty": 8, "desc": "Weighted solid brass desk lamp with adjustable cantilever arm and dimmer dial."},
+    {"cat": "Lighting & Lamps", "title": "Ribbed Opal Glass Pendant Light", "price": 19500.0, "cost": 12400.0, "sku": "LIT-PEN-002", "qty": 7, "desc": "Hand-blown matte opal glass sphere pendant with braided fabric cord."}, # Low stock
+    {"cat": "Lighting & Lamps", "title": "Sculptural Travertine Sconce", "price": 15800.0, "cost": 10200.0, "sku": "LIT-SCN-003", "qty": 10, "desc": "Natural honed Italian travertine wall light casting indirect ambient glow."},
+    {"cat": "Lighting & Lamps", "title": "Rechargeable Cordless Lantern", "price": 8500.0, "cost": 5300.0, "sku": "LIT-LAN-004", "qty": 24, "desc": "Portable IP54 rated indoor/outdoor LED lantern with touch stepless dimming."},
 
     # Decorative Accents
-    {"cat": "Decorative Accents", "title": "Travertine Geometric Bookends", "price": 75.0, "cost": 26.0, "sku": "DEC-BOK-001", "qty": 14, "desc": "Solid architectural stone bookends cut from unfilled natural travertine."},
-    {"cat": "Decorative Accents", "title": "Hand-Woven Jute Storage Basket", "price": 48.0, "cost": 16.0, "sku": "DEC-BSK-002", "qty": 32, "desc": "Sturdy braided golden jute floor basket with integrated carrying handles."},
-    {"cat": "Decorative Accents", "title": "Fluted Brass Pillar Candlestick", "price": 38.0, "cost": 12.0, "sku": "DEC-CDL-003", "qty": 26, "desc": "Heavy turned unlacquered brass candlestick designed to age with rich patina."},
-    {"cat": "Decorative Accents", "title": "Curved Walnut Wall Mirror", "price": 210.0, "cost": 82.0, "sku": "DEC-MIR-004", "qty": 9, "desc": "Solid American black walnut statement mirror with soft rounded pill silhouette."},
+    {"cat": "Decorative Accents", "title": "Travertine Geometric Bookends", "price": 7900.0, "cost": 5000.0, "sku": "DEC-BOK-001", "qty": 14, "desc": "Solid architectural stone bookends cut from unfilled natural travertine."},
+    {"cat": "Decorative Accents", "title": "Hand-Woven Jute Storage Basket", "price": 3800.0, "cost": 2400.0, "sku": "DEC-BSK-002", "qty": 32, "desc": "Sturdy braided golden jute floor basket with integrated carrying handles."},
+    {"cat": "Decorative Accents", "title": "Fluted Brass Pillar Candlestick", "price": 2900.0, "cost": 1800.0, "sku": "DEC-CDL-003", "qty": 26, "desc": "Heavy turned unlacquered brass candlestick designed to age with rich patina."},
+    {"cat": "Decorative Accents", "title": "Curved Walnut Wall Mirror", "price": 24500.0, "cost": 15500.0, "sku": "DEC-MIR-004", "qty": 9, "desc": "Solid American black walnut statement mirror with soft rounded pill silhouette."},
 ]
 
 CUSTOMERS_DATA = [
@@ -153,7 +153,7 @@ def seed():
             store = Store(
                 user_id=user.id,
                 name=f"{user.full_name or 'Sarah'}'s Store",
-                currency="USD",
+                currency="PKR",
                 platform="manual"
             )
             db.add(store)
@@ -161,6 +161,8 @@ def seed():
             db.refresh(store)
             print(f"Created active store '{store.name}' (ID: {store.id}) for user '{user.email}'.")
         else:
+            store.currency = "PKR"
+            db.flush()
             print(f"Found active store '{store.name}' (ID: {store.id}) for user '{user.email}'.")
 
         # 3. Check Idempotency
@@ -345,7 +347,7 @@ def seed():
                 total_discounts=0.0,
                 financial_status=fin_status,
                 fulfillment_status=ful_status,
-                currency="USD",
+                currency="PKR",
                 created_at=order_time
             )
             db.add(order)
@@ -376,7 +378,7 @@ def seed():
                 cust.last_order_at = max(o[0] for o in orders)
                 
                 # Assign segment
-                if cust.total_spent >= 600.0 or cust.orders_count >= 5:
+                if cust.total_spent >= 50000.0 or cust.orders_count >= 5:
                     cust.segment = "high_value"
                 elif cust.orders_count >= 2:
                     cust.segment = "returning"
@@ -393,15 +395,15 @@ def seed():
             {
                 "category": "sales",
                 "title": "AOV Expansion on Weekend Collections",
-                "observation": "Saturday & Sunday checkout baskets average $142.50, outperforming weekday averages by +22%.",
-                "impact": "Potential +$3,800/mo incremental revenue through weekend bundles.",
+                "observation": "Saturday & Sunday checkout baskets average Rs 14,500, outperforming weekday averages by +22%.",
+                "impact": "Potential +Rs 380,000/mo incremental revenue through weekend bundles.",
                 "rec": "Activate weekend-exclusive multi-item incentives and curated room set discounts starting Friday afternoon.",
                 "confidence": 0.94
             },
             {
                 "category": "products",
                 "title": "High Margin Opportunity in Linens",
-                "observation": "Washed Belgian Linen Duvet Cover maintains a 62% gross margin and 94% 5-star customer rating.",
+                "observation": "Washed Belgian Linen Duvet Cover maintains a 64% gross margin and 94% 5-star customer rating.",
                 "impact": "Strongest lifetime value predictor across store catalog.",
                 "rec": "Promote Linen collections in post-purchase welcome sequence to accelerate second order velocity.",
                 "confidence": 0.91
@@ -438,11 +440,11 @@ def seed():
         # 10. Create Notifications
         print("Creating notifications for store events...")
         notifs_data = [
-            ("order", "New Order #1200 Received", "Marcus Vance placed an order for Washed Belgian Linen Duvet Cover ($208.65).", "/sales", False, 1),
+            ("order", "New Order #1200 Received", "Marcus Vance placed an order for Washed Belgian Linen Duvet Cover (Rs 23,625).", "/sales", False, 1),
             ("inventory_alert", "Low Stock Alert: Terracotta Planter", "Handcrafted Terracotta Planter is down to 4 units in stock.", "/products", False, 3),
-            ("ai_insight", "AI Growth Strategy Ready", "Weekend AOV patterns identified an incremental revenue opportunity of +$3,800/mo.", "/marketing", False, 5),
+            ("ai_insight", "AI Growth Strategy Ready", "Weekend AOV patterns identified an incremental revenue opportunity of +Rs 380,000/mo.", "/marketing", False, 5),
             ("gamification", "Achievement Unlocked: Catalog Master", "Your store catalog now has over 20 active products (+150 Points!).", "/rewards", True, 8),
-            ("sales", "Weekly Sales Target Reached", "Sarah's Store generated over $5,000 in weekly revenue.", "/sales", True, 12),
+            ("sales", "Weekly Sales Target Reached", "Sarah's Store generated over Rs 500,000 in weekly revenue.", "/sales", True, 12),
         ]
         for cat, title, msg, link, is_read, hours_ago in notifs_data:
             db.add(Notification(

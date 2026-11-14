@@ -109,7 +109,7 @@ def synthesis_step(state: AgentState) -> AgentState:
                 f"Your specialized AI agent team analyzed the store database and returned the following verified data:\n"
                 f"{consolidated_draft}\n\n"
                 f"Synthesize this into a polished, professional, concise response. "
-                f"Preserve all exact dollar amounts, percentages, product names, and action items. "
+                f"Preserve all exact rupee amounts (PKR / Rs), percentages, product names, and action items. "
                 f"Do not invent any numbers. Keep the tone sharp, executive, and encouraging."
             )
             response = client.models.generate_content(

@@ -56,7 +56,7 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({ data }) => {
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
           <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={{ stroke: "#E2E8F0" }} tickLine={false} dy={8} />
-          <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}`} />
+          <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} tickFormatter={(val) => formatCurrency(val)} />
           <Tooltip content={<CustomTooltip />} />
           <Area type="monotone" dataKey="actualRevenue" stroke="#7b1425" strokeWidth={2.5} fill="#FBF1F3" fillOpacity={0.4} name="Actual Revenue" />
           <Area type="monotone" dataKey="projectedRevenue" stroke="#10B981" strokeWidth={2.5} strokeDasharray="5 5" fill="url(#forecastArea)" name="Projected Revenue" />

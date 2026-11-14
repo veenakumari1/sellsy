@@ -34,7 +34,7 @@ class TokenPayload(BaseModel):
 # ----------------- Store -----------------
 class StoreCreate(BaseModel):
     name: str
-    currency: str = "USD"
+    currency: str = "PKR"
     domain: Optional[str] = None
     platform: str = "manual"
 

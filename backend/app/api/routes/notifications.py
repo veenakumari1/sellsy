@@ -46,7 +46,7 @@ def trigger_demo_notification(
     db: Session = Depends(get_db)
 ):
     templates = {
-        "order": ("New Customer Order #1105", "David Vance purchased 2x Minimalist Ceramic Planter ($180.00).", "/sales"),
+        "order": ("New Customer Order #1105", "David Vance purchased 2x Minimalist Ceramic Planter (Rs 18,000).", "/sales"),
         "inventory": ("Inventory Low Warning", "Organic Soy Candle has reached 8 units remaining.", "/products"),
         "ai": ("AI Agent Synthesis", "AOV increased +14% after bundling Ceramic sets. Review marketing recommendations.", "/marketing")
     }

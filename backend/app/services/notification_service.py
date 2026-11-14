@@ -18,7 +18,7 @@ class NotificationService:
             default_notifications = [
                 {
                     "title": "New High-Value Order #1099",
-                    "message": "Sarah Jenkins completed purchase of Ceramic Minimalist Planter ($185.00).",
+                    "message": "Sarah Jenkins completed purchase of Ceramic Minimalist Planter (Rs 18,500).",
                     "category": "order",
                     "link": "/sales",
                     "is_read": False,

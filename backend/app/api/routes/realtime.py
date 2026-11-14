@@ -94,7 +94,7 @@ async def simulate_live_order(
         subtotal_price=total,
         financial_status="paid",
         fulfillment_status="unfulfilled",
-        currency="USD"
+        currency="PKR"
     )
     db.add(new_order)
     db.flush()
@@ -113,7 +113,7 @@ async def simulate_live_order(
         user_id=current_user.id,
         store_id=current_store.id,
         title=f"New Order {order_num} Received",
-        message=f"{qty}x {product_title} purchased for ${total:.2f}.",
+        message=f"{qty}x {product_title} purchased for Rs {int(round(total)):,}.",
         category="order",
         link="/sales"
     )
@@ -124,7 +124,7 @@ async def simulate_live_order(
         user_id=current_user.id,
         activity_type="live_order_processed",
         points=20,
-        description=f"Processed live order {order_num} (${total:.2f})",
+        description=f"Processed live order {order_num} (Rs {int(round(total)):,})",
         store_id=current_store.id
     )
 

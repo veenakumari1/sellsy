@@ -9,7 +9,8 @@ import { RecentOrdersTable } from "@/components/dashboard/RecentOrdersTable";
 import { AiInsightsPanel } from "@/components/dashboard/AiInsightsPanel";
 import { ApiClient } from "@/lib/api";
 import { realtimeClient } from "@/lib/realtime";
-import { DollarSign, ShoppingBag, CreditCard, Users, ArrowUpRight, Percent, RefreshCw, Zap } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { Coins, ShoppingBag, CreditCard, Users, ArrowUpRight, Percent, RefreshCw, Zap } from "lucide-react";
 
 const RevenueChart = dynamic(() => import("@/components/dashboard/RevenueChart").then((m) => m.RevenueChart), {
   ssr: false,
@@ -140,11 +141,11 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
               <KpiCard
                 title={data.kpis.total_revenue.title}
-                value={data.kpis.total_revenue.value}
+                value={formatCurrency(data.kpis.total_revenue.numeric_value ?? data.kpis.total_revenue.value)}
                 deltaPct={data.kpis.total_revenue.delta_pct}
                 trend={data.kpis.total_revenue.trend}
                 subtext={data.kpis.total_revenue.subtext}
-                icon={<DollarSign size={16} />}
+                icon={<Coins size={16} />}
               />
               <KpiCard
                 title={data.kpis.total_orders.title}
@@ -156,7 +157,7 @@ export default function DashboardPage() {
               />
               <KpiCard
                 title={data.kpis.average_order_value.title}
-                value={data.kpis.average_order_value.value}
+                value={formatCurrency(data.kpis.average_order_value.numeric_value ?? data.kpis.average_order_value.value)}
                 deltaPct={data.kpis.average_order_value.delta_pct}
                 trend={data.kpis.average_order_value.trend}
                 subtext={data.kpis.average_order_value.subtext}

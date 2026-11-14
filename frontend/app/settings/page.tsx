@@ -17,7 +17,7 @@ import {
 
 export default function SettingsPage() {
   const [storeName, setStoreName] = useState("My Store");
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("PKR");
   const [geminiKey, setGeminiKey] = useState("");
   const [model, setModel] = useState("gemini-1.5-flash");
   const [saved, setSaved] = useState(false);
@@ -78,6 +78,7 @@ export default function SettingsPage() {
                   onChange={(e) => setCurrency(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-lg border border-[#e8e2dc] text-[#14090b] bg-[#faf8f5] focus:outline-hidden min-h-[40px]"
                 >
+                  <option value="PKR">PKR (Rs - Pakistani Rupee)</option>
                   <option value="USD">USD ($ - United States Dollar)</option>
                   <option value="EUR">EUR (€ - Euro)</option>
                   <option value="GBP">GBP (£ - British Pound)</option>

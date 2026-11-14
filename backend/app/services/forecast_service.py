@@ -156,21 +156,21 @@ class ForecastService:
         if direction == "UPWARD":
             narrative = (
                 f"Historical sales indicate an accelerating trajectory (+{growth_pct}% projected 30-day velocity). "
-                f"Projected store revenue for the upcoming {days_ahead} days stands at ${total_proj_rev:,.2f} "
-                f"(expected range ${sum(p.lower_bound for p in forecast_points):,.2f} - ${sum(p.upper_bound for p in forecast_points):,.2f}). "
-                f"Based on historical AOV (${avg_aov:.2f}), prepare inventory fulfillment for approximately {total_proj_ord} customer orders."
+                f"Projected store revenue for the upcoming {days_ahead} days stands at Rs {total_proj_rev:,.0f} "
+                f"(expected range Rs {sum(p.lower_bound for p in forecast_points):,.0f} - Rs {sum(p.upper_bound for p in forecast_points):,.0f}). "
+                f"Based on historical AOV (Rs {avg_aov:,.0f}), prepare inventory fulfillment for approximately {total_proj_ord} customer orders."
             )
         elif direction == "DOWNWARD":
             narrative = (
                 f"Historical sales exhibit slight deceleration ({growth_pct}% variance). "
-                f"Projected revenue over the next {days_ahead} days is estimated at ${total_proj_rev:,.2f}. "
+                f"Projected revenue over the next {days_ahead} days is estimated at Rs {total_proj_rev:,.0f}. "
                 f"Inventory demand is projected at {total_proj_ord} orders. Consider implementing customer retention playbooks and bundle discounts to counter the trend."
             )
         else:
             narrative = (
                 f"Store sales demonstrate consistent baseline velocity. Projected {days_ahead}-day revenue is "
-                f"${total_proj_rev:,.2f} across approximately {total_proj_ord} orders ($ {avg_daily:.2f}/day average). "
-                f"Expected 80% confidence interval spans ${sum(p.lower_bound for p in forecast_points):,.2f} to ${sum(p.upper_bound for p in forecast_points):,.2f}."
+                f"Rs {total_proj_rev:,.0f} across approximately {total_proj_ord} orders (Rs {avg_daily:,.0f}/day average). "
+                f"Expected 80% confidence interval spans Rs {sum(p.lower_bound for p in forecast_points):,.0f} to Rs {sum(p.upper_bound for p in forecast_points):,.0f}."
             )
 
         return ForecastResultOut(

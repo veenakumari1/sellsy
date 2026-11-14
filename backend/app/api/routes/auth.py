@@ -32,7 +32,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     store = Store(
         user_id=user.id,
         name=f"{user.full_name}'s Store",
-        currency="USD",
+        currency="PKR",
         platform="manual"
     )
     db.add(store)

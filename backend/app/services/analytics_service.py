@@ -60,7 +60,7 @@ class AnalyticsService:
         cust_delta = calc_delta(total_customers, prev_customers_query)
 
         def make_card(title: str, val: float, is_currency: bool, delta: float, sub: str) -> KpiCard:
-            val_str = f"${val:,.2f}" if is_currency else f"{int(val):,}"
+            val_str = f"Rs {int(round(val)):,}" if is_currency else f"{int(val):,}"
             trend = "up" if delta > 0 else ("down" if delta < 0 else "neutral")
             return KpiCard(
                 title=title,

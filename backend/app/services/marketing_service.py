@@ -22,7 +22,7 @@ class MarketingService:
         vip_seg = next((s for s in cust_insights.segments if s.segment == "high_value"), None)
 
         current_aov = kpis.average_order_value.numeric_value
-        target_aov_threshold = round((current_aov * 1.25) / 5) * 5  # nearest $5 milestone
+        target_aov_threshold = round((current_aov * 1.25) / 100) * 100  # nearest Rs 100 milestone
 
         campaigns = [
             MarketingCampaignOut(
@@ -32,12 +32,12 @@ class MarketingService:
                 target_segment="High-Value VIPs",
                 recommended_channels=["Direct Email (Klaviyo)", "Personalized SMS Concierge"],
                 hero_product_title=star_prod,
-                offer_summary=f"Exclusive 48-hour early release window with a complimentary artisanal gift on orders exceeding ${target_aov_threshold}.",
-                expected_impact="+18% Repeat Purchase Rate lift, estimated $2,400+ incremental weekend revenue.",
+                offer_summary=f"Exclusive 48-hour early release window with a complimentary artisanal gift on orders exceeding Rs {target_aov_threshold:,.0f}.",
+                expected_impact="+18% Repeat Purchase Rate lift, estimated Rs 250,000+ incremental weekend revenue.",
                 action_steps=[
                     "Export high-value customer segment list from Sellsy Customers tab.",
                     f"Draft email emphasizing appreciation for their brand loyalty with private shop link.",
-                    f"Set minimum cart threshold of ${target_aov_threshold} for free gift qualification.",
+                    f"Set minimum cart threshold of Rs {target_aov_threshold:,.0f} for free gift qualification.",
                     "Schedule send for Thursday 6:00 PM EST prior to peak weekend buying traffic."
                 ]
             )
@@ -71,18 +71,18 @@ class MarketingService:
                     target_segment="At-Risk Customers",
                     recommended_channels=["2-Step Email Sequence"],
                     hero_product_title="Curated New Arrivals",
-                    offer_summary="Tiered incentive: '$15 off your next order over $60' expiring in 7 days.",
+                    offer_summary="Tiered incentive: 'Rs 1,500 off your next order over Rs 6,000' expiring in 7 days.",
                     expected_impact=f"Reactivate ~12-15% of lapsed customers (approx {int(at_risk_seg.count * 0.14)} reactivated orders).",
                     action_steps=[
                         "Segment customers filtered by 'At-Risk' in Sellsy.",
                         "Step 1: 'We Miss You - See What's New' email with highlighted top-selling items.",
-                        "Step 2 (4 days later): Time-sensitive reminder of the $15 voucher countdown."
+                        "Step 2 (4 days later): Time-sensitive reminder of the Rs 1,500 voucher countdown."
                     ]
                 )
             )
 
         quick_wins = [
-            f"Add a free shipping progress bar at ${target_aov_threshold:.2f} (current AOV: ${current_aov:.2f}) to incentivize multi-item orders.",
+            f"Add a free shipping progress bar at Rs {target_aov_threshold:,.0f} (current AOV: Rs {current_aov:,.0f}) to incentivize multi-item orders.",
             f"Highlight '{star_prod}' on your homepage hero carousel with social proof badges (e.g. 'Customer Favorite').",
             "Send weekend sales promotional emails on Friday evening to capture peak weekend conversion momentum."
         ]
