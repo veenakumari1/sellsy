@@ -113,7 +113,18 @@ export default function AssistantPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-[calc(100dvh-7.5rem)] lg:h-[calc(100vh-8.5rem)] min-w-0">
+      <div className="space-y-4">
+        {/* Page Heading */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e8e2dc]">
+          <div>
+            <h2 className="text-xl font-bold text-[#14090b] tracking-tight">Assistant</h2>
+            <p className="text-xs text-[#6f6264] mt-0.5">
+              Ask questions and get AI insights about your store
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-[calc(100dvh-12.5rem)] lg:h-[calc(100vh-13.5rem)] min-h-[480px] min-w-0">
         {/* Left Sessions Column */}
         <div
           className={`w-full lg:w-72 bg-white rounded-2xl border border-[#e8e2dc]/90 p-4 shadow-xs flex-col justify-between overflow-hidden flex-shrink-0 ${
@@ -135,7 +146,7 @@ export default function AssistantPage() {
               </button>
             </div>
 
-            <div className="mt-3 space-y-1 overflow-y-auto max-h-[35vh] lg:max-h-[calc(100vh-18rem)]">
+            <div className="mt-3 space-y-1 overflow-y-auto max-h-[35vh] lg:max-h-[calc(100vh-23rem)]">
               {conversations.map((c) => (
                 <button
                   key={c.id}
@@ -349,6 +360,7 @@ export default function AssistantPage() {
           </div>
         </div>
       </div>
+    </div>
     </DashboardLayout>
   );
 }

@@ -10,12 +10,14 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   daysFilter?: number;
   onDaysChange?: (days: number) => void;
+  showMobileTitle?: boolean;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   children,
   daysFilter,
   onDaysChange,
+  showMobileTitle = false,
 }) => {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
@@ -52,6 +54,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           daysFilter={daysFilter}
           onDaysChange={onDaysChange}
           onOpenMobileSidebar={() => setMobileOpen(true)}
+          showMobileTitle={showMobileTitle}
         />
         <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
           {children}

@@ -19,12 +19,14 @@ interface NavbarProps {
   daysFilter?: number;
   onDaysChange?: (days: number) => void;
   onOpenMobileSidebar?: () => void;
+  showMobileTitle?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   daysFilter = 30,
   onDaysChange,
   onOpenMobileSidebar,
+  showMobileTitle = false,
 }) => {
   const pathname = usePathname();
   const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
@@ -122,15 +124,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Logo size={26} />
         </Link>
 
-        <div className="min-w-0">
-          {/* h1 ko globals.css se Fraunces mil jata hai */}
-          <h1 className="text-base sm:text-lg font-semibold text-[#14090b] tracking-tight leading-none truncate">
-            {getPageTitle(pathname)}
-          </h1>
-          <p className="text-xs text-[#6f6264] mt-0.5 truncate hidden sm:block">
-            Here&apos;s how your store is doing
-          </p>
-        </div>
+        {showMobileTitle && (
+          <div className="min-w-0 md:hidden">
+            <h1 className="text-base font-semibold text-[#14090b] tracking-tight leading-none truncate">
+              {getPageTitle(pathname)}
+            </h1>
+          </div>
+        )}
 
         {/* Store Selector Pill */}
         <div ref={storeDropdownRef} className="relative hidden md:flex items-center flex-shrink-0">
