@@ -190,7 +190,7 @@ export class ApiClient {
         this.setCache(cacheKey, data);
       } else {
         // Clear related caches on mutations
-        if (endpoint.includes("/seed") || endpoint.includes("/csv") || endpoint.includes("/reports")) {
+        if (endpoint.includes("/seed") || endpoint.includes("/csv") || endpoint.includes("/reports") || endpoint.includes("/sample-data")) {
           this.clearCache();
         }
       }
@@ -244,6 +244,23 @@ export class ApiClient {
 
   static async listStores(forceRefresh = false) {
     return this.request<any[]>("/api/v1/stores", { forceRefresh });
+  }
+
+  static async loadSampleData() {
+    const res = await this.request<{
+      success: boolean;
+      status: string;
+      message: string;
+      categories: number;
+      products: number;
+      customers: number;
+      orders: number;
+      notifications?: number;
+    }>("/api/v1/stores/active/sample-data", {
+      method: "POST",
+    });
+    this.clearCache();
+    return res;
   }
 
   // --- Analytics ---

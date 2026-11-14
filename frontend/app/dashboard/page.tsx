@@ -11,7 +11,10 @@ import { ApiClient } from "@/lib/api";
 import { realtimeClient } from "@/lib/realtime";
 import { formatCurrency } from "@/lib/utils";
 import { LiquidGauge } from "@/components/ui/liquid-gauge";
-import { Coins, ShoppingBag, CreditCard, Users, ArrowUpRight, Percent, RefreshCw, Zap } from "lucide-react";
+import {
+  Coins, ShoppingBag, CreditCard, Users, ArrowUpRight, Percent, RefreshCw, Zap,
+  Sparkles, Database, Loader2, CheckCircle2, AlertCircle
+} from "lucide-react";
 
 const RevenueChart = dynamic(() => import("@/components/dashboard/RevenueChart").then((m) => m.RevenueChart), {
   ssr: false,
@@ -30,6 +33,9 @@ export default function DashboardPage() {
   const [days, setDays] = useState(30);
   const [livePulse, setLivePulse] = useState(false);
   const [simulating, setSimulating] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [seedSuccess, setSeedSuccess] = useState<string | null>(null);
+  const [seedError, setSeedError] = useState<string | null>(null);
 
   const loadDashboard = async (force = false) => {
     if (force || !ApiClient.getCached("/api/v1/analytics/overview")) {
@@ -45,6 +51,23 @@ export default function DashboardPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoadSampleData = async () => {
+    if (seeding) return;
+    setSeeding(true);
+    setSeedError(null);
+    setSeedSuccess(null);
+    try {
+      const res = await ApiClient.loadSampleData();
+      setSeedSuccess(res.message || "Sample data loaded successfully! 8 products, 12 customers, and 30 orders created.");
+      await loadDashboard(true);
+    } catch (err: any) {
+      const msg = err.message || "Failed to load sample data. Store may already contain records.";
+      setSeedError(msg.replace(/^\[\d+\]\s*/, ""));
+    } finally {
+      setSeeding(false);
     }
   };
 
@@ -80,6 +103,11 @@ export default function DashboardPage() {
     }
   };
 
+  const totalOrders = Number(data?.kpis?.total_orders?.value ?? 0);
+  const productsCount = data?.top_products?.length ?? 0;
+  const recentOrdersCount = data?.recent_orders?.length ?? 0;
+  const isEmptyStore = Boolean(data && totalOrders === 0 && productsCount === 0 && recentOrdersCount === 0);
+
   return (
     <DashboardLayout daysFilter={days} onDaysChange={setDays}>
       <div className="space-y-6">
@@ -113,6 +141,75 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {seedSuccess && (
+          <div className="p-4 rounded-xl bg-[#FBF1F3] border border-[#7b1425]/20 text-[#7b1425] text-xs flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 size={16} className="text-[#7b1425] flex-shrink-0" />
+              <span className="font-semibold">{seedSuccess}</span>
+            </div>
+            <button
+              onClick={() => setSeedSuccess(null)}
+              className="text-[#7b1425]/70 hover:text-[#7b1425] text-xs font-semibold ml-3 cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {seedError && (
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle size={16} className="text-amber-700 flex-shrink-0" />
+              <span className="font-medium">{seedError}</span>
+            </div>
+            <button
+              onClick={() => setSeedError(null)}
+              className="text-amber-800/70 hover:text-amber-900 text-xs font-semibold ml-3 cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {isEmptyStore && (
+          <div className="relative overflow-hidden rounded-2xl border border-[#7b1425]/20 bg-gradient-to-br from-[#7b1425]/5 via-white to-[#faf8f5] p-6 sm:p-8 shadow-xs">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#7b1425]/10 text-[#7b1425] text-[11px] font-semibold tracking-wide uppercase">
+                  <Sparkles size={12} />
+                  <span>Quick Start</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-[#14090b] tracking-tight">
+                  Explore Sellsy with realistic sample data
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6f6264] leading-relaxed">
+                  Your store is currently empty. Populate it with 1 week of realistic Pakistani e-commerce data (8 products, 12 customers, ~30 orders in PKR, AI insights, and notifications) to test analytics, reports, and AI growth tools.
+                </p>
+              </div>
+
+              <div className="flex-shrink-0">
+                <button
+                  onClick={handleLoadSampleData}
+                  disabled={seeding}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#7b1425] hover:bg-[#600f1d] active:bg-[#4a0b16] text-white font-medium text-xs sm:text-sm shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                >
+                  {seeding ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin flex-shrink-0" />
+                      <span>Loading sample data...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Database size={16} className="flex-shrink-0" />
+                      <span>Load sample data</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">

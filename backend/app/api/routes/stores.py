@@ -2,9 +2,10 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.models import Store, User
+from app.models import Store, User, Product, Customer, Order
 from app.schemas import StoreOut, StoreCreate, StoreUpdate
 from app.api.deps import get_current_user, get_current_store
+from scripts.seed_account_data import seed_store_data
 
 router = APIRouter(prefix="/stores", tags=["Stores"])
 
@@ -16,6 +17,43 @@ def list_stores(current_user: User = Depends(get_current_user), db: Session = De
 @router.get("/active", response_model=StoreOut)
 def get_active_store(current_store: Store = Depends(get_current_store)):
     return StoreOut.model_validate(current_store)
+
+@router.post("/active/sample-data", status_code=status.HTTP_201_CREATED)
+def load_sample_data(
+    current_user: User = Depends(get_current_user),
+    current_store: Store = Depends(get_current_store),
+    db: Session = Depends(get_db),
+):
+    """
+    Fills an empty store with a realistic 1-week PKR sample dataset.
+    Safety: Fails with 409 Conflict if the store already has products, customers, or orders.
+    """
+    existing_products = db.query(Product).filter(Product.store_id == current_store.id).count()
+    existing_orders = db.query(Order).filter(Order.store_id == current_store.id).count()
+    existing_customers = db.query(Customer).filter(Customer.store_id == current_store.id).count()
+
+    if existing_products > 0 or existing_orders > 0 or existing_customers > 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Your store already has data. Sample data can only be loaded into an empty store."
+        )
+
+    result = seed_store_data(
+        db=db,
+        user=current_user,
+        store=current_store,
+        days=7,
+        scale=1.0,
+        reset=False
+    )
+
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=result.get("message", "Could not load sample data. Store may already contain data.")
+        )
+
+    return result
 
 @router.post("", response_model=StoreOut)
 def create_store(
