@@ -10,6 +10,7 @@ import { AiInsightsPanel } from "@/components/dashboard/AiInsightsPanel";
 import { ApiClient } from "@/lib/api";
 import { realtimeClient } from "@/lib/realtime";
 import { formatCurrency } from "@/lib/utils";
+import { LiquidGauge } from "@/components/ui/liquid-gauge";
 import { Coins, ShoppingBag, CreditCard, Users, ArrowUpRight, Percent, RefreshCw, Zap } from "lucide-react";
 
 const RevenueChart = dynamic(() => import("@/components/dashboard/RevenueChart").then((m) => m.RevenueChart), {
@@ -219,11 +220,38 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Tables Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-              <TopProductsTable products={data.top_products} />
-              <RecentOrdersTable orders={data.recent_orders} />
-            </div>
+            {/* Revenue Goal & Top Products Row */}
+            {(() => {
+              const currentRevenue = Number(data?.kpis?.total_revenue?.numeric_value ?? 0);
+              const revenueGoal = 250000;
+              const revenuePercent = revenueGoal > 0 ? Math.min(100, Math.round((currentRevenue / revenueGoal) * 100)) : 0;
+
+              return (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                  {/* Monthly Revenue Goal Liquid Gauge */}
+                  <div className="flex justify-center">
+                    <LiquidGauge
+                      label="Monthly revenue goal"
+                      value={revenuePercent}
+                      total={revenueGoal}
+                      unit="Rs"
+                      readOnly={true}
+                      subline={`${formatCurrency(currentRevenue)} of ${formatCurrency(revenueGoal)}`}
+                      statusText={revenuePercent >= 100 ? "Goal reached!" : `${Math.round(revenuePercent)}% achieved`}
+                      className="w-full max-w-full h-full min-h-[340px] rounded-xl border-[#e8e2dc]/90"
+                    />
+                  </div>
+
+                  {/* Top Products Table */}
+                  <div className="lg:col-span-2">
+                    <TopProductsTable products={data.top_products} />
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Recent Orders Table */}
+            <RecentOrdersTable orders={data.recent_orders} />
           </>
         ) : null}
       </div>

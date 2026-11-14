@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ApiClient } from "@/lib/api";
 import { formatCurrency, formatNumber } from "@/lib/utils";
+import { LiquidGauge } from "@/components/ui/liquid-gauge";
 import {
   Search,
   Sparkles,
@@ -122,28 +123,66 @@ export default function ProductsPage() {
           </div>
         ) : (
           <>
-            {/* AI Product Tips */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-              <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 flex items-start gap-3 h-full">
-                <Flame size={20} className="text-amber-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-amber-950">Top seller: Ultrasonic Aroma Diffuser</p>
-                  <p className="text-xs text-amber-900 mt-0.5 leading-relaxed">
-                    Over Rs 315,000 in sales with strong weekend demand. Make sure stock stays above 50 units.
-                  </p>
-                </div>
-              </div>
+            {/* Catalog Overview & Stock Health */}
+            {(() => {
+              const totalProducts = products?.length || 0;
+              const lowStockProducts = (products || []).filter((p) => (p.inventory_quantity ?? 0) <= 5);
+              const lowStockCount = lowStockProducts.length;
+              const healthyProductsCount = Math.max(0, totalProducts - lowStockCount);
+              const stockHealthPercent = totalProducts > 0 ? Math.round((healthyProductsCount / totalProducts) * 100) : 0;
+              const totalInventoryValue = (products || []).reduce(
+                (acc, p) => acc + (p.price || 0) * (p.inventory_quantity || 0),
+                0
+              );
+              const topSeller = (products || []).slice().sort((a, b) => (b.revenue_generated || 0) - (a.revenue_generated || 0))[0];
 
-              <div className="p-4 rounded-xl bg-rose-50/70 border border-rose-200 flex items-start gap-3 h-full">
-                <AlertTriangle size={20} className="text-rose-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-rose-950">Slow-moving product: Wild Cedarwood Room Spray</p>
-                  <p className="text-xs text-rose-900 mt-0.5 leading-relaxed">
-                    Sales dropped 42% over the last 30 days. Consider bundling with another product or offering a small discount.
-                  </p>
+              return (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                  {/* Left 2 cols: AI Product Tips & Inventory Highlights */}
+                  <div className="lg:col-span-2 flex flex-col justify-between gap-4">
+                    <div className="p-4 sm:p-5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-start gap-3.5 h-full">
+                      <Flame size={20} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-amber-950">Top Seller Activity</p>
+                        <p className="text-xs text-amber-900 mt-1 leading-relaxed">
+                          {topSeller
+                            ? `${topSeller.title} leads catalog gross sales with ${formatCurrency(topSeller.revenue_generated || 0)} and ${topSeller.units_sold || 0} units sold.`
+                            : "Track your bestselling catalog items and velocity trends here."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 sm:p-5 rounded-xl bg-rose-50/70 border border-rose-200 flex items-start gap-3.5 h-full">
+                      <AlertTriangle size={20} className="text-rose-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-rose-950">Stock Alert Advisory</p>
+                        <p className="text-xs text-rose-900 mt-1 leading-relaxed">
+                          {lowStockCount > 0
+                            ? `${lowStockCount} product${lowStockCount > 1 ? "s are" : " is"} running low on inventory (<= 5 units remaining: ${lowStockProducts.map(p => p.title).join(", ")}). Consider restocking soon.`
+                            : "All catalog inventory levels are currently in a healthy range with no critical stockouts."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right 1 col: Stock Health Liquid Gauge */}
+                  <div className="flex justify-center">
+                    <LiquidGauge
+                      label="Stock health"
+                      value={stockHealthPercent}
+                      total={totalProducts}
+                      unit="items"
+                      warnAt={50}
+                      warnBelow={true}
+                      readOnly={true}
+                      subline={`${healthyProductsCount} of ${totalProducts} in stock (${formatCurrency(totalInventoryValue)})`}
+                      statusText={stockHealthPercent < 50 ? "Restock needed" : `${stockHealthPercent}% healthy stock`}
+                      className="w-full max-w-full h-full min-h-[280px] rounded-xl border-[#e8e2dc]/90"
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* Filter and Search Bar */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-[#e8e2dc]/90 shadow-2xs">

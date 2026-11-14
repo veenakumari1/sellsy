@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ApiClient } from "@/lib/api";
 import { realtimeClient } from "@/lib/realtime";
 import { formatNumber, formatDate, formatCurrency } from "@/lib/utils";
+import { LiquidGauge } from "@/components/ui/liquid-gauge";
 import {
   Trophy,
   Award,
@@ -546,6 +547,24 @@ export default function RewardsPage() {
 
               {/* Right Column (1 Col): Leaderboard & Recent Activity */}
               <div className="space-y-6">
+                {/* Next Level Progress Liquid Gauge */}
+                <div className="flex justify-center">
+                  <LiquidGauge
+                    label="Next level progress"
+                    value={overview.level_progress_pct ?? 0}
+                    total={overview.next_level_points ?? 100}
+                    unit="pts"
+                    readOnly={true}
+                    subline={`${overview.total_points ?? 0} of ${overview.next_level_points ?? 100} pts`}
+                    statusText={
+                      overview.points_to_next_level > 0
+                        ? `${overview.points_to_next_level} pts until Level ${overview.level + 1}`
+                        : "Max level reached!"
+                    }
+                    className="w-full max-w-full h-80 rounded-xl border-[#e8e2dc]/80"
+                  />
+                </div>
+
                 {/* Leaderboard Benchmarking */}
                 <div className="bg-white rounded-xl border border-[#e8e2dc]/80 shadow-xs overflow-hidden">
                   <div className="p-4 sm:p-5 border-b border-[#f3ede7] flex items-center justify-between">
