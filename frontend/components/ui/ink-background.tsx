@@ -2,48 +2,53 @@
 
 /**
  * @author: @dorianbaffier (adapted for Sellsy & Tailwind 3)
- * @description: Ink Background from Kokonut UI
+ * @description: Interactive Ink Headline & Background from Kokonut UI
  * @license: MIT
  * @website: https://kokonutui.com
  */
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-export interface InkBackgroundProps {
-  /** The headline written in ink. It bleeds when stirred and gathers again. */
-  text?: string;
-  /**
-   * Color of the ink a click drops. Leave it out for the same ink as the
-   * headline.
-   */
-  accent?: string;
-  /** Content over the ink, under the headline. */
-  children?: ReactNode;
-  /** Set false for a still backdrop. */
-  interactive?: boolean;
-  className?: string;
+export interface InkLine {
+  text: string;
+  color?: string; // Hex color, e.g. #14090b or #7b1425
+  fontWeight?: number | string; // e.g. 600 or 800
+  fontStyle?: "normal" | "italic"; // e.g. "italic"
 }
 
-// The velocity field is solved on a grid this many cells on its short side;
-// the ink is drawn on a finer one.
+export interface InkBackgroundProps {
+  /** Single headline string (for standard Kokonut UI usage) */
+  text?: string;
+  /** Multi-line headline with custom per-line colors and font weights/styles */
+  lines?: InkLine[];
+  /** Color of the ink a click drops (default: #7b1425 maroon) */
+  accent?: string;
+  /** Content under the headline */
+  children?: ReactNode;
+  /** Set false for a still backdrop / disabled interactions */
+  interactive?: boolean;
+  className?: string;
+  /** Custom display font family. Defaults to Fraunces. */
+  fontFamily?: string;
+}
+
+// Fluid simulation grid constants
 const SIM = 128;
 const DYE = 512;
 const PRESSURE_ITERATIONS = 20;
-// How fast stirred ink fades away, and how fast velocity calms down.
+// Ink dissipation and velocity damping
 const DYE_FADE = 0.35;
 const VELOCITY_FADE = 1.2;
-// Swirl kept in the flow, so stirring curls instead of smearing.
-const CURL = 22;
-// The headline pulls its ink back at this rate per frame once left alone,
-// after this long.
-const GATHER = 0.06;
-const GATHER_AFTER = 1200;
-// The loop stops after this long with nothing moving it.
-const SLEEP_AFTER = 5000;
-const STIR_FORCE = 5200;
-const STIR_RADIUS = 0.0018;
-const DROP_RADIUS = 0.0035;
+const CURL = 24;
+// Rate at which letters pull ink back once untouched
+const GATHER = 0.08;
+const GATHER_AFTER = 1000;
+// Loop pauses after this long with no interaction to conserve resources
+const SLEEP_AFTER = 4000;
+const STIR_FORCE = 5400;
+const STIR_RADIUS = 0.0024;
+const DROP_RADIUS = 0.004;
 
 const VERTEX = `#version 300 es
 in vec2 aPos;
@@ -165,30 +170,37 @@ uniform float value;
 void main() {
   o = value * texture(uTarget, vUv);
 }`,
-  // Pulls the headline's ink (red channel) back toward the letters. Dropped
-  // ink (green) is left to drift and fade.
   gather: `${HEAD}
 uniform sampler2D uDye;
 uniform sampler2D uMask;
 uniform float rate;
 void main() {
   vec4 d = texture(uDye, vUv);
-  float m = texture(uMask, vUv).r;
-  o = vec4(mix(d.r, m, rate), d.g, 0.0, 1.0);
+  vec4 m = texture(uMask, vUv);
+  o = vec4(mix(d.r, m.r, rate), mix(d.g, m.g, rate), d.b, 1.0);
 }`,
   display: `${HEAD}
 uniform sampler2D uDye;
-uniform vec3 paper;
-uniform vec3 ink;
+uniform vec3 ink1;
+uniform vec3 ink2;
 uniform vec3 accent;
 void main() {
   vec4 d = texture(uDye, vUv);
-  // A soft knee, so thin washes stay pale and dense ink goes solid.
-  float a = smoothstep(0.02, 0.85, d.r);
-  float b = smoothstep(0.02, 0.85, d.g);
-  vec3 c = mix(paper, ink, a);
-  c = mix(c, accent, b * 0.92);
-  o = vec4(c, 1.0);
+  float a1 = smoothstep(0.015, 0.85, d.r);
+  float a2 = smoothstep(0.015, 0.85, d.g);
+  float a3 = smoothstep(0.015, 0.85, d.b);
+
+  vec2 edge = smoothstep(vec2(0.0), vec2(0.06), vUv) * smoothstep(vec2(1.0), vec2(0.94), vUv);
+  float edgeFade = edge.x * edge.y;
+
+  vec3 col = ink1 * a1 + ink2 * a2 + accent * (a3 * 0.92);
+  float alpha = clamp(a1 + a2 + a3 * 0.92, 0.0, 1.0);
+  if (alpha > 0.001) {
+    col /= alpha;
+  }
+  alpha *= edgeFade;
+
+  o = vec4(col, alpha);
 }`,
 };
 
@@ -209,9 +221,7 @@ interface Double {
 
 function compile(gl: WebGL2RenderingContext, type: number, source: string) {
   const shader = gl.createShader(type);
-  if (!shader) {
-    return null;
-  }
+  if (!shader) return null;
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -229,40 +239,46 @@ interface Program {
 function link(gl: WebGL2RenderingContext, vertex: WebGLShader, source: string) {
   const fragment = compile(gl, gl.FRAGMENT_SHADER, source);
   const program = gl.createProgram();
-  if (!(fragment && program)) {
-    return null;
-  }
+  if (!(fragment && program)) return null;
   gl.attachShader(program, vertex);
   gl.attachShader(program, fragment);
   gl.bindAttribLocation(program, 0, "aPos");
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    return null;
-  }
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return null;
   const uniforms: Program["uniforms"] = {};
   const count = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
   for (let i = 0; i < count; i++) {
     const info = gl.getActiveUniform(program, i);
-    if (info) {
-      uniforms[info.name] = gl.getUniformLocation(program, info.name);
-    }
+    if (info) uniforms[info.name] = gl.getUniformLocation(program, info.name);
   }
   return { program, uniforms };
 }
 
-/** Parses any CSS color, oklch included, by painting it into one pixel. */
-function toRgb(color: string, probe: CanvasRenderingContext2D) {
-  probe.clearRect(0, 0, 1, 1);
-  probe.fillStyle = color;
-  probe.fillRect(0, 0, 1, 1);
-  const data = probe.getImageData(0, 0, 1, 1).data;
-  return [data[0] / 255, data[1] / 255, data[2] / 255];
+function parseHex(hexStr: string, fallback: [number, number, number]): [number, number, number] {
+  if (!hexStr) return fallback;
+  const clean = hexStr.replace("#", "").trim();
+  if (clean.length === 3) {
+    return [
+      parseInt(clean[0] + clean[0], 16) / 255,
+      parseInt(clean[1] + clean[1], 16) / 255,
+      parseInt(clean[2] + clean[2], 16) / 255,
+    ];
+  }
+  if (clean.length === 6) {
+    return [
+      parseInt(clean.slice(0, 2), 16) / 255,
+      parseInt(clean.slice(2, 4), 16) / 255,
+      parseInt(clean.slice(4, 6), 16) / 255,
+    ];
+  }
+  return fallback;
 }
 
 interface Fluid {
   resize: (w: number, h: number) => void;
   setMask: (source: HTMLCanvasElement) => void;
-  setColors: (paper: number[], ink: number[], accent: number[]) => void;
+  initDyeFromMask: () => void;
+  setColors: (ink1: number[], ink2: number[], accent: number[]) => void;
   splat: (
     x: number,
     y: number,
@@ -276,27 +292,15 @@ interface Fluid {
   destroy: () => void;
 }
 
-/**
- * A small stable-fluids solver (semi-Lagrangian advection, vorticity
- * confinement, Jacobi pressure), in the spirit of Jos Stam's paper and
- * Pavel Dobryakov's WebGL port. Returns null where half-float render
- * targets aren't available.
- */
 function createFluid(gl: WebGL2RenderingContext): Fluid | null {
-  if (!gl.getExtension("EXT_color_buffer_float")) {
-    return null;
-  }
+  if (!gl.getExtension("EXT_color_buffer_float")) return null;
   gl.getExtension("OES_texture_float_linear");
   const vertex = compile(gl, gl.VERTEX_SHADER, VERTEX);
-  if (!vertex) {
-    return null;
-  }
+  if (!vertex) return null;
   const programs = {} as Record<ProgramName, Program>;
   for (const name of Object.keys(SHADERS) as ProgramName[]) {
     const made = link(gl, vertex, SHADERS[name]);
-    if (!made) {
-      return null;
-    }
+    if (!made) return null;
     programs[name] = made;
   }
 
@@ -346,7 +350,7 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       0
     );
     gl.viewport(0, 0, w, h);
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     textures.push(tex);
     framebuffers.push(fbo);
@@ -386,22 +390,18 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
   gl.texImage2D(
     gl.TEXTURE_2D,
     0,
-    gl.R8,
+    gl.RGBA,
     1,
     1,
     0,
-    gl.RED,
+    gl.RGBA,
     gl.UNSIGNED_BYTE,
-    new Uint8Array([0])
+    new Uint8Array([0, 0, 0, 0])
   );
 
   const free = () => {
-    for (const t of textures) {
-      gl.deleteTexture(t);
-    }
-    for (const f of framebuffers) {
-      gl.deleteFramebuffer(f);
-    }
+    for (const t of textures) gl.deleteTexture(t);
+    for (const f of framebuffers) gl.deleteFramebuffer(f);
     textures.length = 0;
     framebuffers.length = 0;
   };
@@ -411,7 +411,6 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       ? [Math.round(short * aspect), short]
       : [short, Math.round(short / aspect)];
 
-  // Binds a program, its textures and its output, and draws the quad.
   let unit = 0;
   const run = (name: ProgramName, texel: [number, number]) => {
     const p = programs[name];
@@ -429,11 +428,15 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
   const blit = (out: Target | null, w?: number, h?: number) => {
     gl.bindFramebuffer(gl.FRAMEBUFFER, out ? out.fbo : null);
     gl.viewport(0, 0, out ? out.w : (w ?? 1), out ? out.h : (h ?? 1));
+    if (!out) {
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   };
 
-  let paper = [0.9804, 0.9725, 0.9608]; // #faf8f5
-  let inkColor = [0.4824, 0.0784, 0.1451]; // #7b1425
+  let ink1Color = [0.0784, 0.0353, 0.0431]; // #14090b
+  let ink2Color = [0.4824, 0.0784, 0.1451]; // #7b1425
   let accentColor = [0.4824, 0.0784, 0.1451]; // #7b1425
   let canvasW = 1;
   let canvasH = 1;
@@ -455,12 +458,21 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
     setMask(source) {
       gl.bindTexture(gl.TEXTURE_2D, mask);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, gl.RED, gl.UNSIGNED_BYTE, source);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     },
-    setColors(p, i, a) {
-      paper = p;
-      inkColor = i;
+    initDyeFromMask() {
+      // Instantly copies the mask into the dye texture so headline letters are immediately filled
+      const p = run("gather", [1 / dye.read.w, 1 / dye.read.h]);
+      bind(p, "uDye", dye.read.tex);
+      bind(p, "uMask", mask);
+      gl.uniform1f(p.uniforms.rate, 1.0);
+      blit(dye.write);
+      dye.swap();
+    },
+    setColors(i1, i2, a) {
+      ink1Color = i1;
+      ink2Color = i2;
       accentColor = a;
     },
     splat(x, y, vx, vy, ink, radius) {
@@ -473,12 +485,12 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       gl.uniform1f(p.uniforms.radius, r);
       blit(velocity.write);
       velocity.swap();
-      if (ink[0] || ink[1]) {
+      if (ink[0] || ink[1] || ink[2]) {
         p = run("splat", [1 / dye.read.w, 1 / dye.read.h]);
         bind(p, "uTarget", dye.read.tex);
         gl.uniform1f(p.uniforms.aspect, aspect);
         gl.uniform2f(p.uniforms.point, x, y);
-        gl.uniform3f(p.uniforms.color, ink[0], ink[1], 0);
+        gl.uniform3f(p.uniforms.color, ink[0], ink[1], ink[2]);
         gl.uniform1f(p.uniforms.radius, r);
         blit(dye.write);
         dye.swap();
@@ -541,10 +553,9 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       dye.swap();
 
       if (gather > 0) {
-        // Calm the water as the letters gather, so they settle crisp.
         p = run("scale", sim);
         bind(p, "uTarget", velocity.read.tex);
-        gl.uniform1f(p.uniforms.value, 1 - gather);
+        gl.uniform1f(p.uniforms.value, Math.max(0.0, 1 - gather * 1.5));
         blit(velocity.write);
         velocity.swap();
 
@@ -559,8 +570,8 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
     draw() {
       const p = run("display", [1 / dye.read.w, 1 / dye.read.h]);
       bind(p, "uDye", dye.read.tex);
-      gl.uniform3fv(p.uniforms.paper, paper);
-      gl.uniform3fv(p.uniforms.ink, inkColor);
+      gl.uniform3fv(p.uniforms.ink1, ink1Color);
+      gl.uniform3fv(p.uniforms.ink2, ink2Color);
       gl.uniform3fv(p.uniforms.accent, accentColor);
       blit(null, canvasW, canvasH);
     },
@@ -568,100 +579,74 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       free();
       gl.deleteTexture(mask);
       gl.deleteBuffer(quad);
-      for (const p of Object.values(programs)) {
-        gl.deleteProgram(p.program);
-      }
+      for (const p of Object.values(programs)) gl.deleteProgram(p.program);
       gl.deleteShader(vertex);
     },
   };
 }
 
-/** Where the headline sits: centre line as a share of the height, and size. */
-function headline(width: number, height: number) {
-  const size = Math.max(44, Math.min(width * 0.13, height * 0.24, 140));
-  return { size, center: height * 0.4 };
-}
-
-/** Writes the headline into a canvas as soft white letters on black. */
-function drawMask(
-  canvas: HTMLCanvasElement,
-  text: string,
-  width: number,
-  height: number,
-  font: string
-) {
-  const scale = DYE / Math.min(width, height);
-  canvas.width = Math.round(width * scale);
-  canvas.height = Math.round(height * scale);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    return;
-  }
-  const { size, center } = headline(width, height);
-  ctx.setTransform(scale, 0, 0, scale, 0, 0);
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, width, height);
-  if (text && text.trim()) {
-    ctx.font = `650 ${size}px ${font}`;
-    ctx.letterSpacing = `${-size * 0.045}px`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    // A little blur gives the letters a wet, feathered edge to bleed from.
-    ctx.filter = `blur(${Math.max(1, size * 0.012)}px)`;
-    ctx.fillStyle = "white";
-    ctx.fillText(text, width / 2, center, width - 32);
-  }
-}
-
 export default function InkBackground({
-  text = "",
+  text,
+  lines,
   accent = "#7b1425",
   children,
   interactive = true,
   className,
+  fontFamily = '"Fraunces", Georgia, serif',
 }: InkBackgroundProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const line1Ref = useRef<HTMLSpanElement>(null);
+  const line2Ref = useRef<HTMLSpanElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const paperRef = useRef<HTMLSpanElement>(null);
-  const inkRef = useRef<HTMLSpanElement>(null);
-  const [failed, setFailed] = useState(false);
-  const [contentTop, setContentTop] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+
+  const [ready, setReady] = useState(false);
+  const [padX, setPadX] = useState(70);
+  const [padY, setPadY] = useState(55);
+
+  const effectiveLines: InkLine[] = lines && lines.length > 0
+    ? lines
+    : [
+        { text: text || "Turn your store data into", color: "#14090b", fontWeight: 600 },
+        { text: "smarter business decisions.", color: "#7b1425", fontWeight: 800, fontStyle: "italic" },
+      ];
+
+  const line1ColorHex = effectiveLines[0]?.color || "#14090b";
+  const line2ColorHex = effectiveLines[1]?.color || "#7b1425";
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const hasText = Boolean(text && text.trim());
-
-  useEffect(() => {
-    const root = rootRef.current;
+    let canceled = false;
+    const container = containerRef.current;
     const canvas = canvasRef.current;
-    const gl = canvas?.getContext("webgl2", {
-      alpha: false,
+    const line1El = line1Ref.current;
+    const line2El = line2Ref.current;
+
+    if (!container || !canvas || !line1El) return;
+
+    // Check prefers-reduced-motion
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    const gl = canvas.getContext("webgl2", {
+      alpha: true,
       antialias: false,
       depth: false,
       preserveDrawingBuffer: false,
     });
-    const probe = document
-      .createElement("canvas")
-      .getContext("2d", { willReadFrequently: true });
-    if (!(root && canvas && probe)) {
-      return;
-    }
-    const fluid = gl ? createFluid(gl) : null;
-    if (!fluid) {
-      setFailed(true);
-      return;
-    }
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+    if (!gl) return;
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    const fluid = createFluid(gl);
+    if (!fluid) return;
+
+    fluid.setColors(
+      parseHex(line1ColorHex, [0.0784, 0.0353, 0.0431]),
+      parseHex(line2ColorHex, [0.4824, 0.0784, 0.1451]),
+      parseHex(accent, [0.4824, 0.0784, 0.1451])
+    );
+
     const maskCanvas = document.createElement("canvas");
 
     let width = 0;
@@ -669,109 +654,101 @@ export default function InkBackground({
     let raf = 0;
     let last = 0;
     let visible = true;
-    let colorKey = "";
-    // Time of the last stir, and of the last thing that moved the fluid.
     let touched = -Number.POSITIVE_INFINITY;
     let active = performance.now();
-    const born = performance.now();
     const hand = { x: 0, y: 0, on: false, down: false, moved: 0 };
 
-    const readColors = () => {
-      let paper = "#faf8f5";
-      let ink = "#7b1425";
-      if (paperRef.current) {
-        const computed = getComputedStyle(paperRef.current).color;
-        if (computed && computed !== "rgba(0, 0, 0, 0)") paper = computed;
+    const build = async () => {
+      if (document.fonts) {
+        await document.fonts.ready;
       }
-      if (inkRef.current) {
-        const computed = getComputedStyle(inkRef.current).color;
-        if (computed && computed !== "rgba(0, 0, 0, 0)") ink = computed;
-      }
-      const actualAccent = accent || ink;
-      const key = `${paper}|${ink}|${actualAccent}`;
-      if (key === colorKey) {
-        return false;
-      }
-      colorKey = key;
-      const inkRgb = toRgb(ink, probe);
-      fluid.setColors(
-        toRgb(paper, probe),
-        inkRgb,
-        actualAccent ? toRgb(actualAccent, probe) : inkRgb
-      );
-      return true;
-    };
+      if (canceled) return;
 
-    const build = () => {
-      const rect = root.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      if (width < 2 || height < 2) {
-        return;
-      }
+      const cRect = container.getBoundingClientRect();
+      const l1Rect = line1El.getBoundingClientRect();
+      const l2Rect = line2El?.getBoundingClientRect();
+
+      if (cRect.width < 2 || cRect.height < 2) return;
+
+      const isMobile = window.innerWidth < 768;
+      const currentPadX = isMobile ? 18 : 70;
+      const currentPadY = isMobile ? 24 : 55;
+      setPadX(currentPadX);
+      setPadY(currentPadY);
+
+      width = Math.round(cRect.width + currentPadX * 2);
+      height = Math.round(cRect.height + currentPadY * 2);
+
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       fluid.resize(canvas.width, canvas.height);
-      drawMask(
-        maskCanvas,
-        text,
-        width,
-        height,
-        getComputedStyle(root).fontFamily
-      );
-      fluid.setMask(maskCanvas);
-      const { size, center } = headline(width, height);
-      setContentTop(center + size * 0.62);
-      // Reduced motion: the letters, already gathered, and no flow.
-      fluid.step(1 / 60, reduceMotion ? 1 : 0);
-      fluid.draw();
-    };
 
-    // Ink drops land around the letters and the headline pulls them in.
-    const bloom = () => {
-      const { size, center } = headline(width, height);
-      const y = 1 - center / height;
-      for (let i = 0; i < 9; i++) {
-        const x = 0.2 + (0.6 * (i + Math.random() * 0.6)) / 9;
-        const dy = ((Math.random() - 0.5) * size * 0.6) / height;
-        fluid.splat(
-          x,
-          y + dy,
-          (Math.random() - 0.5) * 320,
-          (Math.random() - 0.5) * 320,
-          [0.35, 0],
-          DROP_RADIUS * (0.6 + Math.random())
-        );
+      // Draw mask in offscreen canvas
+      const scale = DYE / Math.min(width, height);
+      maskCanvas.width = Math.round(width * scale);
+      maskCanvas.height = Math.round(height * scale);
+      const ctx = maskCanvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
+
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, width, height);
+
+      const style1 = getComputedStyle(line1El);
+      const fontSize1 = parseFloat(style1.fontSize) || 60;
+      const x1 = l1Rect.left - cRect.left + currentPadX + l1Rect.width / 2;
+      const y1 = l1Rect.top - cRect.top + currentPadY + l1Rect.height / 2;
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.filter = `blur(${Math.max(0.8, fontSize1 * 0.012)}px)`;
+
+      // Line 1: Red channel in mask texture
+      ctx.letterSpacing = style1.letterSpacing || "-0.03em";
+      ctx.font = `${effectiveLines[0].fontWeight || 600} ${fontSize1}px ${fontFamily}`;
+      ctx.fillStyle = "rgb(255, 0, 0)";
+      ctx.fillText(effectiveLines[0].text, x1, y1);
+
+      // Line 2: Green channel in mask texture
+      if (line2El && l2Rect && effectiveLines[1]?.text) {
+        const style2 = getComputedStyle(line2El);
+        const fontSize2 = parseFloat(style2.fontSize) || fontSize1;
+        const x2 = l2Rect.left - cRect.left + currentPadX + l2Rect.width / 2;
+        const y2 = l2Rect.top - cRect.top + currentPadY + l2Rect.height / 2;
+
+        ctx.letterSpacing = style2.letterSpacing || "-0.03em";
+        ctx.font = `${effectiveLines[1].fontStyle || "italic"} ${effectiveLines[1].fontWeight || 800} ${fontSize2}px ${fontFamily}`;
+        ctx.fillStyle = "rgb(0, 255, 0)";
+        ctx.fillText(effectiveLines[1].text, x2, y2);
+      }
+
+      fluid.setMask(maskCanvas);
+      // Immediately initialize the dye texture to match the mask
+      fluid.initDyeFromMask();
+      fluid.draw();
+
+      if (!canceled) {
+        setReady(true);
       }
     };
 
     const frame = (now: number) => {
       raf = 0;
-      if (!visible) {
-        return;
-      }
+      if (!visible) return;
       const dt = Math.min((now - (last || now - 16)) / 1000, 1 / 30);
       last = now;
       if (hand.down || hand.moved > now - 100) {
         active = now;
       }
-      // Hold off while someone is stirring, then ease the letters back.
       const idle = now - touched;
       let gather = 0;
-      if (hasText) {
-        if (idle > GATHER_AFTER) {
-          gather = GATHER * Math.min(1, (idle - GATHER_AFTER) / 1500);
-        }
-        // The first second and a half is the bloom: the letters fill in fast.
-        const age = now - born;
-        if (age < 1500) {
-          gather = Math.max(gather, 0.012 + (age / 1500) * GATHER);
-        }
+      if (idle > GATHER_AFTER) {
+        gather = GATHER * Math.min(1, (idle - GATHER_AFTER) / 1200);
       }
       fluid.step(dt, gather);
       fluid.draw();
-      if (now - active < SLEEP_AFTER || now - born < 4000) {
+      if (now - active < SLEEP_AFTER) {
         raf = requestAnimationFrame(frame);
       }
     };
@@ -783,54 +760,32 @@ export default function InkBackground({
       }
     };
 
-    readColors();
     build();
-    canvas.style.opacity = "1";
-    if (!reduceMotion) {
-      bloom();
-      start();
-    }
 
     const resizeObserver = new ResizeObserver(() => {
-      const rect = root.getBoundingClientRect();
-      if (
-        Math.abs(rect.width - width) > 1 ||
-        Math.abs(rect.height - height) > 1
-      ) {
-        build();
-        active = performance.now();
-        touched = -Number.POSITIVE_INFINITY;
-        start();
-      }
+      build();
+      active = performance.now();
+      touched = -Number.POSITIVE_INFINITY;
+      start();
     });
-    resizeObserver.observe(root);
+    resizeObserver.observe(container);
 
-    // A tab coming back must not wake a background that's scrolled away.
     let onScreen = true;
     const intersection = new IntersectionObserver(([entry]) => {
       onScreen = entry.isIntersecting;
       visible = onScreen && document.visibilityState === "visible";
       start();
     });
-    intersection.observe(root);
+    intersection.observe(container);
+
     const onVisibility = () => {
       visible = onScreen && document.visibilityState === "visible";
       start();
     };
     document.addEventListener("visibilitychange", onVisibility);
 
-    // Follow theme changes if any
-    const colorTimer = window.setInterval(() => {
-      if (!visible) {
-        return;
-      }
-      if (readColors() && !raf) {
-        fluid.draw();
-      }
-    }, 500);
-
     const local = (event: PointerEvent) => {
-      const rect = root.getBoundingClientRect();
+      const rect = canvas.getBoundingClientRect();
       return {
         x: (event.clientX - rect.left) / rect.width,
         y: 1 - (event.clientY - rect.top) / rect.height,
@@ -843,13 +798,12 @@ export default function InkBackground({
         const dx = p.x - hand.x;
         const dy = p.y - hand.y;
         if (dx || dy) {
-          // Hovering stirs the liquid; dragging lays down ink.
           fluid.splat(
             p.x,
             p.y,
             dx * STIR_FORCE,
             dy * STIR_FORCE,
-            hand.down ? [0, 0.08] : (hasText ? [0, 0] : [0, 0.015]),
+            hand.down ? [0, 0.06, 0] : [0, 0, 0],
             STIR_RADIUS
           );
           touched = performance.now();
@@ -876,8 +830,8 @@ export default function InkBackground({
       hand.on = true;
       hand.x = p.x;
       hand.y = p.y;
-      // A drop: a dab of ink pushed out in a ring.
-      fluid.splat(p.x, p.y, 0, 0, [0, 0.65], DROP_RADIUS);
+      // Click drops extra maroon ink
+      fluid.splat(p.x, p.y, 0, 0, [0, 0, 0.65], DROP_RADIUS);
       for (let i = 0; i < 8; i++) {
         const a = (i / 8) * Math.PI * 2;
         const r = 0.012;
@@ -886,7 +840,7 @@ export default function InkBackground({
           p.y + Math.sin(a) * r,
           Math.cos(a) * 420,
           Math.sin(a) * 420,
-          [0, 0],
+          [0, 0, 0],
           STIR_RADIUS * 0.6
         );
       }
@@ -899,95 +853,80 @@ export default function InkBackground({
       hand.down = false;
     };
 
-    const isInteractive = interactive && !isMobile && !reduceMotion;
-    const target = root.parentElement || root;
-
-    if (isInteractive) {
-      target.addEventListener("pointermove", onMove);
-      target.addEventListener("pointerleave", onLeave);
-      target.addEventListener("pointerdown", onDown);
-      target.addEventListener("pointerup", onUp);
-      target.addEventListener("pointercancel", onUp);
+    if (interactive && !reduceMotion) {
+      canvas.addEventListener("pointermove", onMove);
+      canvas.addEventListener("pointerleave", onLeave);
+      canvas.addEventListener("pointerdown", onDown);
+      canvas.addEventListener("pointerup", onUp);
+      canvas.addEventListener("pointercancel", onUp);
     }
 
     return () => {
+      canceled = true;
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       intersection.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
-      window.clearInterval(colorTimer);
-      target.removeEventListener("pointermove", onMove);
-      target.removeEventListener("pointerleave", onLeave);
-      target.removeEventListener("pointerdown", onDown);
-      target.removeEventListener("pointerup", onUp);
-      target.removeEventListener("pointercancel", onUp);
+      canvas.removeEventListener("pointermove", onMove);
+      canvas.removeEventListener("pointerleave", onLeave);
+      canvas.removeEventListener("pointerdown", onDown);
+      canvas.removeEventListener("pointerup", onUp);
+      canvas.removeEventListener("pointercancel", onUp);
       fluid.destroy();
     };
-  }, [text, accent, interactive, isMobile, hasText]);
+  }, [effectiveLines[0]?.text, effectiveLines[1]?.text, line1ColorHex, line2ColorHex, accent, interactive, fontFamily]);
+
+  const displayStyle: React.CSSProperties = {
+    fontFamily,
+    fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144',
+  };
 
   return (
     <div
-      className={cn(
-        "relative w-full touch-pan-y overflow-hidden bg-[#faf8f5] text-[#14090b]",
-        className
-      )}
-      ref={rootRef}
+      ref={containerRef}
+      className={cn("relative mx-auto flex justify-center text-center", className)}
     >
-      {/* Theme colors for the shader: the paper and the ink. */}
-      <span className="sr-only text-[#faf8f5]" ref={paperRef} />
-      <span className="sr-only text-[#7b1425]" ref={inkRef} />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
-        <canvas
-          className="h-full w-full opacity-0 transition-opacity duration-500 ease-out"
-          ref={canvasRef}
-        />
-      </div>
-      {hasText && (
-        <h2
-          className={cn(
-            failed
-              ? "absolute inset-x-0 top-[40%] -translate-y-1/2 text-balance px-6 text-center font-semibold text-5xl tracking-tight sm:text-7xl"
-              : "sr-only"
-          )}
-        >
-          {text}
-        </h2>
-      )}
-      {children !== undefined ? (
-        <div className="relative z-10 w-full">{children}</div>
-      ) : hasText ? (
-        <div
-          className="pointer-events-none absolute inset-x-0 flex justify-center px-6"
-          style={{ top: contentTop ?? "62%" }}
-        >
-          <DefaultContent />
-        </div>
-      ) : null}
+      {/* Real accessible <h1> for SEO & initial static display */}
+      <h1
+        ref={headingRef}
+        style={displayStyle}
+        className={cn(
+          "text-[2.6rem] sm:text-6xl lg:text-[5.4rem] font-semibold tracking-[-0.03em] leading-[1.02]",
+          ready ? "opacity-0 select-none" : "opacity-100"
+        )}
+      >
+        <span ref={line1Ref} className="block text-[#14090b]">
+          {effectiveLines[0].text}
+        </span>
+        {effectiveLines[1]?.text && (
+          <span
+            ref={line2Ref}
+            className="block italic font-extrabold text-[#7b1425]"
+          >
+            {effectiveLines[1].text}
+          </span>
+        )}
+      </h1>
+
+      {/* The interactive WebGL ink canvas */}
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-auto touch-pan-y absolute transition-opacity duration-300",
+          ready ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        style={{
+          left: `-${padX}px`,
+          top: `-${padY}px`,
+          width: `calc(100% + ${padX * 2}px)`,
+          height: `calc(100% + ${padY * 2}px)`,
+        }}
+      />
+
+      {children && <div className="relative z-10 w-full">{children}</div>}
     </div>
   );
 }
 
-function DefaultContent() {
-  return (
-    <div className="flex max-w-md flex-col items-center gap-6 text-center">
-      <p className="text-balance text-base text-[#14090b]/60 leading-relaxed">
-        A quiet page for first drafts. Nothing to set up, nothing to sync. Stir
-        the ink and it settles back.
-      </p>
-      <div className="pointer-events-auto flex items-center gap-2">
-        <a
-          className="inline-flex h-10 items-center rounded-full bg-[#14090b] px-5 font-medium text-sm text-white transition-colors duration-150 hover:bg-[#7b1425]"
-          href="#start"
-        >
-          Start writing
-        </a>
-        <a
-          className="inline-flex h-10 items-center rounded-full px-4 font-medium text-sm text-[#14090b]/70 transition-colors duration-150 hover:bg-[#14090b]/5 hover:text-[#14090b]"
-          href="#tour"
-        >
-          See how it works
-        </a>
-      </div>
-    </div>
-  );
-}
+export { InkBackground as InkHeadline };

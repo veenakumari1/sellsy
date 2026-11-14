@@ -22,7 +22,25 @@ import { Reveal } from "@/components/Reveal";
 
 const InkBackground = dynamic(
   () => import("@/components/kokonutui/ink-background"),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="relative mx-auto flex justify-center text-center mt-6">
+        <h1
+          style={{
+            fontFamily: '"Fraunces", Georgia, serif',
+            fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144',
+          }}
+          className="text-[2.6rem] sm:text-6xl lg:text-[5.4rem] font-semibold tracking-[-0.03em] leading-[1.02]"
+        >
+          <span className="block text-[#14090b]">Turn your store data into</span>
+          <span className="block italic font-extrabold text-[#7b1425]">
+            smarter business decisions.
+          </span>
+        </h1>
+      </div>
+    ),
+  }
 );
 
 /*
@@ -164,48 +182,40 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* 2. Hero Section with Kokonut UI Ink Background */}
-        <section className="relative overflow-hidden bg-[#faf8f5]">
-          <InkBackground
-            text=""
-            accent="#7b1425"
-            className="pt-24 pb-20 px-6 text-center"
-          >
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-[460px] z-[1]"
-              style={{ background: "radial-gradient(ellipse 60% 70% at 50% -10%, rgba(123,20,37,.10), rgba(123,20,37,0) 70%)" }}
+        {/* 2. Hero Section */}
+        <section className="relative pt-24 pb-20 px-6 text-center overflow-hidden">
+          <div className="relative max-w-5xl mx-auto">
+            <Kicker>Multi-agent e-commerce intelligence</Kicker>
+
+            <InkBackground
+              lines={[
+                { text: "Turn your store data into", color: "#14090b", fontWeight: 600 },
+                { text: "smarter business decisions.", color: "#7b1425", fontWeight: 800, fontStyle: "italic" },
+              ]}
+              accent="#7b1425"
+              className="mt-6"
             />
-            <div className="relative z-10 max-w-5xl mx-auto">
-              <Kicker>Multi-agent e-commerce intelligence</Kicker>
 
-              <h1 style={display} className="mt-6 text-[2.6rem] sm:text-6xl lg:text-[5.4rem] font-semibold tracking-[-0.03em] leading-[1.02]">
-                Turn your store data into
-                <br />
-                <span className="italic font-extrabold text-[#7b1425]">smarter business decisions.</span>
-              </h1>
+            <p className="mt-7 text-lg sm:text-xl text-[#14090b]/65 max-w-2xl mx-auto leading-relaxed">
+              Understand sales performance, discover customer behavior, predict trends, and grow your e-commerce business with AI-powered intelligence.
+            </p>
 
-              <p className="mt-7 text-lg sm:text-xl text-[#14090b]/65 max-w-2xl mx-auto leading-relaxed">
-                Understand sales performance, discover customer behavior, predict trends, and grow your e-commerce business with AI-powered intelligence.
-              </p>
-
-              <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/dashboard"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#7b1425] hover:bg-[#14090b] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-                >
-                  <span>Get Started</span>
-                  <ArrowRight size={16} />
-                </Link>
-                <a
-                  href="#features"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-[#14090b]/40 hover:bg-[#14090b] hover:text-white text-[#14090b] font-semibold text-sm transition-colors"
-                >
-                  Explore Features
-                </a>
-              </div>
+            <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/dashboard"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#7b1425] hover:bg-[#14090b] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+              >
+                <span>Get Started</span>
+                <ArrowRight size={16} />
+              </Link>
+              <a
+                href="#features"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-[#14090b]/40 hover:bg-[#14090b] hover:text-white text-[#14090b] font-semibold text-sm transition-colors"
+              >
+                Explore Features
+              </a>
             </div>
-          </InkBackground>
+          </div>
         </section>
 
         {/* 3. Capabilities - Reveal & Stagger */}
