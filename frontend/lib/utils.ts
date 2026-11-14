@@ -26,7 +26,7 @@ export function formatNumber(val: number | null | undefined): string {
 }
 
 export function formatPercent(val: number | null | undefined): string {
-  if (val === null || val === undefined || isNaN(val)) return "0.0%";
+  if (val === null || val === undefined || !Number.isFinite(val)) return "0.0%";
   const sign = val > 0 ? "+" : "";
   return `${sign}${val.toFixed(1)}%`;
 }
@@ -35,13 +35,14 @@ export function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "-";
   try {
     const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "-";
     return d.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric"
     });
   } catch {
-    return dateStr;
+    return "-";
   }
 }
 

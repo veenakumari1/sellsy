@@ -41,11 +41,14 @@ class AnalyticsService:
         prev_count = len(previous_orders)
         prev_aov = prev_rev / prev_count if prev_count > 0 else 0.0
 
-        # Calculate percentage changes safely
+        # Calculate percentage changes safely (0% if no prior period data)
         def calc_delta(curr: float, prev: float) -> float:
-            if prev == 0:
-                return 100.0 if curr > 0 else 0.0
-            return round(((curr - prev) / prev) * 100, 1)
+            if prev <= 0:
+                return 0.0
+            diff = ((curr - prev) / prev) * 100
+            if not (-999 <= diff <= 999):
+                return 0.0
+            return round(diff, 1)
 
         rev_delta = calc_delta(curr_rev, prev_rev)
         orders_delta = calc_delta(curr_count, prev_count)
@@ -62,14 +65,19 @@ class AnalyticsService:
         def make_card(title: str, val: float, is_currency: bool, delta: float, sub: str) -> KpiCard:
             val_str = f"Rs {int(round(val)):,}" if is_currency else f"{int(val):,}"
             trend = "up" if delta > 0 else ("down" if delta < 0 else "neutral")
+            card_sub = sub
+            if prev_rev == 0 and "vs previous" in sub:
+                card_sub = "not enough prior data"
             return KpiCard(
                 title=title,
                 value=val_str,
                 numeric_value=round(val, 2),
                 delta_pct=delta,
                 trend=trend,
-                subtext=sub
+                subtext=card_sub
             )
+
+        growth_sub = "period-over-period" if prev_rev > 0 else "not enough prior data"
 
         return KpiSummaryOut(
             total_revenue=make_card("Total Revenue", curr_rev, True, rev_delta, f"vs previous {days} days"),
@@ -84,7 +92,7 @@ class AnalyticsService:
                 trend="up",
                 subtext="industry benchmark 2.8%"
             ),
-            revenue_growth=make_card("Revenue Growth", rev_delta, False, rev_delta, "period-over-period")
+            revenue_growth=make_card("Revenue Growth", rev_delta, False, rev_delta, growth_sub)
         )
 
     @staticmethod
@@ -131,12 +139,28 @@ class AnalyticsService:
         # Overall AOV
         overall_aov = round(total_rev / total_ord, 2) if total_ord > 0 else 0.0
 
+        # Prior period comparison for growth
+        previous_start = start_date - timedelta(days=days)
+        prev_rev = db.query(func.sum(Order.total_price)).filter(
+            Order.store_id == store_id,
+            Order.created_at >= previous_start,
+            Order.created_at < start_date,
+            Order.financial_status != "refunded"
+        ).scalar() or 0.0
+
+        if prev_rev > 0:
+            growth_pct = round(((total_rev - prev_rev) / prev_rev) * 100, 1)
+            if not (-999 <= growth_pct <= 999):
+                growth_pct = 0.0
+        else:
+            growth_pct = 0.0
+
         return SalesTrendsOut(
             timeline=points,
             total_revenue=round(total_rev, 2),
             total_orders=float(total_ord),
             aov=overall_aov,
-            growth_rate_pct=14.2
+            growth_rate_pct=growth_pct
         )
 
     @staticmethod

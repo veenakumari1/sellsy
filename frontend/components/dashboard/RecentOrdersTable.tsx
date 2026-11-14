@@ -50,10 +50,21 @@ export const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({ orders }) 
                   </td>
                   <td className="px-4 py-3.5 font-medium text-[#2a1b1e] align-middle whitespace-nowrap">{o.customer_name}</td>
                   <td className="px-4 py-3.5 align-middle whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700">
-                      <CheckCircle2 size={11} className="flex-shrink-0" />
-                      <span>Paid</span>
-                    </span>
+                    {o.financial_status === "refunded" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700">
+                        <span>Refunded</span>
+                      </span>
+                    ) : o.financial_status === "pending" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700">
+                        <Clock size={11} className="flex-shrink-0" />
+                        <span>Pending</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+                        <CheckCircle2 size={11} className="flex-shrink-0" />
+                        <span>Paid</span>
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3.5 text-right text-[#5a4e50] align-middle whitespace-nowrap">{o.items_count}</td>
                   <td className="px-4 py-3.5 text-[#6f6264] align-middle whitespace-nowrap">{formatDate(o.created_at)}</td>

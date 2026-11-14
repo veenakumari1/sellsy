@@ -21,8 +21,9 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   subtext,
   icon,
 }) => {
-  const isUp = trend === "up" || deltaPct > 0;
-  const isDown = trend === "down" || deltaPct < 0;
+  const validDelta = typeof deltaPct === "number" && Number.isFinite(deltaPct) ? deltaPct : 0;
+  const isUp = (trend === "up" && validDelta > 0) || validDelta > 0;
+  const isDown = (trend === "down" && validDelta < 0) || validDelta < 0;
 
   return (
     <div className="bg-white rounded-xl border border-[#e8e2dc]/80 p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between h-full">
@@ -50,7 +51,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
             ) : (
               <Minus size={13} className="flex-shrink-0" />
             )}
-            <span>{deltaPct > 0 ? `+${deltaPct}%` : `${deltaPct}%`}</span>
+            <span>{validDelta > 0 ? `+${validDelta}%` : `${validDelta}%`}</span>
           </div>
         </div>
       </div>

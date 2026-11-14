@@ -107,7 +107,9 @@ export default function SalesAnalyticsPage() {
                   <p className="text-2xl font-bold text-[#14090b] mt-1 whitespace-nowrap">{formatCurrency(trends.total_revenue)}</p>
                 </div>
                 <p className="text-xs font-semibold text-emerald-600 mt-2 truncate">
-                  {formatPercent(kpis.total_revenue.delta_pct)} vs previous {days} days
+                  {kpis.total_revenue.delta_pct > 0
+                    ? `${formatPercent(kpis.total_revenue.delta_pct)} vs previous ${days} days`
+                    : (kpis.total_revenue.subtext || "0% (new store)")}
                 </p>
               </div>
 
@@ -117,7 +119,9 @@ export default function SalesAnalyticsPage() {
                   <p className="text-2xl font-bold text-[#14090b] mt-1 whitespace-nowrap">{formatNumber(trends.total_orders)}</p>
                 </div>
                 <p className="text-xs font-semibold text-emerald-600 mt-2 truncate">
-                  {formatPercent(kpis.total_orders.delta_pct)} order volume
+                  {kpis.total_orders.delta_pct > 0
+                    ? `${formatPercent(kpis.total_orders.delta_pct)} order volume`
+                    : (kpis.total_orders.subtext || "0% (new store)")}
                 </p>
               </div>
 
@@ -127,16 +131,22 @@ export default function SalesAnalyticsPage() {
                   <p className="text-2xl font-bold text-[#14090b] mt-1 whitespace-nowrap">{formatCurrency(trends.aov)}</p>
                 </div>
                 <p className="text-xs font-semibold text-[#6f6264] mt-2 truncate">
-                  {formatPercent(kpis.average_order_value.delta_pct)} vs previous period
+                  {kpis.average_order_value.delta_pct > 0
+                    ? `${formatPercent(kpis.average_order_value.delta_pct)} vs previous period`
+                    : (kpis.average_order_value.subtext || "per completed order")}
                 </p>
               </div>
 
               <div className="bg-white p-5 rounded-xl border border-[#e8e2dc]/80 shadow-xs flex flex-col justify-between h-full">
                 <div>
                   <p className="text-xs font-semibold text-[#a89b99] uppercase tracking-wider truncate">Growth</p>
-                  <p className="text-2xl font-bold text-emerald-600 mt-1 whitespace-nowrap">+{trends.growth_rate_pct}%</p>
+                  <p className="text-2xl font-bold text-emerald-600 mt-1 whitespace-nowrap">
+                    {trends.growth_rate_pct > 0 ? `+${trends.growth_rate_pct}%` : `${trends.growth_rate_pct}%`}
+                  </p>
                 </div>
-                <p className="text-xs text-[#6f6264] mt-2 truncate">Compared to previous period</p>
+                <p className="text-xs text-[#6f6264] mt-2 truncate">
+                  {trends.growth_rate_pct === 0 ? "Not enough prior period data" : "Compared to previous period"}
+                </p>
               </div>
             </div>
 
