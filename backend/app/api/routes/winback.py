@@ -13,7 +13,7 @@ from app.schemas import (
 from app.services.winback_service import WinBackService
 from app.api.deps import get_current_store
 
-router = APIRouter(prefix="/winback", tags=["Churn Prediction & Win-Back"])
+router = APIRouter(prefix="/winback", tags=["Customer Prediction & Win-Back"])
 
 @router.get("/at-risk", response_model=WinBackListResponse)
 def get_at_risk_customers(

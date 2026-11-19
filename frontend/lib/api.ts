@@ -471,7 +471,7 @@ export class ApiClient {
     return this.request<any[]>(`/api/v1/agents/history?limit=${limit}`, { forceRefresh });
   }
 
-  // --- Churn Prediction & Win-Back ---
+  // --- Customer Prediction & Win-Back ---
   static async getAtRiskCustomers(days = 30, forceRefresh = false) {
     return this.request<any>(`/api/v1/winback/at-risk?days=${days}`, { forceRefresh });
   }

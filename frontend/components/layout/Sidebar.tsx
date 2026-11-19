@@ -99,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { name: "Products", href: "/products", icon: Package },
     { name: "Inventory Alerts", href: "/inventory", icon: Boxes, highlight: true },
     { name: "Customers", href: "/customers", icon: Users },
-    { name: "Win-Back", href: "/winback", icon: UserCheck, highlight: true },
+    { name: "Customer Prediction & Win-Back", href: "/winback", icon: UserCheck, highlight: true },
     { name: "Forecast", href: "/forecasting", icon: LineChart },
     { name: "Marketing", href: "/marketing", icon: Sparkles },
     { name: "AI Content", href: "/content", icon: Wand2, highlight: true },

@@ -79,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       case "/customers":
         return "Customers";
       case "/winback":
-        return "Win-Back";
+        return "Customer Prediction & Win-Back";
       case "/forecasting":
         return "Forecast";
       case "/marketing":

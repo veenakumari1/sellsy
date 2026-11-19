@@ -466,7 +466,7 @@ class AgentRunResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-# Feature 2: Churn Prediction & Win-Back
+# Feature 2: Customer Prediction & Win-Back
 class AtRiskCustomerOut(BaseModel):
     id: str
     name: str

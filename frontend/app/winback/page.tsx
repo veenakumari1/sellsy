@@ -134,7 +134,7 @@ export default function WinBackPage() {
             </div>
             <h1 className="text-2xl font-bold text-[#14090b] tracking-tight mt-1 flex items-center gap-2">
               <UserCheck className="text-[#7b1425]" size={26} />
-              Churn Prediction & Win-Back
+              Customer Prediction & Win-Back
             </h1>
             <p className="text-xs text-[#6f6264] mt-0.5 max-w-2xl">
               Identifies previous buyers at risk of permanent churn. Re-engage them directly via personalized WhatsApp
