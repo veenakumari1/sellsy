@@ -43,7 +43,7 @@ const slides: Slide[] = [
   {
     id: 1,
     badge: "Welcome",
-    title: "Welcome to Sellsy",
+    title: "Welcome to Storsy",
     description: "Your store's sales, products and customers, all in one simple place.",
     icon: Store,
   },
@@ -206,7 +206,7 @@ export default function ExploreDemoWalkthrough() {
   // Mute preference in localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("sellsy_demo_muted");
+      const saved = localStorage.getItem("storsy_demo_muted") ?? localStorage.getItem("sellsy_demo_muted");
       if (saved !== null) {
         const val = saved === "true";
         setIsMuted(val);
@@ -220,7 +220,7 @@ export default function ExploreDemoWalkthrough() {
       const next = !prev;
       mutedRef.current = next;
       try {
-        localStorage.setItem("sellsy_demo_muted", String(next));
+        localStorage.setItem("storsy_demo_muted", String(next));
       } catch {}
       if (!next) {
         getOrCreateAudioContext();
@@ -498,13 +498,13 @@ export default function ExploreDemoWalkthrough() {
             }}
             className="px-4 text-white"
           >
-            Sellsy
+            Storsy
           </span>
           <span
             style={monoFont}
             className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-medium text-white/75"
           >
-            SELLSY PLATFORM
+            STORSY PLATFORM
           </span>
         </div>
       </div>,

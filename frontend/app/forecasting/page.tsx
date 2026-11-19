@@ -210,7 +210,7 @@ export default function ForecastingPage() {
             <AlertCircle size={36} className="text-amber-500 mx-auto mb-3" />
             <h3 className="text-base font-bold text-[#14090b]">More sales data needed</h3>
             <p className="text-xs text-[#6f6264] mt-2 leading-relaxed">
-              {forecast?.insufficient_data_reason || "Sellsy needs at least 15 completed orders to generate an accurate forecast for your store."}
+              {forecast?.insufficient_data_reason || "Storsy needs at least 15 completed orders to generate an accurate forecast for your store."}
             </p>
           </div>
         )}

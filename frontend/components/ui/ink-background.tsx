@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * @author: @dorianbaffier (adapted for Sellsy & Tailwind 3)
+ * @author: @dorianbaffier (adapted for Storsy & Tailwind 3)
  * @description: Interactive Ink Headline & Background from Kokonut UI
  * @license: MIT
  * @website: https://kokonutui.com
@@ -375,12 +375,26 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
     return pair;
   };
 
-  let velocity: Double;
-  let dye: Double;
-  let pressure: Double;
-  let divergence: Target;
-  let curl: Target;
+  const free = () => {
+    for (const t of textures) gl.deleteTexture(t);
+    for (const f of framebuffers) gl.deleteFramebuffer(f);
+    textures.length = 0;
+    framebuffers.length = 0;
+  };
+
   let aspect = 1;
+  const sizeFor = (short: number) =>
+    aspect >= 1
+      ? [Math.round(short * aspect), short]
+      : [short, Math.round(short / aspect)];
+
+  const [initSw, initSh] = sizeFor(SIM);
+  const [initDw, initDh] = sizeFor(DYE);
+  let velocity: Double = double(initSw, initSh, gl.RG16F, gl.RG);
+  let dye: Double = double(initDw, initDh, gl.RGBA16F, gl.RGBA);
+  let pressure: Double = double(initSw, initSh, gl.R16F, gl.RED);
+  let divergence: Target = target(initSw, initSh, gl.R16F, gl.RED);
+  let curl: Target = target(initSw, initSh, gl.R16F, gl.RED);
   const mask = gl.createTexture() as WebGLTexture;
   gl.bindTexture(gl.TEXTURE_2D, mask);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -398,18 +412,6 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
     gl.UNSIGNED_BYTE,
     new Uint8Array([0, 0, 0, 0])
   );
-
-  const free = () => {
-    for (const t of textures) gl.deleteTexture(t);
-    for (const f of framebuffers) gl.deleteFramebuffer(f);
-    textures.length = 0;
-    framebuffers.length = 0;
-  };
-
-  const sizeFor = (short: number) =>
-    aspect >= 1
-      ? [Math.round(short * aspect), short]
-      : [short, Math.round(short / aspect)];
 
   let unit = 0;
   const run = (name: ProgramName, texel: [number, number]) => {
@@ -443,6 +445,7 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
 
   return {
     resize(w, h) {
+      if (!w || !h || w < 2 || h < 2) return;
       canvasW = w;
       canvasH = h;
       aspect = w / h;
@@ -462,6 +465,7 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     },
     initDyeFromMask() {
+      if (!dye?.read || !dye?.write) return;
       // Instantly copies the mask into the dye texture so headline letters are immediately filled
       const p = run("gather", [1 / dye.read.w, 1 / dye.read.h]);
       bind(p, "uDye", dye.read.tex);
@@ -476,6 +480,7 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       accentColor = a;
     },
     splat(x, y, vx, vy, ink, radius) {
+      if (!velocity?.read || !velocity?.write || !dye?.read || !dye?.write) return;
       const r = radius * (aspect > 1 ? aspect : 1);
       let p = run("splat", [1 / velocity.read.w, 1 / velocity.read.h]);
       bind(p, "uTarget", velocity.read.tex);
@@ -497,6 +502,18 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       }
     },
     step(dt, gather) {
+      if (
+        !velocity?.read ||
+        !velocity?.write ||
+        !dye?.read ||
+        !dye?.write ||
+        !pressure?.read ||
+        !pressure?.write ||
+        !curl ||
+        !divergence
+      ) {
+        return;
+      }
       const sim: [number, number] = [1 / velocity.read.w, 1 / velocity.read.h];
       let p = run("curl", sim);
       bind(p, "uVelocity", velocity.read.tex);
@@ -568,6 +585,7 @@ function createFluid(gl: WebGL2RenderingContext): Fluid | null {
       }
     },
     draw() {
+      if (!dye?.read) return;
       const p = run("display", [1 / dye.read.w, 1 / dye.read.h]);
       bind(p, "uDye", dye.read.tex);
       gl.uniform3fv(p.uniforms.ink1, ink1Color);
@@ -649,6 +667,7 @@ export default function InkBackground({
 
     const maskCanvas = document.createElement("canvas");
 
+    let isBuilt = false;
     let width = 0;
     let height = 0;
     let raf = 0;
@@ -729,13 +748,15 @@ export default function InkBackground({
       fluid.draw();
 
       if (!canceled) {
+        isBuilt = true;
         setReady(true);
+        start();
       }
     };
 
     const frame = (now: number) => {
       raf = 0;
-      if (!visible) return;
+      if (!visible || !isBuilt) return;
       const dt = Math.min((now - (last || now - 16)) / 1000, 1 / 30);
       last = now;
       if (hand.down || hand.moved > now - 100) {
@@ -754,7 +775,7 @@ export default function InkBackground({
     };
 
     const start = () => {
-      if (!raf && visible && !reduceMotion) {
+      if (!raf && visible && isBuilt && !reduceMotion) {
         last = 0;
         raf = requestAnimationFrame(frame);
       }
@@ -793,6 +814,7 @@ export default function InkBackground({
     };
 
     const onMove = (event: PointerEvent) => {
+      if (!isBuilt) return;
       const p = local(event);
       if (hand.on) {
         const dx = p.x - hand.x;
@@ -822,6 +844,7 @@ export default function InkBackground({
     };
 
     const onDown = (event: PointerEvent) => {
+      if (!isBuilt) return;
       if ((event.target as HTMLElement).closest("a, button, input, textarea")) {
         return;
       }
@@ -863,6 +886,7 @@ export default function InkBackground({
 
     return () => {
       canceled = true;
+      isBuilt = false;
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       intersection.disconnect();

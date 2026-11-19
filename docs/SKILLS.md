@@ -4,7 +4,7 @@
 
 ## 1. Overview
 
-Sellsy organizes analytical knowledge into reusable Skill definition files located in `skills/`. Each skill provides structured execution instructions, required inputs, tool integration guidelines, and validation rules.
+Storsy organizes analytical knowledge into reusable Skill definition files located in `skills/`. Each skill provides structured execution instructions, required inputs, tool integration guidelines, and validation rules.
 
 ---
 

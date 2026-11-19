@@ -52,7 +52,7 @@ NEXT_PUBLIC_API_URL=https://sellsy-backend-production.up.railway.app
 
 ## 3. Local Development Setup
 
-To run Sellsy locally on your workstation:
+To run Storsy locally on your workstation:
 
 ### Backend:
 ```bash

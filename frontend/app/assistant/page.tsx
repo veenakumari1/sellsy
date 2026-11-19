@@ -218,7 +218,7 @@ export default function AssistantPage() {
                   <BotMessageSquare size={24} />
                 </div>
                 <div>
-                  <h4 className="text-base font-bold text-[#14090b]">How can Sellsy help your store today?</h4>
+                  <h4 className="text-base font-bold text-[#14090b]">How can Storsy help your store today?</h4>
                   <p className="text-xs text-[#6f6264] mt-1 leading-relaxed">
                     Ask questions about your sales, top products, returning buyers, or marketing ideas.
                   </p>

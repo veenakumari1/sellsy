@@ -18,6 +18,7 @@ from app.models.entities import (
     AchievementDefinition,
     UserAchievement,
     GamificationActivity,
+    AgentRun,
     generate_uuid,
     utc_now
 )
@@ -42,6 +43,7 @@ __all__ = [
     "AchievementDefinition",
     "UserAchievement",
     "GamificationActivity",
+    "AgentRun",
     "generate_uuid",
     "utc_now"
 ]

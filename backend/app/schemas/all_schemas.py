@@ -429,3 +429,131 @@ class ClaimTaskRequest(BaseModel):
     task_key: str
     task_title: str
 
+# ----------------- AI Growth Features -----------------
+
+# Feature 1: Multi-Agent AI Team
+class AgentFinding(BaseModel):
+    specialist: str
+    role: str
+    status: str = "completed"
+    headline: str
+    metrics: Dict[str, Any] = Field(default_factory=dict)
+    key_finding: str
+    recommendation: str
+    confidence_score: float = 0.95
+
+class ActionPlanItem(BaseModel):
+    priority: str  # high, medium, low
+    title: str
+    description: str
+    expected_impact: str
+    action_category: str  # sales, inventory, marketing
+
+class ManagerPlan(BaseModel):
+    weekly_theme: str
+    executive_summary: str
+    actions: List[ActionPlanItem]
+    generated_at: str
+
+class AgentRunResponse(BaseModel):
+    id: str
+    store_id: str
+    sales_finding: Dict[str, Any]
+    inventory_finding: Dict[str, Any]
+    marketing_finding: Dict[str, Any]
+    manager_plan: Dict[str, Any]
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Feature 2: Churn Prediction & Win-Back
+class AtRiskCustomerOut(BaseModel):
+    id: str
+    name: str
+    email: str
+    phone: Optional[str] = None
+    whatsapp: Optional[str] = None
+    days_inactive: int
+    last_order_at: Optional[datetime] = None
+    orders_count: int
+    total_spent: float
+    risk_level: str  # High, Medium, Low
+    last_product_name: Optional[str] = None
+    currency: str = "PKR"
+
+    model_config = ConfigDict(from_attributes=True)
+
+class WinBackListResponse(BaseModel):
+    customers: List[AtRiskCustomerOut]
+    total_at_risk: int
+    high_risk_count: int
+    medium_risk_count: int
+    low_risk_count: int
+    potential_revenue_at_risk: float
+
+class CustomerWhatsappUpdate(BaseModel):
+    whatsapp: str
+
+class WinBackMessageRequest(BaseModel):
+    customer_id: str
+    discount_code: Optional[str] = "WELCOMEBACK"
+
+class WinBackMessageResponse(BaseModel):
+    customer_id: str
+    customer_name: str
+    whatsapp: Optional[str] = None
+    message: str
+    wa_link: Optional[str] = None
+
+# Feature 3: Inventory and Restock Alerts
+class InventoryAlertItem(BaseModel):
+    id: str
+    title: str
+    sku: Optional[str] = None
+    category_name: Optional[str] = None
+    price: float
+    inventory_quantity: int
+    reorder_level: int
+    daily_velocity: float
+    days_left: Optional[int] = None
+    status: str  # Out of stock, Low stock, Healthy
+    suggested_restock_qty: int
+    restock_reason: str
+    estimated_restock_cost: float
+
+    model_config = ConfigDict(from_attributes=True)
+
+class InventoryAlertsResponse(BaseModel):
+    items: List[InventoryAlertItem]
+    total_skus: int
+    low_stock_count: int
+    out_of_stock_count: int
+    healthy_count: int
+    estimated_reorder_cost: float
+
+class ReorderLevelUpdate(BaseModel):
+    reorder_level: int = Field(..., ge=0)
+
+# Feature 4: AI Content Generator
+class ContentGenerateRequest(BaseModel):
+    product_id: str
+    content_type: str = "description"  # description, ad_copy, social_post
+    tone: str = "friendly"  # friendly, premium, urgent
+
+class ContentVariation(BaseModel):
+    id: int
+    title: str
+    headline: str
+    body: str
+    call_to_action: str
+    tags: List[str] = Field(default_factory=list)
+    char_count: int = 0
+
+class ContentGenerateResponse(BaseModel):
+    product_id: str
+    product_title: str
+    content_type: str
+    tone: str
+    variations: List[ContentVariation]
+
+

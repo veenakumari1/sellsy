@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * @author: @dorianbaffier (adapted for Sellsy & Tailwind 3)
+ * @author: @dorianbaffier (adapted for Storsy & Tailwind 3)
  * @description: Page Flip from Kokonut UI
  * @license: MIT
  * @website: https://kokonutui.com
@@ -648,7 +648,7 @@ function Paper({
         "absolute top-0 h-full w-1/2 origin-top-left overflow-hidden text-white",
         back
           ? "bg-[#5c0f1c]" // slightly deeper maroon for the back of sheet
-          : "bg-[#7b1425]", // rich Sellsy burgundy/maroon for page front
+          : "bg-[#7b1425]", // rich Storsy burgundy/maroon for page front
         side === "left"
           ? "left-0 rounded-l-md shadow-[inset_-2px_0_6px_rgba(0,0,0,0.35)]"
           : "left-1/2 rounded-r-md shadow-[inset_2px_0_6px_rgba(0,0,0,0.35)]",

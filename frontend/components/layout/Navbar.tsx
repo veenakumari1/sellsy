@@ -74,14 +74,22 @@ export const Navbar: React.FC<NavbarProps> = ({
         return "Sales";
       case "/products":
         return "Products";
+      case "/inventory":
+        return "Inventory Alerts";
       case "/customers":
         return "Customers";
+      case "/winback":
+        return "Win-Back";
       case "/forecasting":
         return "Forecast";
       case "/marketing":
         return "Marketing";
+      case "/content":
+        return "AI Content";
       case "/assistant":
         return "Assistant";
+      case "/agents":
+        return "AI Team";
       case "/rewards":
         return "Rewards";
       case "/reports":
@@ -119,8 +127,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Menu size={22} />
         </button>
 
-        {/* Mobile Sellsy Logo */}
-        <Link href="/" className="flex md:hidden items-center flex-shrink-0 mr-1" aria-label="Sellsy Home">
+        {/* Mobile Storsy Logo */}
+        <Link href="/" className="flex md:hidden items-center flex-shrink-0 mr-1" aria-label="Storsy Home">
           <Logo size={26} />
         </Link>
 

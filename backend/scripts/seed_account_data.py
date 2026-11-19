@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Seed Account Data Script for Sellsy
+Seed Account Data Script for Storsy
 Usage:
     python scripts/seed_account_data.py --email sarah@gmail.com [--reset] [--days 7] [--scale 1.0]
 
@@ -33,12 +33,12 @@ from app.core.database import SessionLocal, engine, database_url, Base
 from app.models import (
     User, Store, ProductCategory, Product, Customer, Order, OrderItem,
     AiInsight, Notification, UserGamification, AchievementDefinition,
-    UserAchievement, GamificationActivity
+    UserAchievement, GamificationActivity, AgentRun
 )
 from app.services.gamification_service import GamificationService
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Seed realistic compact sample data into an existing Sellsy account.")
+    parser = argparse.ArgumentParser(description="Seed realistic compact sample data into an existing Storsy account.")
     parser.add_argument("--email", required=True, help="Email address of the target user (e.g. sarah@gmail.com)")
     parser.add_argument("--reset", action="store_true", help="Delete existing data for this store before seeding")
     parser.add_argument("--days", type=int, default=7, help="Number of historical days for orders (default: 7)")
@@ -90,7 +90,8 @@ PRODUCTS_DATA = [
         "price": 3900.0,
         "cost": 2450.0, # 62.8%
         "sku": "HOM-PLN-002",
-        "qty": 5, # Low stock
+        "qty": 0, # Out of stock
+        "reorder_level": 10,
         "desc": "Hand-hammered warm brass planter with protective clear coat and indoor drainage plate."
     },
     {
@@ -119,7 +120,8 @@ PRODUCTS_DATA = [
         "price": 14500.0,
         "cost": 9200.0, # 63.4%
         "sku": "LEA-BAG-002",
-        "qty": 9,
+        "qty": 5, # Low stock
+        "reorder_level": 10,
         "desc": "Handcrafted premium buffalo leather 15-inch laptop briefcase with antique brass hardware."
     },
     {
@@ -227,6 +229,7 @@ def seed_store_data(
             cost_price=p_info["cost"],
             sku=p_info["sku"],
             inventory_quantity=p_info["qty"],
+            reorder_level=p_info.get("reorder_level", 10),
             status="active"
         )
         db.add(prod)
@@ -242,6 +245,7 @@ def seed_store_data(
             last_name=ln,
             email=email,
             phone=phone,
+            whatsapp=phone,
             total_spent=0.0,
             orders_count=0,
             segment="new"
@@ -386,6 +390,32 @@ def seed_store_data(
         else:
             cust.segment = "inactive"
 
+    # Ensure realistic at-risk cohorts for Win-Back feature
+    if len(customer_objs) >= 3:
+        # Customer 0: inactive 95 days (High Risk)
+        c0 = customer_objs[0]
+        c0.orders_count = max(c0.orders_count, 3)
+        c0.total_spent = max(c0.total_spent, 18500.0)
+        c0.last_order_at = now - timedelta(days=95)
+        c0.first_order_at = now - timedelta(days=130)
+        c0.segment = "at_risk"
+
+        # Customer 1: inactive 65 days (Medium/High Risk)
+        c1 = customer_objs[1]
+        c1.orders_count = max(c1.orders_count, 2)
+        c1.total_spent = max(c1.total_spent, 9800.0)
+        c1.last_order_at = now - timedelta(days=65)
+        c1.first_order_at = now - timedelta(days=85)
+        c1.segment = "at_risk"
+
+        # Customer 2: inactive 38 days (Medium/Low Risk)
+        c2 = customer_objs[2]
+        c2.orders_count = max(c2.orders_count, 1)
+        c2.total_spent = max(c2.total_spent, 4500.0)
+        c2.last_order_at = now - timedelta(days=38)
+        c2.first_order_at = now - timedelta(days=38)
+        c2.segment = "at_risk"
+
     # 8. Create AI Insights (PKR)
     insights_data = [
         {
@@ -497,7 +527,7 @@ def seed_store_data(
                 ua.current_progress = ad.target_progress
 
     activities_data = [
-        ("store_registered", 50, "Connected storefront to Sellsy intelligence engine", 6),
+        ("store_registered", 50, "Connected storefront to Storsy intelligence engine", 6),
         ("first_sale", 25, "Recorded first customer transaction", 4),
         ("daily_review", 20, "Checked store analytics dashboard", 1)
     ]
@@ -509,6 +539,12 @@ def seed_store_data(
             description=desc,
             created_at=now - timedelta(days=days_ago)
         ))
+
+    # 10. Seed Initial Multi-Agent AI Team Run
+    existing_agent_run = db.query(AgentRun).filter(AgentRun.store_id == store.id).first()
+    if not existing_agent_run:
+        from app.services.agents_team_service import AgentsTeamService
+        AgentsTeamService.execute_full_run(db, store)
 
     db.commit()
 

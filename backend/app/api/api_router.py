@@ -2,7 +2,8 @@ from fastapi import APIRouter
 from app.api.routes import (
     auth, stores, sales, products, customers,
     forecasts, marketing, assistant, reports, integrations,
-    notifications, gamification, realtime
+    notifications, gamification, realtime,
+    agents, winback, inventory, content
 )
 
 api_router = APIRouter()
@@ -20,5 +21,10 @@ api_router.include_router(integrations.router)
 api_router.include_router(notifications.router)
 api_router.include_router(gamification.router)
 api_router.include_router(realtime.router)
+api_router.include_router(agents.router)
+api_router.include_router(winback.router)
+api_router.include_router(inventory.router)
+api_router.include_router(content.router)
+
 
 

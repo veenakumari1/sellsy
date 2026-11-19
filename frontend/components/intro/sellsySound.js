@@ -1,13 +1,13 @@
 /**
- * sellsySound.js — cinematic "wow" intro score for SellsyIntro
+ * storsySound.js — cinematic "wow" intro score for StorsyIntro
  * Drop-in replacement for the inline createSound() (same API).
  *
  * Feel: warm pad swell + rising air → deep sub "drop" exactly when the logo
  * slides away → glassy bell chord → soft sparkles while the ribbon flies →
  * resolving chord at the finale. No chiptune/arcade/club sounds.
  *
- * Usage in SellsyIntro.jsx:
- *   import { createSound, NOOP } from './sellsySound';
+ * Usage in StorsyIntro.jsx:
+ *   import { createSound, NOOP } from './storsySound';
  *   const sound = createSound(setSnd, logoTime, duration) || NOOP;
  *   (delete the old SCALE / NOOP / createSound block from the component)
  *
@@ -29,7 +29,7 @@ export function createSound(onUi, logoTime = 3, duration = 4.5) {
   if (!AC) return null;
 
   let muted = false;
-  try { muted = localStorage.getItem('sellsySoundMuted') === '1'; } catch (e) {}
+  try { muted = (localStorage.getItem('storsySoundMuted') ?? localStorage.getItem('sellsySoundMuted')) === '1'; } catch (e) {}
 
   const ctx = new AC();
 
@@ -200,7 +200,7 @@ export function createSound(onUi, logoTime = 3, duration = 4.5) {
     toggle() {
       if (ctx.state !== 'running') { muted = false; ctx.resume().catch(() => {}); }
       else muted = !muted;
-      try { localStorage.setItem('sellsySoundMuted', muted ? '1' : '0'); } catch (e) {}
+      try { localStorage.setItem('storsySoundMuted', muted ? '1' : '0'); } catch (e) {}
       applyVol(); ui();
     },
 

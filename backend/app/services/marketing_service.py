@@ -35,7 +35,7 @@ class MarketingService:
                 offer_summary=f"Exclusive 48-hour early release window with a complimentary artisanal gift on orders exceeding Rs {target_aov_threshold:,.0f}.",
                 expected_impact="+18% Repeat Purchase Rate lift, estimated Rs 250,000+ incremental weekend revenue.",
                 action_steps=[
-                    "Export high-value customer segment list from Sellsy Customers tab.",
+                    "Export high-value customer segment list from Storsy Customers tab.",
                     f"Draft email emphasizing appreciation for their brand loyalty with private shop link.",
                     f"Set minimum cart threshold of Rs {target_aov_threshold:,.0f} for free gift qualification.",
                     "Schedule send for Thursday 6:00 PM EST prior to peak weekend buying traffic."
@@ -74,7 +74,7 @@ class MarketingService:
                     offer_summary="Tiered incentive: 'Rs 1,500 off your next order over Rs 6,000' expiring in 7 days.",
                     expected_impact=f"Reactivate ~12-15% of lapsed customers (approx {int(at_risk_seg.count * 0.14)} reactivated orders).",
                     action_steps=[
-                        "Segment customers filtered by 'At-Risk' in Sellsy.",
+                        "Segment customers filtered by 'At-Risk' in Storsy.",
                         "Step 1: 'We Miss You - See What's New' email with highlighted top-selling items.",
                         "Step 2 (4 days later): Time-sensitive reminder of the Rs 1,500 voucher countdown."
                     ]

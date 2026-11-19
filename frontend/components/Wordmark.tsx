@@ -26,7 +26,7 @@ export function Wordmark({ size = 28, compact = false, className = "" }: Wordmar
       <span style={{ color: "#7b1425" }}>S</span>
       {!compact && (
         <>
-          ell<span>s</span>
+          tor<span>s</span>
           <span style={{ color: "#7b1425" }}>y</span>
         </>
       )}

@@ -15,7 +15,7 @@ import {
   Plug,
   Sparkles,
 } from "lucide-react";
-import SellsyIntro from "@/components/intro/SellsyIntro";
+import StorsyIntro from "@/components/intro/StorsyIntro";
 import ChatWidget from "@/components/ChatWidget";
 import { Logo } from "@/components/Logo";
 import { Reveal } from "@/components/Reveal";
@@ -63,7 +63,7 @@ const features = [
   { icon: Users, title: "Customer Insights", text: "RFM segmentation (High-Value VIPs, Returning Loyalists, At-Risk Shoppers) with verified cohort repeat rates and churn prevention triggers." },
   { icon: LineChart, title: "Statistical Forecasting", text: "Holt-Winters double exponential smoothing with 80% confidence bands. Predictive mathematical models rather than LLM hallucinations." },
   { icon: Sparkles, title: "AI Marketing Advisor", text: "Actionable marketing blueprints, hero product campaigns, cart threshold optimizations, and cross-sell pairing suggestions." },
-  { icon: BotMessageSquare, title: "Sellsy AI Assistant", text: "Conversational assistant powered by Model Context Protocol (MCP) tools and LangGraph multi-agent orchestration." },
+  { icon: BotMessageSquare, title: "Storsy AI Assistant", text: "Conversational assistant powered by Model Context Protocol (MCP) tools and LangGraph multi-agent orchestration." },
 ];
 
 const agents = [
@@ -91,7 +91,7 @@ function Kicker({ children, light = false }: { children: React.ReactNode; light?
 const shouldSkipIntro = () => {
   if (typeof window === "undefined") return false;
   try {
-    if (sessionStorage.getItem("sellsyIntroSeen") === "true") return true;
+    if ((sessionStorage.getItem("storsyIntroSeen") || sessionStorage.getItem("sellsyIntroSeen")) === "true") return true;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
   } catch (e) {}
   return false;
@@ -105,7 +105,7 @@ export default function LandingPage() {
   useEffect(() => {
     const markSeen = () => {
       try {
-        sessionStorage.setItem("sellsyIntroSeen", "true");
+        sessionStorage.setItem("storsyIntroSeen", "true");
       } catch (e) {}
     };
 
@@ -133,14 +133,14 @@ export default function LandingPage() {
   return (
     <>
       <link rel="stylesheet" href={FONT_URL} />
-      <SellsyIntro
+      <StorsyIntro
         phase={phase}
         once={true}
         onEnter={() => setPhase("intro")}
         onDone={() => setPhase("done")}
       />
 
-      {/* Chat widget: "Ask Sellsy" button */}
+      {/* Chat widget: "Ask Storsy" button */}
       {phase === "done" && <ChatWidget />}
 
       <div
@@ -262,7 +262,7 @@ export default function LandingPage() {
                   Specialized AI agents, <span className="italic font-extrabold text-[#7b1425]">working in harmony.</span>
                 </h2>
                 <p className="text-base text-[#14090b]/65 mt-4">
-                  Instead of a generic chatbot, Sellsy routes your questions through specialized autonomous agents governed by a Central Orchestrator.
+                  Instead of a generic chatbot, Storsy routes your questions through specialized autonomous agents governed by a Central Orchestrator.
                 </p>
               </div>
             </Reveal>
@@ -350,7 +350,7 @@ export default function LandingPage() {
                   href="/dashboard"
                   className="px-8 py-3.5 rounded-full bg-[#faf8f5] text-[#7b1425] font-bold text-sm hover:bg-[#14090b] hover:text-white transition-colors"
                 >
-                  Explore Live Sellsy Dashboard
+                  Explore Live Storsy Dashboard
                 </Link>
               </div>
             </Reveal>
@@ -364,7 +364,7 @@ export default function LandingPage() {
               <Logo size={24} />
               <span>• Understand your store. Make smarter decisions.</span>
             </div>
-            <p>© 2026 Sellsy Inc. Enterprise Capstone Platform.</p>
+            <p>© 2026 Storsy Inc. Enterprise Capstone Platform.</p>
           </div>
         </footer>
       </div>

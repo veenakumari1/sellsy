@@ -120,7 +120,7 @@ export default function SettingsPage() {
                 />
               </div>
               <p className="text-[11px] text-[#a89b99] mt-1">
-                When left empty, Sellsy provides deterministic analytical synthesis using real database metrics.
+                When left empty, Storsy provides deterministic analytical synthesis using real database metrics.
               </p>
             </div>
 
@@ -151,7 +151,7 @@ export default function SettingsPage() {
             </div>
             <div className="p-3.5 rounded-xl bg-[#faf8f5] border border-[#f3ede7]">
               <p className="font-bold text-[#14090b]">Team Member 2: Backend & AI Engineering</p>
-              <p className="text-[#6f6264] mt-1">FastAPI, SQLAlchemy, LangGraph Multi-Agent Architecture, Sellsy MCP Server, Reusable Skills, Holt Forecasting, Railway Deployment.</p>
+              <p className="text-[#6f6264] mt-1">FastAPI, SQLAlchemy, LangGraph Multi-Agent Architecture, Storsy MCP Server, Reusable Skills, Holt Forecasting, Railway Deployment.</p>
             </div>
           </div>
         </div>

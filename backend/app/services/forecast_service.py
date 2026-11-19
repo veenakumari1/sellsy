@@ -48,7 +48,7 @@ class ForecastService:
                 confidence_level_pct=0,
                 trend_direction="INSUFFICIENT_DATA",
                 methodology="Holt Linear Exponential Smoothing",
-                narrative_explanation="Insufficient historical sales data. Sellsy requires at least 15 completed transactions across 10 distinct days to generate statistically meaningful forecasts.",
+                narrative_explanation="Insufficient historical sales data. Storsy requires at least 15 completed transactions across 10 distinct days to generate statistically meaningful forecasts.",
                 historical_points=[],
                 forecast_points=[],
                 is_sufficient_data=False,

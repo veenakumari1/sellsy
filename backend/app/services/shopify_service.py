@@ -27,7 +27,7 @@ class ShopifyService:
             db.add(integration)
 
         integration.shop_domain = clean_domain
-        integration.access_token = access_token or "shpat_mock_token_sellsy"
+        integration.access_token = access_token or "shpat_mock_token_storsy"
         integration.api_key = api_key or "shpca_mock_key"
         integration.status = "connected"
         integration.last_synced_at = datetime.now(timezone.utc)

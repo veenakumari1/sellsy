@@ -24,7 +24,7 @@ export function Logo({ size = 30, className = "", href, light = false }: LogoPro
         display: "inline-block",
       }}
     >
-      <span style={{ color: "#7b1425" }}>S</span>ell<span>s</span>
+      <span style={{ color: "#7b1425" }}>S</span>tor<span>s</span>
       <span style={{ color: "#7b1425" }}>y</span>
     </span>
   );

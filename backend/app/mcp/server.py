@@ -1,5 +1,5 @@
 """
-Sellsy Custom Model Context Protocol (MCP) Server.
+Storsy Custom Model Context Protocol (MCP) Server.
 Exposes specialized e-commerce intelligence tools using the official Python MCP SDK.
 """
 
@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from mcp.server.mcpserver import MCPServer
 from app.mcp import tools
 
-# Initialize Sellsy MCP Server
-mcp_server = MCPServer("sellsy-intelligence-server")
+# Initialize Storsy MCP Server
+mcp_server = MCPServer("storsy-intelligence-server")
 
 @mcp_server.tool()
 def get_sales_summary(store_id: str, days: int = 30) -> dict:
@@ -73,7 +73,7 @@ def generate_business_report(store_id: str, report_type: str = "executive") -> d
 
 def main():
     """Run the MCP server over standard input/output transport."""
-    print("Starting Sellsy MCP Intelligence Server via stdio transport...", file=sys.stderr)
+    print("Starting Storsy MCP Intelligence Server via stdio transport...", file=sys.stderr)
     mcp_server.run()
 
 if __name__ == "__main__":

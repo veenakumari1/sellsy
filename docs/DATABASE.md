@@ -4,7 +4,7 @@
 
 ## 1. Relational Database Overview
 
-Sellsy utilizes a PostgreSQL relational schema engineered for rapid analytical aggregation, foreign key referential integrity, and multi-tenant data isolation.
+Storsy utilizes a PostgreSQL relational schema engineered for rapid analytical aggregation, foreign key referential integrity, and multi-tenant data isolation.
 
 ---
 

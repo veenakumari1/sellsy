@@ -1,10 +1,10 @@
-# Sellsy: Technical Architecture & System Design
+# Storsy: Technical Architecture & System Design
 
 ---
 
 ## 1. System Overview
 
-**Sellsy** is an AI-powered e-commerce intelligence and growth SaaS platform built with a high-throughput, decoupled architecture:
+**Storsy** is an AI-powered e-commerce intelligence and growth SaaS platform built with a high-throughput, decoupled architecture:
 - **Frontend Layer:** Next.js 14+ (App Router), TypeScript, Tailwind CSS, Recharts, and Lucide Icons.
 - **API & Intelligence Layer:** FastAPI (Python 3.13), Pydantic v2, and RESTful service layer.
 - **Multi-Agent Orchestration Layer:** LangGraph StateGraph governing 5 specialized autonomous agents.
@@ -31,7 +31,7 @@ flowchart TD
         Orchestrator --> MktAgent
     end
 
-    subgraph MCPServer["Custom Sellsy MCP Server"]
+    subgraph MCPServer["Custom Storsy MCP Server"]
         MCP_Tools[Tools: get_sales_summary, get_top_products, get_customer_insights, get_sales_forecast, ...]
     end
 
@@ -49,7 +49,7 @@ flowchart TD
 
 ## 2. Multi-Agent Orchestration (LangGraph)
 
-Instead of a single unstructured prompt, Sellsy implements a multi-agent state graph where each specialist executes its corresponding skills and tools:
+Instead of a single unstructured prompt, Storsy implements a multi-agent state graph where each specialist executes its corresponding skills and tools:
 1. **Sales Analysis Agent:** Evaluates gross sales, order volume, AOV, and period-over-period growth deltas ($\Delta\%$).
 2. **Product Intelligence Agent:** Evaluates SKU velocities, profit margins, catalog stars, and declining items.
 3. **Customer Behavior Agent:** Segments shoppers into RFM cohorts (VIP, Returning, New, At-Risk, Inactive) and calculates repeat purchase rates.

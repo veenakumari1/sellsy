@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * @author: @dorianbaffier (adapted for Sellsy & Tailwind 3)
+ * @author: @dorianbaffier (adapted for Storsy & Tailwind 3)
  * @description: Liquid Gauge from Kokonut UI
  * @license: MIT
  * @website: https://kokonutui.com
@@ -695,7 +695,7 @@ export function LiquidGauge({
         style={{ clipPath: flatPolygon(initial, RIM) }}
       />
 
-      {/* The liquid with Sellsy burgundy/maroon branding, turning red on warning */}
+      {/* The liquid with Storsy burgundy/maroon branding, turning red on warning */}
       <div
         aria-hidden="true"
         className={cn(

@@ -4,7 +4,7 @@
 
 ## 1. Project Team Structure
 
-**Project:** Sellsy (AI-Powered E-commerce Intelligence & Growth Platform)  
+**Project:** Storsy (AI-Powered E-commerce Intelligence & Growth Platform)  
 **Developers:** Exactly 2 Team Members
 
 ---
@@ -27,7 +27,7 @@
 - **FastAPI Core Gateway:** Developed modular REST architecture with Pydantic v2 schemas and JWT authentication.
 - **Database Architecture:** Designed PostgreSQL relational schema with SQLAlchemy models, migrations, and indexed analytical rollups.
 - **Multi-Agent Orchestration:** Constructed the LangGraph `StateGraph` governing 5 autonomous analytical agents and intent-based routing.
-- **Sellsy MCP Server:** Implemented the official Python MCP SDK server exposing 8 validated analytical tools.
+- **Storsy MCP Server:** Implemented the official Python MCP SDK server exposing 8 validated analytical tools.
 - **Statistical Forecasting Engine:** Implemented Holt linear exponential smoothing with 80% confidence intervals.
 - **Report & Data Ingestion Engine:** Built ReportLab PDF & CSV generators and automated CSV column mapping engine.
 - **Production Packaging:** Authored Dockerfile, `railway.json`, Procfile, and verification test suites.

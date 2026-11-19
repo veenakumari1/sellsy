@@ -39,7 +39,7 @@ class NotificationService:
                 },
                 {
                     "title": "Achievement Unlocked: Store Starter",
-                    "message": "You successfully connected Aura Living Essentials to Sellsy (+100 Points earned!).",
+                    "message": "You successfully connected Aura Living Essentials to Storsy (+100 Points earned!).",
                     "category": "gamification",
                     "link": "/rewards",
                     "is_read": True,

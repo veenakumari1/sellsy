@@ -10,7 +10,7 @@ from app.schemas import (
 from app.agents.orchestrator import run_agent_workflow
 from app.api.deps import get_current_user, get_current_store
 
-router = APIRouter(prefix="/assistant", tags=["Sellsy AI Assistant"])
+router = APIRouter(prefix="/assistant", tags=["Storsy AI Assistant"])
 
 @router.get("/conversations", response_model=List[ConversationOut])
 def list_conversations(

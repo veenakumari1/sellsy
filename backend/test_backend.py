@@ -17,7 +17,7 @@ from app.agents.orchestrator import run_agent_workflow
 
 def run_all_tests():
     print("=" * 60)
-    print("RUNNING SELLSY BACKEND VERIFICATION SUITE")
+    print("RUNNING STORSY BACKEND VERIFICATION SUITE")
     print("=" * 60)
 
     # 1. Initialize DB and Seed Demo Store
@@ -81,7 +81,7 @@ def run_all_tests():
         print(f"✓ Top Campaign: '{strat.campaigns[0].title}'")
 
     # 7. Test MCP Tools
-    print("\n[7/8] Testing Custom Sellsy MCP Tools...")
+    print("\n[7/8] Testing Custom Storsy MCP Tools...")
     mcp_summary = tools.get_sales_summary(store_id, days=30)
     print(f"✓ MCP get_sales_summary -> Revenue: {mcp_summary['total_revenue_display']}")
     mcp_top = tools.get_top_products(store_id, limit=2)

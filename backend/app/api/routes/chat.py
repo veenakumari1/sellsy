@@ -19,7 +19,7 @@ def api_health():
 @router.post("/chat")
 async def chat_endpoint(request: Request, db: Session = Depends(get_db)):
     """
-    Public chat endpoint for Sellsy assistant widget.
+    Public chat endpoint for Storsy assistant widget.
     Request JSON: { "message": "string", "history": [ { "role": "user" | "assistant", "content": "string" } ] }
     Response JSON: { "reply": "string" }
     """

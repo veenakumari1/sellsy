@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List, Any
 from fastapi import WebSocket
 
-logger = logging.getLogger("sellsy.websocket")
+logger = logging.getLogger("storsy.websocket")
 
 class ConnectionManager:
     def __init__(self):

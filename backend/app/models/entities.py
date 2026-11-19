@@ -57,6 +57,7 @@ class Store(Base):
     import_jobs = relationship("ImportJob", back_populates="store", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="store", cascade="all, delete-orphan")
     gamification = relationship("UserGamification", back_populates="store", uselist=False, cascade="all, delete-orphan")
+    agent_runs = relationship("AgentRun", back_populates="store", cascade="all, delete-orphan")
 
 class StoreIntegration(Base):
     __tablename__ = "store_integrations"
@@ -99,6 +100,7 @@ class Product(Base):
     cost_price = Column(Float, nullable=False, default=0.0)
     sku = Column(String(100), nullable=True, index=True)
     inventory_quantity = Column(Integer, default=0)
+    reorder_level = Column(Integer, default=10, nullable=False)
     status = Column(String(50), default="active")  # active, draft, archived
     image_url = Column(String(1000), nullable=True)
     created_at = Column(DateTime, default=utc_now)
@@ -117,6 +119,7 @@ class Customer(Base):
     first_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
     phone = Column(String(50), nullable=True)
+    whatsapp = Column(String(50), nullable=True)
     total_spent = Column(Float, default=0.0)
     orders_count = Column(Integer, default=0)
     segment = Column(String(50), default="new")  # high_value, returning, new, at_risk, inactive
@@ -323,3 +326,17 @@ class GamificationActivity(Base):
     created_at = Column(DateTime, default=utc_now, index=True)
 
     user = relationship("User", back_populates="activities")
+
+class AgentRun(Base):
+    __tablename__ = "agent_runs"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    sales_finding = Column(JSON, nullable=False)
+    inventory_finding = Column(JSON, nullable=False)
+    marketing_finding = Column(JSON, nullable=False)
+    manager_plan = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=utc_now, index=True)
+
+    store = relationship("Store", back_populates="agent_runs")
+

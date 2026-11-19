@@ -22,22 +22,24 @@ export class ApiClient {
 
   public static getToken(): string | null {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("sellsy_token");
+    return localStorage.getItem("storsy_token") || localStorage.getItem("sellsy_token");
   }
 
   public static isAuthenticated(): boolean {
     if (typeof window === "undefined") return false;
-    return Boolean(localStorage.getItem("sellsy_token"));
+    return Boolean(localStorage.getItem("storsy_token") || localStorage.getItem("sellsy_token"));
   }
 
   public static setToken(token: string) {
     if (typeof window !== "undefined") {
-      localStorage.setItem("sellsy_token", token);
+      localStorage.setItem("storsy_token", token);
     }
   }
 
   public static clearToken() {
     if (typeof window !== "undefined") {
+      localStorage.removeItem("storsy_token");
+      localStorage.removeItem("storsy_user");
       localStorage.removeItem("sellsy_token");
       localStorage.removeItem("sellsy_user");
     }
@@ -47,7 +49,7 @@ export class ApiClient {
   public static getUser(): any {
     if (typeof window === "undefined") return null;
     try {
-      const raw = localStorage.getItem("sellsy_user");
+      const raw = localStorage.getItem("storsy_user") || localStorage.getItem("sellsy_user");
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
@@ -216,7 +218,7 @@ export class ApiClient {
     });
     this.setToken(data.access_token);
     if (typeof window !== "undefined") {
-      localStorage.setItem("sellsy_user", JSON.stringify(data.user));
+      localStorage.setItem("storsy_user", JSON.stringify(data.user));
     }
     return data;
   }
@@ -228,7 +230,7 @@ export class ApiClient {
     });
     this.setToken(data.access_token);
     if (typeof window !== "undefined") {
-      localStorage.setItem("sellsy_user", JSON.stringify(data.user));
+      localStorage.setItem("storsy_user", JSON.stringify(data.user));
     }
     return data;
   }
@@ -456,5 +458,67 @@ export class ApiClient {
     this.clearCache("/api/v1/notifications");
     this.clearCache("/api/v1/gamification");
     return res;
+  }
+
+  // --- Multi-Agent AI Team ---
+  static async runAiTeam() {
+    const res = await this.request<any>("/api/v1/agents/run", { method: "POST" });
+    this.clearCache("/api/v1/agents");
+    return res;
+  }
+
+  static async getAiTeamHistory(limit = 20, forceRefresh = false) {
+    return this.request<any[]>(`/api/v1/agents/history?limit=${limit}`, { forceRefresh });
+  }
+
+  // --- Churn Prediction & Win-Back ---
+  static async getAtRiskCustomers(days = 30, forceRefresh = false) {
+    return this.request<any>(`/api/v1/winback/at-risk?days=${days}`, { forceRefresh });
+  }
+
+  static async updateCustomerWhatsapp(customerId: string, whatsapp: string) {
+    const res = await this.request<any>(`/api/v1/winback/customer/${customerId}/whatsapp`, {
+      method: "PATCH",
+      body: JSON.stringify({ whatsapp }),
+    });
+    this.clearCache("/api/v1/winback");
+    return res;
+  }
+
+  static async generateWinbackMessage(customerId: string, discountCode = "WELCOMEBACK") {
+    return this.request<any>("/api/v1/winback/message", {
+      method: "POST",
+      body: JSON.stringify({ customer_id: customerId, discount_code: discountCode }),
+    });
+  }
+
+  // --- Inventory & Restock Alerts ---
+  static async getInventoryAlerts(forceRefresh = false) {
+    return this.request<any>("/api/v1/inventory/alerts", { forceRefresh });
+  }
+
+  static async updateProductReorderLevel(productId: string, reorderLevel: number) {
+    const res = await this.request<any>(`/api/v1/inventory/products/${productId}/reorder-level`, {
+      method: "PATCH",
+      body: JSON.stringify({ reorder_level: reorderLevel }),
+    });
+    this.clearCache("/api/v1/inventory");
+    return res;
+  }
+
+  static async checkInventoryAlerts() {
+    return this.request<any>("/api/v1/inventory/check-alerts", { method: "POST" });
+  }
+
+  // --- AI Content Generator ---
+  static async generateContent(productId: string, contentType: string, tone: string) {
+    return this.request<any>("/api/v1/content/generate", {
+      method: "POST",
+      body: JSON.stringify({
+        product_id: productId,
+        content_type: contentType,
+        tone: tone,
+      }),
+    });
   }
 }

@@ -28,10 +28,10 @@ class ReportService:
         cust_insights = CustomerService.get_insights(db, store_id)
 
         report_id = str(uuid.uuid4())
-        filename = f"sellsy_{report_type}_{report_id[:8]}.{file_format.lower()}"
+        filename = f"storsy_{report_type}_{report_id[:8]}.{file_format.lower()}"
         file_path = os.path.join(REPORTS_DIR, filename)
 
-        title = f"Sellsy {report_type.capitalize()} Intelligence Report"
+        title = f"Storsy {report_type.capitalize()} Intelligence Report"
 
         if file_format.lower() == "csv":
             ReportService._generate_csv(file_path, kpis, top_prods, cust_insights)
@@ -63,7 +63,7 @@ class ReportService:
     def _generate_csv(path: str, kpis: Any, top_prods: Any, cust_insights: Any):
         with open(path, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
-            writer.writerow(["=== SELLSY STORE INTELLIGENCE SUMMARY ==="])
+            writer.writerow(["=== STORSY STORE INTELLIGENCE SUMMARY ==="])
             writer.writerow(["Generated At", datetime.now(timezone.utc).isoformat()])
             writer.writerow([])
             writer.writerow(["--- KEY PERFORMANCE INDICATORS (Calculated) ---"])
@@ -149,7 +149,7 @@ class ReportService:
         )
 
         elements.append(Paragraph(title, title_style))
-        elements.append(Paragraph(f"Sellsy E-commerce Intelligence • Generated {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M UTC')}", subtitle_style))
+        elements.append(Paragraph(f"Storsy E-commerce Intelligence • Generated {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M UTC')}", subtitle_style))
 
         # KPI Table
         elements.append(Paragraph("1. Executive Financial Performance (Calculated Metrics)", heading_style))

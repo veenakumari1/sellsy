@@ -181,7 +181,7 @@ export default function DashboardPage() {
                   <span>Quick Start</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-[#14090b] tracking-tight">
-                  Explore Sellsy with realistic sample data
+                  Explore Storsy with realistic sample data
                 </h3>
                 <p className="text-xs sm:text-sm text-[#6f6264] leading-relaxed">
                   Your store is currently empty. Populate it with 1 week of realistic Pakistani e-commerce data (8 products, 12 customers, ~30 orders in PKR, AI insights, and notifications) to test analytics, reports, and AI growth tools.

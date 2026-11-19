@@ -4,7 +4,7 @@
 
 ## 1. Overview
 
-Sellsy rejects monolithic prompts in favor of an orchestrated multi-agent network compiled with **LangGraph**. A centralized orchestrator receives merchant queries, extracts operational intent, dispatches tasks to specialized analytical agents, and consolidates intermediate findings into an executive report.
+Storsy rejects monolithic prompts in favor of an orchestrated multi-agent network compiled with **LangGraph**. A centralized orchestrator receives merchant queries, extracts operational intent, dispatches tasks to specialized analytical agents, and consolidates intermediate findings into an executive report.
 
 ---
 

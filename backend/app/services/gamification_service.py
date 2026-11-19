@@ -52,7 +52,7 @@ DEFAULT_ACHIEVEMENTS = [
     {
         "key": "ai_explorer",
         "title": "AI Explorer",
-        "description": "Consult Sellsy Multi-Agent Assistant for autonomous diagnostic insights.",
+        "description": "Consult Storsy Multi-Agent Assistant for autonomous diagnostic insights.",
         "category": "ai",
         "icon_name": "bot",
         "points_reward": 30,

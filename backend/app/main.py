@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Sellsy: AI-Powered E-commerce Intelligence & Growth Platform API",
+    description="Storsy: AI-Powered E-commerce Intelligence & Growth Platform API",
     lifespan=lifespan
 )
 
@@ -47,7 +47,7 @@ def health_check():
         db_status = "unavailable"
     return {
         "status": "healthy",
-        "service": "Sellsy Intelligence Backend",
+        "service": "Storsy Intelligence Backend",
         "version": settings.VERSION,
         "database": db_status
     }
@@ -55,7 +55,7 @@ def health_check():
 @app.get("/", tags=["Root"])
 def root():
     return {
-        "message": "Welcome to Sellsy - AI-Powered E-commerce Intelligence Platform",
+        "message": "Welcome to Storsy - AI-Powered E-commerce Intelligence Platform",
         "docs": "/docs",
         "health": "/health"
     }

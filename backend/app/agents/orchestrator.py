@@ -104,7 +104,7 @@ def synthesis_step(state: AgentState) -> AgentState:
             from google import genai
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
             prompt = (
-                f"You are the Sellsy AI Executive Assistant for e-commerce store intelligence.\n"
+                f"You are the Storsy AI Executive Assistant for e-commerce store intelligence.\n"
                 f"The user asked: '{query}'\n\n"
                 f"Your specialized AI agent team analyzed the store database and returned the following verified data:\n"
                 f"{consolidated_draft}\n\n"

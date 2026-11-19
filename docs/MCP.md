@@ -1,10 +1,10 @@
-# Sellsy Custom Model Context Protocol (MCP) Server
+# Storsy Custom Model Context Protocol (MCP) Server
 
 ---
 
 ## 1. Overview & Specification
 
-Sellsy implements a dedicated Model Context Protocol (MCP) server utilizing the official Python MCP SDK (`mcp`). The server exposes 8 verified tools that allow autonomous AI agents and external MCP clients to interact safely with store database records.
+Storsy implements a dedicated Model Context Protocol (MCP) server utilizing the official Python MCP SDK (`mcp`). The server exposes 8 verified tools that allow autonomous AI agents and external MCP clients to interact safely with store database records.
 
 ---
 
@@ -23,7 +23,7 @@ Sellsy implements a dedicated Model Context Protocol (MCP) server utilizing the 
 
 ---
 
-## 3. Running the Sellsy MCP Server
+## 3. Running the Storsy MCP Server
 
 The MCP server can be launched directly over stdio transport:
 

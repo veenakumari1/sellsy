@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from app.core.config import settings
 
-logger = logging.getLogger("sellsy.database")
+logger = logging.getLogger("storsy.database")
 
 # Adjust database URL for SQLAlchemy if needed
 raw_url = (settings.DATABASE_URL or "").strip()
@@ -62,6 +62,26 @@ def init_db(max_retries: int = 3, retry_delay: float = 1.0):
             logger.info(f"Connecting to database and initializing schema (attempt {attempt}/{max_retries})...")
             Base.metadata.create_all(bind=engine)
             logger.info("Database schema initialized successfully.")
+
+            # Safe column migrations for existing tables (Postgres & SQLite compatible)
+            try:
+                from sqlalchemy import inspect, text
+                inspector = inspect(engine)
+                table_names = inspector.get_table_names()
+                if "customers" in table_names:
+                    customer_cols = [c["name"] for c in inspector.get_columns("customers")]
+                    if "whatsapp" not in customer_cols:
+                        with engine.begin() as conn:
+                            conn.execute(text("ALTER TABLE customers ADD COLUMN whatsapp VARCHAR(50)"))
+                        logger.info("Migrated: added 'whatsapp' column to customers table.")
+                if "products" in table_names:
+                    product_cols = [c["name"] for c in inspector.get_columns("products")]
+                    if "reorder_level" not in product_cols:
+                        with engine.begin() as conn:
+                            conn.execute(text("ALTER TABLE products ADD COLUMN reorder_level INTEGER NOT NULL DEFAULT 10"))
+                        logger.info("Migrated: added 'reorder_level' column to products table.")
+            except Exception as e:
+                logger.warning(f"Column migration check notice: {e}")
 
             # Ensure default achievement definitions exist
             try:

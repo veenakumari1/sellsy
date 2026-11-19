@@ -1,4 +1,4 @@
-# SELLSY
+# STORSY
 ### AI-Powered E-commerce Intelligence & Growth Platform
 
 > **"Understand Your Store. Make Smarter Decisions."**
@@ -14,9 +14,9 @@
 
 ## 1. Product Vision & Executive Summary
 
-**Sellsy** is an enterprise-grade, full-stack AI e-commerce intelligence SaaS platform designed for store owners, online retailers, and D2C brands. It bridges the gap between raw, overwhelming store statistics and actionable growth decisions by utilizing an autonomous multi-agent orchestration architecture powered by **LangGraph**, **Google Gemini**, **Model Context Protocol (MCP)**, and **statistical time-series forecasting**.
+**Storsy** is an enterprise-grade, full-stack AI e-commerce intelligence SaaS platform designed for store owners, online retailers, and D2C brands. It bridges the gap between raw, overwhelming store statistics and actionable growth decisions by utilizing an autonomous multi-agent orchestration architecture powered by **LangGraph**, **Google Gemini**, **Model Context Protocol (MCP)**, and **statistical time-series forecasting**.
 
-Rather than presenting static vanity metrics or disconnected chatbots, Sellsy actively interprets store dynamics: identifying why revenue changed, highlighting catalog stars vs. declining inventory, calculating verified customer RFM retention rates, predicting future demand with confidence bands, and drafting grounded marketing blueprints.
+Rather than presenting static vanity metrics or disconnected chatbots, Storsy actively interprets store dynamics: identifying why revenue changed, highlighting catalog stars vs. declining inventory, calculating verified customer RFM retention rates, predicting future demand with confidence bands, and drafting grounded marketing blueprints.
 
 ---
 
@@ -51,7 +51,7 @@ Rather than presenting static vanity metrics or disconnected chatbots, Sellsy ac
   - Tactical campaign blueprints with targeted segments, recommended channels, hero offers, and execution checklists.
   - High-impact quick wins and cross-sell catalog pairings to lift basket AOV.
 
-- **Sellsy AI Conversational Assistant:**
+- **Storsy AI Conversational Assistant:**
   - Full-screen conversational intelligence interface.
   - Powered by live database tool calls via the **Model Context Protocol (MCP)**.
   - Interactive tool execution badges showing exact arguments and outputs.
@@ -89,7 +89,7 @@ flowchart TD
         Orchestrator --> MktAgent
     end
 
-    subgraph MCPServer["Custom Sellsy MCP Server (Python MCP SDK)"]
+    subgraph MCPServer["Custom Storsy MCP Server (Python MCP SDK)"]
         Tools["get_sales_summary | get_top_products | get_customer_insights | get_sales_forecast | ..."]
     end
 
@@ -114,8 +114,8 @@ flowchart TD
 
 ## 4. Evaluator Demo Mode
 
-Sellsy includes an automated, reproducible demo seeding engine that pre-populates realistic e-commerce data:
-- **Demo Account:** `demo@sellsy.io`
+Storsy includes an automated, reproducible demo seeding engine that pre-populates realistic e-commerce data:
+- **Demo Account:** `demo@storsy.io`
 - **Demo Password:** `demo123456`
 - **Demo Store:** *Aura Living Essentials* (`auraliving.myshopify.com`)
 - **Seeded Catalog:** 25 realistic lifestyle products across 4 categories with pricing, COGS, inventory, and SKU identifiers.
@@ -166,13 +166,13 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:3000` to explore Sellsy.
+Visit `http://localhost:3000` to explore Storsy.
 
 ---
 
 ## 6. Model Context Protocol (MCP) Server
 
-Sellsy implements a dedicated MCP server (`backend/app/mcp/server.py`) using the official Python MCP SDK:
+Storsy implements a dedicated MCP server (`backend/app/mcp/server.py`) using the official Python MCP SDK:
 - `get_sales_summary(store_id, days)`
 - `get_top_products(store_id, limit, metric)`
 - `get_product_performance(store_id, product_id)`
@@ -192,7 +192,7 @@ python -m app.mcp.server
 
 ## 7. Reusable AI Skills
 
-Sellsy packages analytical guidelines into reusable Skill definition files in `skills/`:
+Storsy packages analytical guidelines into reusable Skill definition files in `skills/`:
 - `skills/sales-analysis/SKILL.md`
 - `skills/product-intelligence/SKILL.md`
 - `skills/customer-insights/SKILL.md`
@@ -211,7 +211,7 @@ Developed by a dedicated 2-member team:
   - UI/UX Design System, Next.js 14 App Router, Recharts Data Visualizations, Collapsible Sidebar Layout, Authentication Interface, Client-side API Client, Vercel Production Deployment.
 
 - **Team Member 2 (Backend & AI Engineering):**
-  - FastAPI Modular Architecture, SQLAlchemy Relational Schema, LangGraph Multi-Agent Orchestrator, Custom Sellsy MCP Server, Reusable AI Skills, Holt Exponential Smoothing Forecasting, ReportLab PDF Engine, Railway Deployment.
+  - FastAPI Modular Architecture, SQLAlchemy Relational Schema, LangGraph Multi-Agent Orchestrator, Custom Storsy MCP Server, Reusable AI Skills, Holt Exponential Smoothing Forecasting, ReportLab PDF Engine, Railway Deployment.
 
 ---
 

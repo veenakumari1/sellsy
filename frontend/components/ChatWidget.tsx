@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * ChatWidget — floating Sellsy assistant for the landing page
+ * ChatWidget — floating Storsy assistant for the landing page
  * Theme: white · burgundy · black
  *
  * Modes
@@ -21,17 +21,17 @@ const WINE = "#7b1425";
 const KB: { keys: string[]; answer: string }[] = [
   {
     keys: ["hi", "hello", "hey", "salam", "assalam", "aoa"],
-    answer: "Hi! I'm the Sellsy assistant. Ask me about analytics, the AI agents, forecasting, or how to connect your store.",
+    answer: "Hi! I'm the Storsy assistant. Ask me about analytics, the AI agents, forecasting, or how to connect your store.",
   },
   {
-    keys: ["what can", "features", "capabilities", "what does", "what is sellsy", "do you do", "offer"],
+    keys: ["what can", "features", "capabilities", "what does", "what is storsy", "what is sellsy", "do you do", "offer"],
     answer:
-      "Sellsy turns your store data into decisions with six tools: Sales Analytics, Product Intelligence, Customer Insights, Statistical Forecasting, an AI Marketing Advisor, and a conversational Sellsy AI Assistant.",
+      "Storsy turns your store data into decisions with six tools: Sales Analytics, Product Intelligence, Customer Insights, Statistical Forecasting, an AI Marketing Advisor, and a conversational Storsy AI Assistant.",
   },
   {
     keys: ["agent", "multi-agent", "langgraph", "orchestrator", "how does the ai"],
     answer:
-      "Instead of one generic chatbot, Sellsy routes each question through five specialized agents: Sales, Product, Customer, Prediction and Marketing. A central orchestrator (built on LangGraph) combines their findings into one answer.",
+      "Instead of one generic chatbot, Storsy routes each question through five specialized agents: Sales, Product, Customer, Prediction and Marketing. A central orchestrator (built on LangGraph) combines their findings into one answer.",
   },
   {
     keys: ["connect", "shopify", "csv", "integrat", "import", "upload", "ingest", "data source"],
@@ -66,7 +66,7 @@ const KB: { keys: string[]; answer: string }[] = [
   {
     keys: ["mcp", "model context", "assistant", "chatbot", "ask questions"],
     answer:
-      "The Sellsy AI Assistant is conversational. It uses Model Context Protocol (MCP) tools to read your actual store data, so answers are grounded in your numbers.",
+      "The Storsy AI Assistant is conversational. It uses Model Context Protocol (MCP) tools to read your actual store data, so answers are grounded in your numbers.",
   },
   {
     keys: ["how it works", "how does it work", "steps", "get started", "start", "setup", "onboard"],
@@ -75,7 +75,7 @@ const KB: { keys: string[]; answer: string }[] = [
   },
   {
     keys: ["demo", "try", "explore", "dashboard"],
-    answer: "Press “Explore Demo” at the top of the page to open the live Sellsy dashboard with sample store data.",
+    answer: "Press “Explore Demo” at the top of the page to open the live Storsy dashboard with sample store data.",
   },
   {
     keys: ["price", "pricing", "cost", "free", "plan", "subscription", "pay"],
@@ -85,10 +85,10 @@ const KB: { keys: string[]; answer: string }[] = [
 ];
 
 const FALLBACK =
-  "I can help with Sellsy's analytics, AI agents, forecasting, customer insights, and connecting a store (Shopify or CSV). Could you ask about one of those?";
+  "I can help with Storsy's analytics, AI agents, forecasting, customer insights, and connecting a store (Shopify or CSV). Could you ask about one of those?";
 
 const SUGGESTIONS = [
-  "What can Sellsy do?",
+  "What can Storsy do?",
   "How do the AI agents work?",
   "How do I connect my store?",
   "How accurate is the forecasting?",
@@ -153,7 +153,7 @@ export default function ChatWidget({ endpoint }: { endpoint?: string }) {
     {
       id: 0,
       role: "bot",
-      text: "Hi, I'm the Sellsy assistant. Ask me anything about the platform, or pick a question below.",
+      text: "Hi, I'm the Storsy assistant. Ask me anything about the platform, or pick a question below.",
     },
   ]);
   const idRef = useRef(1);
@@ -210,11 +210,11 @@ export default function ChatWidget({ endpoint }: { endpoint?: string }) {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       {open && (
-        <section className="sc-panel" role="dialog" aria-label="Sellsy assistant">
+        <section className="sc-panel" role="dialog" aria-label="Storsy assistant">
           <header className="sc-head">
             <div>
               <div className="sc-logo">
-                <b>S</b>ell<span>s</span>
+                <b>S</b>tor<span>s</span>
                 <b>y</b>
               </div>
               <div className="sc-sub">
@@ -262,7 +262,7 @@ export default function ChatWidget({ endpoint }: { endpoint?: string }) {
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about Sellsy…"
+              placeholder="Ask about Storsy…"
               maxLength={500}
               aria-label="Your question"
             />
@@ -275,7 +275,7 @@ export default function ChatWidget({ endpoint }: { endpoint?: string }) {
 
       <button className="sc-fab" onClick={() => setOpen((o) => !o)} aria-label={open ? "Close chat" : "Open chat"}>
         {open ? Icon.close : Icon.chat}
-        <span>{open ? "Close" : "Ask Sellsy"}</span>
+        <span>{open ? "Close" : "Ask Storsy"}</span>
       </button>
     </div>
   );

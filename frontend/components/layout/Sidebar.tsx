@@ -20,6 +20,10 @@ import {
   ShieldCheck,
   Trophy,
   X,
+  BrainCircuit,
+  UserCheck,
+  Boxes,
+  Wand2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ApiClient } from "@/lib/api";
@@ -31,7 +35,7 @@ interface SidebarProps {
   onCloseMobile?: () => void;
 }
 
-/* Sellsy brand wordmark (landing page jaisa) */
+/* Storsy brand wordmark (landing page jaisa) */
 function Wordmark({ size = 28, compact = false }: { size?: number; compact?: boolean }) {
   return (
     <span
@@ -50,7 +54,7 @@ function Wordmark({ size = 28, compact = false }: { size?: number; compact?: boo
       <span style={{ color: "#7b1425" }}>S</span>
       {!compact && (
         <>
-          ell<span>s</span>
+          tor<span>s</span>
           <span style={{ color: "#7b1425" }}>y</span>
         </>
       )}
@@ -93,10 +97,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { name: "Home", href: "/dashboard", icon: LayoutDashboard },
     { name: "Sales", href: "/sales", icon: TrendingUp },
     { name: "Products", href: "/products", icon: Package },
+    { name: "Inventory Alerts", href: "/inventory", icon: Boxes, highlight: true },
     { name: "Customers", href: "/customers", icon: Users },
+    { name: "Win-Back", href: "/winback", icon: UserCheck, highlight: true },
     { name: "Forecast", href: "/forecasting", icon: LineChart },
     { name: "Marketing", href: "/marketing", icon: Sparkles },
+    { name: "AI Content", href: "/content", icon: Wand2, highlight: true },
     { name: "Assistant", href: "/assistant", icon: BotMessageSquare, highlight: true },
+    { name: "AI Team", href: "/agents", icon: BrainCircuit, highlight: true },
     { name: "Rewards", href: "/rewards", icon: Trophy },
     { name: "Reports", href: "/reports", icon: FileText },
     { name: "Integrations", href: "/integrations", icon: Plug },
@@ -120,9 +128,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case "/products":
         ApiClient.prefetch("/api/v1/products?sort_by=revenue");
         break;
+      case "/inventory":
+        ApiClient.prefetch("/api/v1/inventory/alerts");
+        break;
       case "/customers":
         ApiClient.prefetch("/api/v1/customers/insights");
         ApiClient.prefetch("/api/v1/customers");
+        break;
+      case "/winback":
+        ApiClient.prefetch("/api/v1/winback/at-risk?days=30");
         break;
       case "/forecasting":
         ApiClient.prefetch("/api/v1/forecasts?days_ahead=30");
@@ -130,8 +144,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case "/marketing":
         ApiClient.prefetch("/api/v1/marketing/strategy");
         break;
+      case "/content":
+        ApiClient.prefetch("/api/v1/products?limit=50");
+        break;
       case "/assistant":
         ApiClient.prefetch("/api/v1/assistant/conversations");
+        break;
+      case "/agents":
+        ApiClient.prefetch("/api/v1/agents/history");
         break;
       case "/rewards":
         ApiClient.prefetch("/api/v1/gamification/overview");

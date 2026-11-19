@@ -31,7 +31,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sellsy | AI-Powered E-commerce Intelligence & Growth Platform",
+  title: "Storsy | AI-Powered E-commerce Intelligence & Growth Platform",
   description:
     "Understand your store, predict sales trends, segment customer cohorts, and make smarter data-driven decisions with specialized AI agents.",
 };

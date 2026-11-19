@@ -195,7 +195,7 @@ export default function IntegrationsPage() {
                   </div>
 
                   <p className="text-xs text-[#5a4e50] leading-relaxed mt-2">
-                    Sellsy automatically imports your products, orders, and customer data from your Shopify store.
+                    Storsy automatically imports your products, orders, and customer data from your Shopify store.
                   </p>
 
                   {shopifySuccess && (
